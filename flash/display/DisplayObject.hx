@@ -40,6 +40,7 @@ class DisplayObject extends EventDispatcher {
 		x = 0;
 		y = 0;
 		
+		__worldAlpha = 1;
 		__worldTransform = new Matrix ();
 		
 	}
