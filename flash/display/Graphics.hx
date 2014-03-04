@@ -12,7 +12,7 @@ class Graphics {
 	
 	private var __bounds:Rectangle;
 	private var __canvas:CanvasElement;
-	private var __commands:Array<CanvasRenderingContext2D->Float->Float->Void>;
+	private var __commands:Array<DrawCommand>;
 	private var __context:CanvasRenderingContext2D;
 	private var __dirty:Bool;
 	
@@ -26,27 +26,7 @@ class Graphics {
 	
 	public function beginFill (rgb:Int, alpha:Int = 0xFF):Void {
 		
-		if (alpha == 0xFF) {
-			
-			__commands.push (function (c:CanvasRenderingContext2D, _, _) {
-				
-				c.fillStyle = "#" + StringTools.hex (rgb, 6);
-				
-			});
-			
-		} else {
-			
-			var r = (rgb & 0xFF0000) >>> 16;
-			var g = (rgb & 0x00FF00) >>> 8;
-			var b = (rgb & 0x0000FF);
-			
-			__commands.push (function (c:CanvasRenderingContext2D, _, _) {
-				
-				c.fillStyle = "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
-				
-			});
-			
-		}
+		__commands.push (BeginFill (rgb, alpha));
 		
 	}
 	
@@ -67,11 +47,7 @@ class Graphics {
 		__inflateBounds (x, y);
 		__inflateBounds (x + width, y + height);
 		
-		__commands.push (function (c:CanvasRenderingContext2D, ox:Float, oy:Float) {
-			
-			c.fillRect (x - ox, y - oy, width, height);
-			
-		});
+		__commands.push (DrawRect (x, y, width, height));
 		
 		__dirty = true;
 		
@@ -137,12 +113,34 @@ class Graphics {
 				__canvas.width = Math.round (__bounds.width);
 				__canvas.height = Math.round (__bounds.height);
 				
-				var ox = __bounds.x;
-				var oy = __bounds.y;
+				var offsetX = __bounds.x;
+				var offsetY = __bounds.y;
 				
 				for (command in __commands) {
 					
-					command (__context, ox, oy);
+					switch (command) {
+						
+						case BeginFill (rgb, alpha):
+							
+							if (alpha == 0xFF) {
+								
+								__context.fillStyle = "#" + StringTools.hex (rgb, 6);
+								
+							} else {
+								
+								var r = (rgb & 0xFF0000) >>> 16;
+								var g = (rgb & 0x00FF00) >>> 8;
+								var b = (rgb & 0x0000FF);
+								
+								__context.fillStyle = "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+								
+							}
+						
+						case DrawRect (x, y, width, height):
+							
+							__context.fillRect (x - offsetX, y - offsetY, width, height);
+						
+					}
 					
 				}
 				
@@ -154,5 +152,13 @@ class Graphics {
 		
 	}
 	
+	
+}
+
+
+enum DrawCommand {
+	
+	BeginFill (rgb:Int, alpha:Float);
+	DrawRect (x:Float, y:Float, width:Float, height:Float);
 	
 }
