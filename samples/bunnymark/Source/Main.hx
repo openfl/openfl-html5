@@ -5,6 +5,7 @@ import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.Sprite;
 import flash.events.Event;
+import openfl.Assets;
 
 
 class Main extends Sprite {
@@ -19,14 +20,10 @@ class Main extends Sprite {
 	private var minY:Float;
 	private var numBunnies:Int;
 	
-	private static var instance:Main;
-	
 	
 	public function new () {
 		
 		super ();
-		
-		instance = this;
 		
 		bunniesRate = 5;
 		numBunnies = 4000;
@@ -49,23 +46,12 @@ class Main extends Sprite {
 			
 		}
 		
-		//addEventListener (Event.ENTER_FRAME, this_onEnterFrame);
+		addEventListener (Event.ENTER_FRAME, this_onEnterFrame);
 		
 	}
 	
 	
-	public static function update ():Void {
-		
-		if (instance != null) {
-			
-			instance.this_onEnterFrame ();
-			
-		}
-		
-	}
-	
-	
-	public function this_onEnterFrame (/*event:Event*/):Void {
+	public function this_onEnterFrame (event:Event):Void {
 		
 		if (addingBunnies) {
 			
@@ -149,7 +135,7 @@ class Bunny extends Bitmap {
 		
 		if (bunnyTexture == null) {
 			
-			bunnyTexture = new BitmapData ();
+			bunnyTexture = Assets.getBitmapData ("assets/wabbit_alpha.png");
 			
 		}
 		

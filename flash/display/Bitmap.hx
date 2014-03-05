@@ -87,7 +87,17 @@ class Bitmap extends DisplayObjectContainer {
 					
 				} else {*/
 					
-					context.drawImage (bitmapData.__source, 0, 0);
+					if (bitmapData.__sourceImage != null) {
+						
+						context.drawImage (bitmapData.__sourceImage, 0, 0);
+						
+					} else {
+						
+						context.drawImage (bitmapData.__sourceCanvas, 0, 0);
+						
+					}
+					
+					
 					//context.drawImage (bitmapData.__source, 0, 0, bitmapData.width, bitmapData.height, -bitmapData.width, -bitmapData.height, bitmapData.width, bitmapData.height);
 					
 				//}

@@ -14,7 +14,7 @@ class EventDispatcher {
 	}
 	
 	
-	public function addEventListener (type:String, listener:Event->Void):Void {
+	public function addEventListener (type:String, listener:Event->Void, useCapture:Bool = false, inPriority:Int = 0, useWeakReference:Bool = false):Void {
 		
 		if (__eventMap == null) {
 			
@@ -62,6 +62,31 @@ class EventDispatcher {
 	public function hasEventListener (type:String):Bool {
 		
 		return (__eventMap != null && __eventMap.exists (type));
+		
+	}
+	
+	
+	public function removeEventListener (type:String, listener:Event->Void):Void {
+		
+		if (__eventMap == null) return;
+		
+		if (__eventMap.exists (type)) {
+			
+			var list = __eventMap.get (type);
+			
+			if (list != null) {
+				
+				list.remove (listener);
+				
+				if (list.length == 0) {
+					
+					__eventMap.remove (type);
+					
+				}
+				
+			}
+			
+		}
 		
 	}
 	

@@ -64,11 +64,11 @@ class DisplayObject extends EventDispatcher {
 	
 	private function __updateTransform ():Void {
 		
-		//if (hasEventListener (Event.ENTER_FRAME)) {
+		if (hasEventListener (Event.ENTER_FRAME)) {
 			
-			//dispatchEvent (new Event (Event.ENTER_FRAME));
+			dispatchEvent (new Event (Event.ENTER_FRAME));
 			
-		//}
+		}
 		
 		if (rotation != __rotationCache) {
 			
