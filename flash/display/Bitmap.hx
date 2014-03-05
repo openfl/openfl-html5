@@ -9,6 +9,7 @@ class Bitmap extends DisplayObjectContainer {
 	
 	
 	public var bitmapData:BitmapData;
+	public var smoothing:Bool;
 	
 	
 	public function new (bitmapData:BitmapData = null) {
@@ -117,6 +118,27 @@ class Bitmap extends DisplayObjectContainer {
 		{
 		renderSession.maskManager.popMask(renderSession.context);
 		}*/
+		
+	}
+	
+	
+	
+	
+	// Get & Set Methods
+	
+	
+	
+	
+	private override function get_height ():Float {
+		
+		return bitmapData.height;
+		
+	}
+	
+	
+	private override function get_width ():Float {
+		
+		return bitmapData.width;
 		
 	}
 	

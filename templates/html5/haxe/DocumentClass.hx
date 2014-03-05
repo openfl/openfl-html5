@@ -2,10 +2,13 @@ import ::APP_MAIN_PACKAGE::::APP_MAIN_CLASS::;
 
 
 import flash.display.DisplayObject;
+import flash.display.MovieClip;
 import flash.display.Stage;
+import flash.Lib;
 import js.Browser;
 
 
+@:access(flash.Lib)
 class DocumentClass extends ::APP_MAIN_CLASS:: {
 	
 	
@@ -17,7 +20,9 @@ class DocumentClass extends ::APP_MAIN_CLASS:: {
 		//element = Browser.document.createElement ("div");
 		
 		children = new Array<DisplayObject> ();
-		__stage.addChild (this);
+		Lib.current = new MovieClip ();
+		Lib.current.addChild (this);
+		__stage.addChild (Lib.current);
 		
 		super ();
 		

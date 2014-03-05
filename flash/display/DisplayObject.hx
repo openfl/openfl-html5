@@ -4,6 +4,7 @@ package flash.display;
 import flash.display.Stage;
 import flash.events.Event;
 import flash.events.EventDispatcher;
+import flash.filters.BitmapFilter;
 import flash.geom.Matrix;
 
 
@@ -11,15 +12,19 @@ class DisplayObject extends EventDispatcher {
 	
 	
 	public var alpha:Float;
+	public var height (get_height, set_height):Float;
+	public var filters (get_filters, set_filters):Array<BitmapFilter>;
 	public var parent (default, null):DisplayObjectContainer;
 	public var rotation:Float;
 	public var scaleX:Float;
 	public var scaleY:Float;
 	public var stage (default, null):Stage;
 	public var visible:Bool;
+	public var width (get_width, set_width):Float;
 	public var x:Float;
 	public var y:Float;
 	
+	private var __filters:Array<BitmapFilter>;
 	private var __interactive:Bool;
 	private var __rotationCache:Float;
 	private var __rotationCosine:Float;
@@ -80,6 +85,7 @@ class DisplayObject extends EventDispatcher {
 		
 		var parentTransform = parent.__worldTransform;
 		var worldTransform = __worldTransform;
+		
 		var px = 0;
 		var py = 0;
 		
@@ -101,6 +107,65 @@ class DisplayObject extends EventDispatcher {
 		worldTransform.ty = b10 * a02 + b11 * a12 + parentTransform.ty;
 		
 		__worldAlpha = alpha * parent.__worldAlpha;
+		
+	}
+	
+	
+	
+	
+	// Get & Set Methods
+	
+	
+	
+	
+	private function get_filters ():Array<BitmapFilter> {
+		
+		if (__filters == null) {
+			
+			return new Array ();
+			
+		} else {
+			
+			return __filters.copy ();
+			
+		}
+		
+	}
+	
+	
+	private function set_filters (value:Array<BitmapFilter>):Array<BitmapFilter> {
+		
+		// set
+		
+		return value;
+		
+	}
+	
+	
+	private function get_height ():Float {
+		
+		return 0;
+		
+	}
+	
+	
+	private function set_height (value:Float):Float {
+		
+		return 0;
+		
+	}
+	
+	
+	private function get_width ():Float {
+		
+		return 0;
+		
+	}
+	
+	
+	private function set_width (value:Float):Float {
+		
+		return 0;
 		
 	}
 	
