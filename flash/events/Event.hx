@@ -34,14 +34,41 @@ class Event {
 	public var bubbles (default, null):Bool;
 	public var cancelable (default, null):Bool;
 	public var currentTarget:Dynamic;
-	public var eventPhase (default, null):Int;
+	public var eventPhase (default, null):EventPhase;
 	public var target:Dynamic;
 	public var type (default, null):String;
+	
+	private var __isCancelled:Bool;
+	private var __isCancelledNow:Bool;
 	
 	
 	public function new (type:String, bubbles:Bool = false, cancelable:Bool = false) {
 		
 		this.type = type;
+		this.bubbles = bubbles;
+		this.cancelable = cancelable;
+		
+	}
+	
+	
+	public function clone ():Event {
+		
+		return new Event (type, bubbles, cancelable);
+		
+	}
+	
+	
+	public function stopImmediatePropagation ():Void {
+		
+		__isCancelled = true;
+		__isCancelledNow = true;
+		
+	}
+	
+	
+	public function stopPropagation ():Void {
+		
+		__isCancelled = true;
 		
 	}
 	

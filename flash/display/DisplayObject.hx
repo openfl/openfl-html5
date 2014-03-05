@@ -70,9 +70,12 @@ class DisplayObject extends EventDispatcher {
 	
 	private function __update ():Void {
 		
-		if (hasEventListener (Event.ENTER_FRAME)) {
+		if (__eventMap != null && hasEventListener (Event.ENTER_FRAME)) {
 			
-			dispatchEvent (new Event (Event.ENTER_FRAME));
+			var event = new Event (Event.ENTER_FRAME);
+			event.target = stage;
+			event.currentTarget = this;
+			dispatchEvent (event);
 			
 		}
 		

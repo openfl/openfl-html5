@@ -1,95 +1,197 @@
 package flash.events;
 
 
-class EventDispatcher {
+import flash.events.EventPhase;
+import flash.events.IEventDispatcher;
+
+
+@:access(flash.events.Event)
+class EventDispatcher implements IEventDispatcher {
 	
 	
-	private var __eventMap:Map<String, Array<Event->Void>>;
+	private var __targetDispatcher:IEventDispatcher;
+	private var __eventMap:Map<String, Array<Listener>>;
 	
 	
-	public function new () {
+	public function new (target:IEventDispatcher = null):Void {
 		
-		
+		if (target != null) {
+			
+			__targetDispatcher = target;
+			
+		}
 		
 	}
 	
 	
-	public function addEventListener (type:String, listener:Event->Void, useCapture:Bool = false, inPriority:Int = 0, useWeakReference:Bool = false):Void {
+	public function addEventListener (type:String, listener:Event->Void, useCapture:Bool = false, priority:Int = 0, useWeakReference:Bool = false):Void {
 		
 		if (__eventMap == null) {
 			
-			__eventMap = new Map ();
+			__eventMap = new Map<String, Array<Listener>> ();
 			
 		}
 		
 		if (!__eventMap.exists (type)) {
 			
-			var list = new Array<Event->Void> ();
-			list.push (listener);
+			var list = new Array<Listener> ();
+			list.push (new Listener (listener, useCapture, priority));
 			__eventMap.set (type, list);
 			
 		} else {
 			
 			var list = __eventMap.get (type);
-			list.push (listener);
+			list.push (new Listener (listener, useCapture, priority));
+			list.sort (__sortByPriority);
 			
 		}
 		
 	}
 	
 	
-	public function dispatchEvent (event:Event):Void {
+	public function dispatchEvent (event:Event):Bool {
 		
-		if (__eventMap != null) {
+		if (__eventMap == null || event == null) return false;
+		
+		var list = __eventMap.get (event.type);
+		
+		if (list == null) return false;
+		
+		if (event.target == null) {
 			
-			var list = __eventMap.get (event.type);
-			
-			if (list != null) {
+			if (__targetDispatcher != null) {
 				
-				for (listener in list) {
+				event.target = __targetDispatcher;
+				
+			} else {
+				
+				event.target = this;
+				
+			}
+			
+		}
+		
+		var capture = (event.eventPhase == EventPhase.CAPTURING_PHASE);
+		var index = 0;
+		var listener;
+		
+		while (index < list.length) {
+			
+			listener = list[index];
+			
+			if (listener.useCapture == capture) {
+				
+				listener.callback (event);
+				
+				if (event.__isCancelledNow) {
 					
-					listener (event);
+					return true;
 					
 				}
 				
 			}
 			
+			if (listener == list[index]) {
+				
+				index++;
+				
+			}
+			
 		}
+		
+		return true;
 		
 	}
 	
 	
 	public function hasEventListener (type:String):Bool {
 		
-		return (__eventMap != null && __eventMap.exists (type));
+		if (__eventMap == null) return false;
+		return __eventMap.exists (type);
 		
 	}
 	
 	
-	public function removeEventListener (type:String, listener:Event->Void):Void {
+	public function removeEventListener (type:String, listener:Event->Void, capture:Bool = false):Void {
 		
 		if (__eventMap == null) return;
 		
-		if (__eventMap.exists (type)) {
+		var list = __eventMap.get (type);
+		
+		if (list == null) return;
+		
+		for (i in 0...list.length) {
 			
-			var list = __eventMap.get (type);
-			
-			if (list != null) {
+			if (list[i].match (listener, capture)) {
 				
-				list.remove (listener);
-				
-				if (list.length == 0) {
-					
-					__eventMap.remove (type);
-					
-				}
+				list.splice (i, 1);
+				break;
 				
 			}
 			
 		}
 		
+		if (list.length == 0) {
+			
+			__eventMap.remove (type);
+			
+		}
+		
+		if (!__eventMap.iterator ().hasNext ()) {
+			
+			__eventMap = null;
+			
+		}
+		
 	}
 	
+	
+	public function toString ():String { 
+		
+		return untyped "[ " +  this.__name__ + " ]";
+		
+	}
+	
+	
+	public function willTrigger (type:String):Bool {
+		
+		return hasEventListener (type);
+		
+	}
+	
+	
+	private static function __sortByPriority (l1:Listener, l2:Listener):Int {
+		
+		return l1.priority == l2.priority ? 0 : (l1.priority > l2.priority ? -1 : 1);
+		
+	}
+	
+	
+}
+
+
+class Listener {
+	
+	
+	public var callback:Event->Void;
+	public var priority:Int;
+	public var useCapture:Bool;
+	
+	
+	public function new (callback:Event->Void, useCapture:Bool, priority:Int) {
+		
+		this.callback = callback;
+		this.useCapture = useCapture;
+		this.priority = priority;
+		
+	}
+	
+	
+	public function match (callback:Event->Void, useCapture:Bool) {
+		
+		return (this.callback == callback && this.useCapture == useCapture);
+		
+	}
 	
 	
 }
