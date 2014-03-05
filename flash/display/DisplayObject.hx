@@ -26,6 +26,7 @@ class DisplayObject extends EventDispatcher {
 	
 	private var __filters:Array<BitmapFilter>;
 	private var __interactive:Bool;
+	private var __renderable:Bool;
 	private var __rotationCache:Float;
 	private var __rotationCosine:Float;
 	private var __rotationSine:Float;
@@ -67,13 +68,16 @@ class DisplayObject extends EventDispatcher {
 	}
 	
 	
-	private function __updateTransform ():Void {
+	private function __update ():Void {
 		
 		if (hasEventListener (Event.ENTER_FRAME)) {
 			
 			dispatchEvent (new Event (Event.ENTER_FRAME));
 			
 		}
+		
+		__renderable = (visible && alpha > 0 && scaleX != 0 && scaleY != 0);
+		if (!__renderable) return;
 		
 		if (rotation != __rotationCache) {
 			

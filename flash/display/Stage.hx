@@ -71,7 +71,8 @@ class Stage extends Sprite {
 		
 		__stats.begin ();
 		
-		__updateTransform ();
+		__renderable = true;
+		__update ();
 		
 		__context.setTransform (1, 0, 0, 1, 0, 0);
 		__context.globalAlpha = 1;

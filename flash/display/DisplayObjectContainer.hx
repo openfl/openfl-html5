@@ -67,7 +67,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	private override function __renderCanvas (renderSession:RenderSession):Void {
 		
-		if (!visible || alpha == 0) return;
+		if (!__renderable) return;
 		
 		/*if (this._mask) {
 			
@@ -105,15 +105,15 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
-	private override function __updateTransform ():Void {
+	private override function __update ():Void {
 		
-		if (!visible) return;
+		super.__update ();
 		
-		super.__updateTransform ();
+		if (!__renderable) return;
 		
 		for (child in children) {
 			
-			child.__updateTransform ();
+			child.__update ();
 			
 		}
 		

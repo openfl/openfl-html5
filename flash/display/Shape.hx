@@ -25,7 +25,7 @@ class Shape extends DisplayObject {
 	
 	private override function __renderCanvas (renderSession:RenderSession):Void {
 		
-		if (!visible || alpha == 0) return;
+		if (!__renderable) return;
 		
 		if (__graphics != null) {
 			
