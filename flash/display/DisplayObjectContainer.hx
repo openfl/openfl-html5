@@ -7,14 +7,14 @@ import flash.display.Stage;
 class DisplayObjectContainer extends InteractiveObject {
 	
 	
-	private var children:Array<DisplayObject>;
+	private var __children:Array<DisplayObject>;
 	
 	
 	public function new () {
 		
 		super ();
 		
-		children = new Array<DisplayObject> ();
+		__children = new Array<DisplayObject> ();
 		
 	}
 	
@@ -29,7 +29,7 @@ class DisplayObjectContainer extends InteractiveObject {
 				
 			}
 			
-			children.push (child);
+			__children.push (child);
 			child.parent = this;
 			
 			if (stage != null) {
@@ -39,6 +39,43 @@ class DisplayObjectContainer extends InteractiveObject {
 			}
 			
 		}
+		
+		return child;
+		
+	}
+	
+	
+	public function addChildAt (child:DisplayObject, index:Int):DisplayObject {
+		
+		if (index > __children.length || index < 0) {
+			
+			throw "Invalid index position " + index;
+			
+		}
+		
+		if (child.parent == this) {
+			
+			__children.remove (child);
+			
+		} else {
+			
+			if (child.parent != null) {
+				
+				child.parent.removeChild (child);
+				
+			}
+			
+			child.parent = this;
+			
+			if (stage != null) {
+				
+				child.__setStageReference (stage);
+				
+			}
+			
+		}
+		
+		__children.insert (index, child);
 		
 		return child;
 		
@@ -56,7 +93,7 @@ class DisplayObjectContainer extends InteractiveObject {
 			}
 			
 			child.parent = null;
-			children.remove (child);
+			__children.remove (child);
 			
 		}
 		
@@ -75,7 +112,7 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 		}*/
 		
-		for (child in children) {
+		for (child in __children) {
 			
 			child.__renderCanvas (renderSession);
 			
@@ -96,7 +133,7 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		//if (__interactive) stage.__dirty = true;
 		
-		for (child in children) {
+		for (child in __children) {
 			
 			child.__setStageReference (stage);
 			
@@ -111,7 +148,7 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		if (!__renderable) return;
 		
-		for (child in children) {
+		for (child in __children) {
 			
 			child.__update ();
 			

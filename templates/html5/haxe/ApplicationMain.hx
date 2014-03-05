@@ -47,6 +47,12 @@ class ApplicationMain {
 		::end::
 		::end::::end::
 		
+		if (total == 0) {
+			
+			new DocumentClass ();
+			
+		}
+		
 	}
 	
 	

@@ -40,9 +40,23 @@ class Graphics {
 	}
 	
 	
+	public function drawCircle (x:Float, y:Float, radius:Float):Void {
+		
+		if (radius <= 0) return;
+		
+		__inflateBounds (x - radius, y - radius);
+		__inflateBounds (x + radius, y + radius);
+		
+		__commands.push (DrawCircle (x, y, radius));
+		
+		__dirty = true;
+		
+	}
+	
+	
 	public function drawRect (x:Float, y:Float, width:Float, height:Float):Void {
 		
-		if (width == 0 || height == 0) return;
+		if (width <= 0 || height <= 0) return;
 		
 		__inflateBounds (x, y);
 		__inflateBounds (x + width, y + height);
@@ -136,6 +150,14 @@ class Graphics {
 								
 							}
 						
+						case DrawCircle (x, y, radius):
+							
+							__context.beginPath();
+							__context.arc (x - offsetX, y - offsetY, radius, 0, Math.PI * 2, true);
+							//__context.fillStyle = "#FF0000";
+							__context.fill();
+							__context.closePath();
+						
 						case DrawRect (x, y, width, height):
 							
 							__context.fillRect (x - offsetX, y - offsetY, width, height);
@@ -159,6 +181,7 @@ class Graphics {
 enum DrawCommand {
 	
 	BeginFill (rgb:Int, alpha:Float);
+	DrawCircle (x:Float, y:Float, radius:Float);
 	DrawRect (x:Float, y:Float, width:Float, height:Float);
 	
 }

@@ -19,7 +19,7 @@ class DocumentClass extends ::APP_MAIN_CLASS:: {
 		
 		//element = Browser.document.createElement ("div");
 		
-		children = new Array<DisplayObject> ();
+		__children = new Array<DisplayObject> ();
 		Lib.current = new MovieClip ();
 		Lib.current.addChild (this);
 		__stage.addChild (Lib.current);
