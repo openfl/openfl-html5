@@ -9,6 +9,7 @@ import js.Browser;
 class Sprite extends DisplayObjectContainer {
 	
 	
+	public var buttonMode:Bool;
 	public var graphics (get, null):Graphics;
 	
 	private var __graphics:Graphics;

@@ -1,6 +1,8 @@
 package flash.display;
 
 
+import flash.events.KeyboardEvent;
+import flash.ui.Keyboard;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
 import js.Browser;
@@ -62,6 +64,9 @@ class Stage extends Sprite {
 		__stats.domElement.style.top = "0px";
 		Browser.document.body.appendChild (__stats.domElement);
 		
+		Browser.window.addEventListener ("keydown", window_onKey, false);
+		Browser.window.addEventListener ("keyup", window_onKey, false);
+		
 		Browser.window.requestAnimationFrame (cast __render);
 		
 	}
@@ -113,6 +118,23 @@ class Stage extends Sprite {
 		__stats.end ();
 		
 		Browser.window.requestAnimationFrame (cast __render);
+		
+	}
+	
+	
+	
+	
+	// Event Handlers
+	
+	
+	
+	
+	private function window_onKey (event:js.html.KeyboardEvent):Void {
+		
+		var keyCode = (event.keyCode != null ? event.keyCode : event.which);
+		keyCode = Keyboard.__convertMozillaCode (keyCode);
+		
+		dispatchEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, event.keyLocation, event.ctrlKey, event.altKey, event.shiftKey));
 		
 	}
 	
