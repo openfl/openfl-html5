@@ -1,6 +1,9 @@
 package flash.events;
 
 
+import flash.ui.KeyLocation;
+
+
 class KeyboardEvent extends Event {
 	
 	
@@ -13,22 +16,21 @@ class KeyboardEvent extends Event {
 	public var commandKey:Bool;
 	public var controlKey:Bool;
 	public var keyCode:Int;
-	public var keyLocation:Int;
+	public var keyLocation:KeyLocation;
 	public var shiftKey:Bool;
 	
 	
-	public function new (type:String, bubbles:Bool = false, cancelable:Bool = false, inCharCode:Int = 0, inKeyCode:Int = 0, inKeyLocation:Int = 0, inCtrlKey:Bool = false, inAltKey:Bool = false, inShiftKey:Bool = false, controlKeyValue:Bool = false, commandKeyValue:Bool = false) {
+	public function new (type:String, bubbles:Bool = false, cancelable:Bool = false, charCodeValue:Int = 0, keyCodeValue:Int = 0, keyLocationValue:KeyLocation = null, ctrlKeyValue:Bool = false, altKeyValue:Bool = false, shiftKeyValue:Bool = false, controlKeyValue:Bool = false, commandKeyValue:Bool = false) {
 		
 		super (type, bubbles, cancelable);
 		
-		altKey = (inAltKey == null ? false : inAltKey);
-		charCode = (inCharCode == null ? 0 : inCharCode);
-		ctrlKey = (inCtrlKey == null ? false : inCtrlKey);
+		charCode = charCodeValue;
+		keyCode = keyCodeValue;
+		keyLocation = keyLocationValue != null ? keyLocationValue : KeyLocation.STANDARD;
+		ctrlKey = ctrlKeyValue;
+		altKey = altKeyValue;
 		commandKey = commandKeyValue;
 		controlKey = controlKeyValue;
-		keyCode = inKeyCode;
-		keyLocation = (inKeyLocation == null ? 0 : inKeyLocation);
-		shiftKey = (inShiftKey == null ? false : inShiftKey);
 		
 	}
 	

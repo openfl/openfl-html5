@@ -12,15 +12,15 @@ class DisplayObject extends EventDispatcher {
 	
 	
 	public var alpha:Float;
-	public var height (get_height, set_height):Float;
-	public var filters (get_filters, set_filters):Array<BitmapFilter>;
+	public var height (get, set):Float;
+	public var filters (get, set):Array<BitmapFilter>;
 	public var parent (default, null):DisplayObjectContainer;
 	public var rotation:Float;
 	public var scaleX:Float;
 	public var scaleY:Float;
 	public var stage (default, null):Stage;
 	public var visible:Bool;
-	public var width (get_width, set_width):Float;
+	public var width (get, set):Float;
 	public var x:Float;
 	public var y:Float;
 	
@@ -48,6 +48,13 @@ class DisplayObject extends EventDispatcher {
 		
 		__worldAlpha = 1;
 		__worldTransform = new Matrix ();
+		
+	}
+	
+	
+	public function hitTestPoint (x:Float, y:Float, shapeFlag:Bool = false):Bool {
+		
+		return false;
 		
 	}
 	

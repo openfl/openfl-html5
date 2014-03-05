@@ -8,23 +8,23 @@ class ColorTransform {
 	public var alphaOffset:Float;
 	public var blueMultiplier:Float;
 	public var blueOffset:Float;
-	public var color(get_color, set_color):Int;
+	public var color (get, set):Int;
 	public var greenMultiplier:Float;
 	public var greenOffset:Float;
 	public var redMultiplier:Float;
 	public var redOffset:Float;
 	
 	
-	public function new (inRedMultiplier:Float = 1, inGreenMultiplier:Float = 1, inBlueMultiplier:Float = 1, inAlphaMultiplier:Float = 1, inRedOffset:Float = 0, inGreenOffset:Float = 0, inBlueOffset:Float = 0, inAlphaOffset:Float = 0):Void {
+	public function new (redMultiplier:Float = 1, greenMultiplier:Float = 1, blueMultiplier:Float = 1, alphaMultiplier:Float = 1, redOffset:Float = 0, greenOffset:Float = 0, blueOffset:Float = 0, alphaOffset:Float = 0):Void {
 		
-		redMultiplier = (inRedMultiplier == null ? 1.0:inRedMultiplier);
-		greenMultiplier = (inGreenMultiplier == null ? 1.0:inGreenMultiplier);
-		blueMultiplier = (inBlueMultiplier == null ? 1.0:inBlueMultiplier);
-		alphaMultiplier = (inAlphaMultiplier == null ? 1.0:inAlphaMultiplier);
-		redOffset = (inRedOffset == null ? 0.0:inRedOffset);
-		greenOffset = (inGreenOffset == null ? 0.0:inGreenOffset);
-		blueOffset = (inBlueOffset == null ? 0.0:inBlueOffset);
-		alphaOffset = (inAlphaOffset == null ? 0.0:inAlphaOffset);
+		this.redMultiplier = redMultiplier;
+		this.greenMultiplier = greenMultiplier;
+		this.blueMultiplier = blueMultiplier;
+		this.alphaMultiplier = alphaMultiplier;
+		this.redOffset = redOffset;
+		this.greenOffset = greenOffset;
+		this.blueOffset = blueOffset;
+		this.alphaOffset = alphaOffset;
 		
 	}
 	

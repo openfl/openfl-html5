@@ -68,6 +68,13 @@ class Graphics {
 	}
 	
 	
+	public function lineStyle (thickness:Null<Float> = null, color:Null<Int> = null, alpha:Null<Float> = null, pixelHinting:Null<Bool> = null, scaleMode:LineScaleMode = null, caps:CapsStyle = null, joints:JointStyle = null, miterLimit:Null<Float> = null):Void {
+		
+		__commands.push (LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit));
+		
+	}
+	
+	
 	private function __inflateBounds (x:Float, y:Float):Void {
 		
 		if (__bounds == null) {
@@ -150,6 +157,23 @@ class Graphics {
 								
 							}
 						
+						case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
+							
+							__context.lineWidth = thickness;
+							__context.lineJoin = joints;
+							__context.lineCap = caps;
+							__context.miterLimit = miterLimit;
+							
+							/*if (lj.grad != null) {
+								
+								ctx.strokeStyle = createCanvasGradient (ctx, lj.grad);
+								
+							} else {
+								
+								ctx.strokeStyle = createCanvasColor (lj.colour, lj.alpha);
+								
+							}*/
+						
 						case DrawCircle (x, y, radius):
 							
 							__context.beginPath();
@@ -183,5 +207,6 @@ enum DrawCommand {
 	BeginFill (rgb:Int, alpha:Float);
 	DrawCircle (x:Float, y:Float, radius:Float);
 	DrawRect (x:Float, y:Float, width:Float, height:Float);
+	LineStyle (thickness:Null<Float>, color:Null<Int>, alpha:Null<Float>, pixelHinting:Null<Bool>, scaleMode:LineScaleMode, caps:CapsStyle, joints:JointStyle, miterLimit:Null<Float>);
 	
 }

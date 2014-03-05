@@ -3,6 +3,7 @@ package flash.display;
 
 import flash.events.KeyboardEvent;
 import flash.ui.Keyboard;
+import flash.ui.KeyLocation;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
 import js.Browser;
@@ -12,6 +13,8 @@ class Stage extends Sprite {
 	
 	
 	public var backgroundColor (get, set):Int;
+	public var mouseX (default, null):Float;
+	public var mouseY (default, null):Float;
 	public var stageHeight (default, null):Int;
 	public var stageWidth (default, null):Int;
 	
@@ -66,6 +69,13 @@ class Stage extends Sprite {
 		
 		Browser.window.addEventListener ("keydown", window_onKey, false);
 		Browser.window.addEventListener ("keyup", window_onKey, false);
+		
+		__canvas.addEventListener ("touchstart", canvas_onTouch, true);
+		__canvas.addEventListener ("touchmove", canvas_onTouch, true);
+		__canvas.addEventListener ("touchend", canvas_onTouch, true);
+		__canvas.addEventListener ("mousedown", canvas_onMouse, true);
+		__canvas.addEventListener ("mousemove", canvas_onMouse, true);
+		__canvas.addEventListener ("mouseup", canvas_onMouse, true);
 		
 		Browser.window.requestAnimationFrame (cast __render);
 		
@@ -129,12 +139,160 @@ class Stage extends Sprite {
 	
 	
 	
+	private function canvas_onTouch (event:js.html.TouchEvent):Void {
+		
+		event.preventDefault ();
+		
+		/*case "touchstart":
+				
+				var evt:js.html.TouchEvent = cast evt;
+				evt.preventDefault ();
+				var touchInfo = new TouchInfo ();
+				__touchInfo[evt.changedTouches[0].identifier] = touchInfo;
+				__onTouch (evt, evt.changedTouches[0], TouchEvent.TOUCH_BEGIN, touchInfo, false);
+			
+			case "touchmove":
+				
+				var evt:js.html.TouchEvent = cast evt;
+				evt.preventDefault ();
+				var touchInfo = __touchInfo[evt.changedTouches[0].identifier];
+				__onTouch (evt, evt.changedTouches[0], TouchEvent.TOUCH_MOVE, touchInfo, true);
+			
+			case "touchend":
+				
+				var evt:js.html.TouchEvent = cast evt;
+				evt.preventDefault ();
+				var touchInfo = __touchInfo[evt.changedTouches[0].identifier];
+				__onTouch (evt, evt.changedTouches[0], TouchEvent.TOUCH_END, touchInfo, true);
+				__touchInfo[evt.changedTouches[0].identifier] = null;
+				
+				
+				var rect:Dynamic = untyped Lib.mMe.__scr.getBoundingClientRect ();
+		var point : Point = untyped new Point (touch.pageX - rect.left, touch.pageY - rect.top);
+		var obj = __getObjectUnderPoint (point);
+		
+		// used in drag implementation
+		_mouseX = point.x;
+		_mouseY = point.y;
+		
+		var stack = new Array<InteractiveObject> ();
+		if (obj != null) obj.__getInteractiveObjectStack (stack);
+		
+		if (stack.length > 0) {
+			
+			//var obj = stack[0];
+			
+			stack.reverse ();
+			var local = obj.globalToLocal (point);
+			var evt = TouchEvent.__create (type, event, touch, local, cast obj);
+			
+			evt.touchPointID = touch.identifier;
+			evt.isPrimaryTouchPoint = isPrimaryTouchPoint;
+			
+			__checkInOuts (evt, stack, touchInfo);
+			obj.__fireEvent (evt);
+			
+			var mouseType = switch (type) {
+				
+				case TouchEvent.TOUCH_BEGIN: MouseEvent.MOUSE_DOWN;
+				case TouchEvent.TOUCH_END: MouseEvent.MOUSE_UP;
+				default: 
+					
+					if (__dragObject != null) {
+						
+						__drag (point);
+						
+					}
+					
+					MouseEvent.MOUSE_MOVE;
+				
+			}
+			
+			obj.__fireEvent (MouseEvent.__create (mouseType, cast evt, local, cast obj));
+			
+		} else {
+			
+			var evt = TouchEvent.__create (type, event, touch, point, null);
+			evt.touchPointID = touch.identifier;
+			evt.isPrimaryTouchPoint = isPrimaryTouchPoint;
+			__checkInOuts (evt, stack, touchInfo);
+			
+		}*/
+		
+	}
+	
+	
+	private function canvas_onMouse (event:js.html.MouseEvent):Void {
+		
+		/*case "mousemove":
+				
+				__onMouse (cast evt, MouseEvent.MOUSE_MOVE);
+			
+			case "mousedown":
+				
+				__onMouse (cast evt, MouseEvent.MOUSE_DOWN);
+			
+			case "mouseup":
+				
+				__onMouse (cast evt, MouseEvent.MOUSE_UP);
+				
+				
+				
+				var rect:Dynamic = untyped Lib.mMe.__scr.getBoundingClientRect ();
+		var point:Point = untyped new Point (event.clientX - rect.left, event.clientY - rect.top);
+		
+		if (__dragObject != null) {
+			
+			__drag (point);
+			
+		}
+		
+		var obj = __getObjectUnderPoint (point);
+		
+		// used in drag implementation
+		_mouseX = point.x;
+		_mouseY = point.y;
+		
+		var stack = new Array<InteractiveObject> ();
+		if (obj != null) obj.__getInteractiveObjectStack (stack);
+		
+		if (stack.length > 0) {
+			
+			//var global = obj.localToGlobal(point);
+			//var obj = stack[0];
+			
+			stack.reverse ();
+			var local = obj.globalToLocal (point);
+			var evt = MouseEvent.__create (type, event, local, cast obj);
+			
+			__checkInOuts (evt, stack);
+			
+			// MOUSE_DOWN brings focus to the clicked object, and takes it
+			// away from any currently focused object
+			if (type == MouseEvent.MOUSE_DOWN) {
+				
+				__onFocus (stack[stack.length - 1]);
+				
+			}
+			
+			obj.__fireEvent (evt);
+			
+		} else {
+			
+			var evt = MouseEvent.__create (type, event, point, null);
+			__checkInOuts (evt, stack);
+			
+		}*/
+		
+	}
+	
+	
 	private function window_onKey (event:js.html.KeyboardEvent):Void {
 		
 		var keyCode = (event.keyCode != null ? event.keyCode : event.which);
 		keyCode = Keyboard.__convertMozillaCode (keyCode);
 		
-		dispatchEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, event.keyLocation, event.ctrlKey, event.altKey, event.shiftKey));
+		dispatchEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, event.keyLocation != null ? cast (event.keyLocation, KeyLocation) : KeyLocation.STANDARD, event.ctrlKey, event.altKey, event.shiftKey));
 		
 	}
 	

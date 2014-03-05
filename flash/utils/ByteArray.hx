@@ -19,9 +19,9 @@ import format.tools.Inflate;
 class ByteArray implements ArrayAccess<Int> {
 	
 	
-	public var bytesAvailable (get_bytesAvailable, null):Int;
-	public var endian (get_endian, set_endian):String;
-	public var length (default, set_length):Int = 0;
+	public var bytesAvailable (get, null):Int;
+	public var endian (get, set):String;
+	public var length (default, set):Int = 0;
 	public var objectEncoding:Int;
 	public var position:Int = 0;
 	
