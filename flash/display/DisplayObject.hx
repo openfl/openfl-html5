@@ -59,6 +59,24 @@ class DisplayObject extends EventDispatcher {
 	}
 	
 	
+	private function __broadcast (event:Event):Void {
+		
+		if (__eventMap != null && hasEventListener (event.type)) {
+			
+			if (event.target == null) {
+				
+				event.target = this;
+				
+			}
+			
+			event.currentTarget = this;
+			dispatchEvent (event);
+			
+		}
+		
+	}
+	
+	
 	private function __renderCanvas (renderSession:RenderSession):Void {
 		
 		
@@ -76,15 +94,6 @@ class DisplayObject extends EventDispatcher {
 	
 	
 	private function __update ():Void {
-		
-		if (__eventMap != null && hasEventListener (Event.ENTER_FRAME)) {
-			
-			var event = new Event (Event.ENTER_FRAME);
-			event.target = stage;
-			event.currentTarget = this;
-			dispatchEvent (event);
-			
-		}
 		
 		__renderable = (visible && alpha > 0 && scaleX != 0 && scaleY != 0);
 		if (!__renderable) return;

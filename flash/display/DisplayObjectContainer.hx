@@ -2,6 +2,7 @@ package flash.display;
 
 
 import flash.display.Stage;
+import flash.events.Event;
 
 
 class DisplayObjectContainer extends InteractiveObject {
@@ -98,6 +99,19 @@ class DisplayObjectContainer extends InteractiveObject {
 		}
 		
 		return child;
+		
+	}
+	
+	
+	private override function __broadcast (event:Event):Void {
+		
+		for (child in __children) {
+			
+			child.__broadcast (event);
+			
+		}
+		
+		dispatchEvent (event);
 		
 	}
 	

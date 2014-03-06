@@ -1,6 +1,7 @@
 package flash.display;
 
 
+import flash.events.Event;
 import flash.events.KeyboardEvent;
 import flash.ui.Keyboard;
 import flash.ui.KeyLocation;
@@ -85,6 +86,9 @@ class Stage extends Sprite {
 	private function __render ():Void {
 		
 		__stats.begin ();
+		
+		var event = new Event (Event.ENTER_FRAME);
+		__broadcast (event);
 		
 		__renderable = true;
 		__update ();
