@@ -4,6 +4,7 @@ package flash.display;
 import flash.geom.Matrix;
 import flash.geom.Rectangle;
 import js.html.CanvasElement;
+import js.html.CanvasPattern;
 import js.html.CanvasRenderingContext2D;
 import js.Browser;
 import openfl.display.Tilesheet;
@@ -185,21 +186,28 @@ class Graphics {
 				var offsetX = __bounds.x;
 				var offsetY = __bounds.y;
 				
+				var bitmapFill:BitmapData = null;
+				var bitmapMatrix:Matrix = null;
+				var bitmapRepeat = false;
+				var pattern:CanvasPattern = null;
+				var setFill = false;
+				
 				for (command in __commands) {
 					
 					switch (command) {
 						
 						case BeginBitmapFill (bitmap, matrix, repeat, smooth):
 							
-							if (bitmap.__sourceImage != null) {
+							if (bitmap != bitmapFill || repeat != bitmapRepeat) {
 								
-								__context.fillStyle = __context.createPattern (bitmap.__sourceImage, repeat ? "repeat" : "no-repeat");
-								
-							} else {
-								
-								__context.fillStyle = __context.createPattern (bitmap.__sourceCanvas, repeat ? "repeat" : "no-repeat");
+								bitmapFill = bitmap;
+								bitmapRepeat = repeat;
+								pattern = null;
+								setFill = false;
 								
 							}
+							
+							bitmapMatrix = matrix;
 						
 						case BeginFill (rgb, alpha):
 							
@@ -216,6 +224,9 @@ class Graphics {
 								__context.fillStyle = "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 								
 							}
+							
+							bitmapFill = null;
+							setFill = true;
 						
 						case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 							
@@ -236,6 +247,27 @@ class Graphics {
 						
 						case DrawCircle (x, y, radius):
 							
+							if (!setFill && bitmapFill != null) {
+								
+								if (pattern == null) {
+									
+									if (bitmapFill.__sourceImage != null) {
+										
+										pattern = __context.createPattern (bitmapFill.__sourceImage, bitmapRepeat ? "repeat" : "no-repeat");
+										
+									} else {
+										
+										pattern = __context.createPattern (bitmapFill.__sourceCanvas, bitmapRepeat ? "repeat" : "no-repeat");
+										
+									}
+									
+								}
+								
+								__context.fillStyle = pattern;
+								setFill = true;
+								
+							}
+							
 							__context.beginPath();
 							__context.arc (x - offsetX, y - offsetY, radius, 0, Math.PI * 2, true);
 							//__context.fillStyle = "#FF0000";
@@ -244,7 +276,46 @@ class Graphics {
 						
 						case DrawRect (x, y, width, height):
 							
-							__context.fillRect (x - offsetX, y - offsetY, width, height);
+							if (width <= bitmapFill.width && height <= bitmapFill.height) {
+								
+								// TODO: Need to handle fill matrix
+								
+								if (bitmapFill.__sourceImage != null) {
+									
+									__context.drawImage (bitmapFill.__sourceImage, 0, 0, bitmapFill.width, bitmapFill.height, x, y, width, height);
+									
+								} else {
+									
+									__context.drawImage (bitmapFill.__sourceCanvas, 0, 0, bitmapFill.width, bitmapFill.height, x, y, width, height);
+									
+								}
+								
+							} else {
+								
+								if (!setFill && bitmapFill != null) {
+									
+									if (pattern == null) {
+										
+										if (bitmapFill.__sourceImage != null) {
+											
+											pattern = __context.createPattern (bitmapFill.__sourceImage, bitmapRepeat ? "repeat" : "no-repeat");
+											
+										} else {
+											
+											pattern = __context.createPattern (bitmapFill.__sourceCanvas, bitmapRepeat ? "repeat" : "no-repeat");
+											
+										}
+										
+									}
+									
+									__context.fillStyle = pattern;
+									setFill = true;
+									
+								}
+								
+								__context.fillRect (x - offsetX, y - offsetY, width, height);
+								
+							}
 						
 						case DrawTiles (sheet, tileData, smooth, flags):
 							
