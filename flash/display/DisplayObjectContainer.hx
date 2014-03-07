@@ -181,11 +181,13 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		if (!visible || !mouseEnabled) return false;
 		
+		var i = __children.length - 1;
+		
 		if (stack == null || !mouseChildren) {
 			
-			for (child in __children) {
+			while (i >= 0) {
 				
-				if (child.__hitTest (x, y, shapeFlag, null)) {
+				if (__children[i].__hitTest (x, y, shapeFlag, null)) {
 					
 					if (stack != null) {
 						
@@ -197,21 +199,25 @@ class DisplayObjectContainer extends InteractiveObject {
 					
 				}
 				
+				i--;
+				
 			}
 			
 		} else if (stack != null) {
 			
 			var length = stack.length;
 			
-			for (child in __children) {
+			while (i >= 0) {
 				
-				if (child.__hitTest (x, y, shapeFlag, stack)) {
+				if (__children[i].__hitTest (x, y, shapeFlag, stack)) {
 					
 					stack.insert (length, this);
 					
 					return true;
 					
 				}
+				
+				i--;
 				
 			}
 			

@@ -15,9 +15,6 @@ class Bitmap extends DisplayObjectContainer {
 	public var pixelSnapping:PixelSnapping;
 	public var smoothing:Bool;
 	
-	private var __height:Null<Float>;
-	private var __width:Null<Float>;
-	
 	
 	public function new (bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) {
 		
@@ -26,9 +23,6 @@ class Bitmap extends DisplayObjectContainer {
 		this.bitmapData = bitmapData;
 		this.pixelSnapping = pixelSnapping;
 		this.smoothing = smoothing;
-		
-		__width = null;
-		__height = null;
 		
 		if (pixelSnapping == null) {
 			

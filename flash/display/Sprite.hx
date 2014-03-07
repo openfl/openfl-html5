@@ -43,6 +43,8 @@ class Sprite extends DisplayObjectContainer {
 		
 		if (!visible || !mouseEnabled) return false;
 		
+		var length = stack.length;
+		
 		if (super.__hitTest (x, y, shapeFlag, stack)) {
 			
 			return true;
@@ -51,7 +53,7 @@ class Sprite extends DisplayObjectContainer {
 			
 			if (stack != null) {
 				
-				stack.push (this);
+				stack.insert (length, this);
 				
 			}
 			
