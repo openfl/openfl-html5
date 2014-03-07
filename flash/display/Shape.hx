@@ -23,6 +23,13 @@ class Shape extends DisplayObject {
 	}
 	
 	
+	private override function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<InteractiveObject>):Bool {
+		
+		return (visible && __graphics != null && __graphics.__hitTest (x, y, shapeFlag, __worldTransform));
+		
+	}
+	
+	
 	private override function __renderCanvas (renderSession:RenderSession):Void {
 		
 		if (!__renderable) return;

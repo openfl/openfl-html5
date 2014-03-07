@@ -2,6 +2,7 @@ package flash.display;
 
 
 import flash.display.Stage;
+import flash.geom.Point;
 
 
 @:access(flash.display.BitmapData)
@@ -17,6 +18,29 @@ class Bitmap extends DisplayObjectContainer {
 		super ();
 		
 		this.bitmapData = bitmapData;
+		
+	}
+	
+	
+	private override function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<InteractiveObject>):Bool {
+		
+		if (!visible || bitmapData == null) return false;
+		
+		var point = globalToLocal (new Point (x, y));
+		
+		if (point.x >= 0 && point.y >= 0 && point.x <= bitmapData.width && point.y <= bitmapData.height) {
+			
+			if (stack != null) {
+				
+				stack.push (this);
+				
+			}
+			
+			return true;
+			
+		}
+		
+		return false;
 		
 	}
 	

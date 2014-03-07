@@ -6,6 +6,7 @@ import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.filters.BitmapFilter;
 import flash.geom.Matrix;
+import flash.geom.Point;
 
 
 class DisplayObject extends EventDispatcher {
@@ -14,6 +15,7 @@ class DisplayObject extends EventDispatcher {
 	public var alpha:Float;
 	public var height (get, set):Float;
 	public var filters (get, set):Array<BitmapFilter>;
+	public var name:String;
 	public var parent (default, null):DisplayObjectContainer;
 	public var rotation:Float;
 	public var scaleX:Float;
@@ -52,6 +54,13 @@ class DisplayObject extends EventDispatcher {
 	}
 	
 	
+	public function globalToLocal (pos:Point):Point {
+		
+		return __worldTransform.clone ().invert ().transformPoint (pos);
+		
+	}
+	
+	
 	public function hitTestPoint (x:Float, y:Float, shapeFlag:Bool = false):Bool {
 		
 		return false;
@@ -73,6 +82,13 @@ class DisplayObject extends EventDispatcher {
 			dispatchEvent (event);
 			
 		}
+		
+	}
+	
+	
+	private function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<InteractiveObject>):Bool {
+		
+		return false;
 		
 	}
 	

@@ -1,6 +1,7 @@
 package flash.display;
 
 
+import flash.geom.Matrix;
 import flash.geom.Rectangle;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
@@ -71,6 +72,13 @@ class Graphics {
 	public function lineStyle (thickness:Null<Float> = null, color:Null<Int> = null, alpha:Null<Float> = null, pixelHinting:Null<Bool> = null, scaleMode:LineScaleMode = null, caps:CapsStyle = null, joints:JointStyle = null, miterLimit:Null<Float> = null):Void {
 		
 		__commands.push (LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit));
+		
+	}
+	
+	
+	private function __hitTest (x:Float, y:Float, shapeFlag:Bool, matrix:Matrix):Bool {
+		
+		return __bounds.clone ().transform (matrix).contains (x, y);
 		
 	}
 	

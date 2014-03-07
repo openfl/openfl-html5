@@ -8,12 +8,16 @@ import flash.events.Event;
 class DisplayObjectContainer extends InteractiveObject {
 	
 	
+	public var mouseChildren:Bool;
+	
 	private var __children:Array<DisplayObject>;
 	
 	
 	public function new () {
 		
 		super ();
+		
+		mouseChildren = true;
 		
 		__children = new Array<DisplayObject> ();
 		
@@ -83,6 +87,19 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
+	public function getChildAt (index:Int):DisplayObject {
+		
+		if (index >= 0 && index < __children.length) {
+			
+			return __children[index];
+			
+		}
+		
+		return null;
+		
+	}
+	
+	
 	public function removeChild (child:DisplayObject):DisplayObject {
 		
 		if (child != null && child.parent == this) {
@@ -112,6 +129,51 @@ class DisplayObjectContainer extends InteractiveObject {
 		}
 		
 		dispatchEvent (event);
+		
+	}
+	
+	
+	private override function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<InteractiveObject>):Bool {
+		
+		if (!visible || !mouseEnabled) return false;
+		
+		if (stack == null || !mouseChildren) {
+			
+			for (child in __children) {
+				
+				if (child.__hitTest (x, y, shapeFlag, null)) {
+					
+					if (stack != null) {
+						
+						stack.push (this);
+						
+					}
+					
+					return true;
+					
+				}
+				
+			}
+			
+		} else if (stack != null) {
+			
+			var length = stack.length;
+			
+			for (child in __children) {
+				
+				if (child.__hitTest (x, y, shapeFlag, stack)) {
+					
+					stack.insert (length, this);
+					
+					return true;
+					
+				}
+				
+			}
+			
+		}
+		
+		return false;
 		
 	}
 	

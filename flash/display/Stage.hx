@@ -2,7 +2,10 @@ package flash.display;
 
 
 import flash.events.Event;
+import flash.events.EventPhase;
 import flash.events.KeyboardEvent;
+import flash.events.MouseEvent;
+import flash.geom.Point;
 import flash.ui.Keyboard;
 import flash.ui.KeyLocation;
 import js.html.CanvasElement;
@@ -10,6 +13,7 @@ import js.html.CanvasRenderingContext2D;
 import js.Browser;
 
 
+@:access(flash.events.Event)
 class Stage extends Sprite {
 	
 	
@@ -24,8 +28,10 @@ class Stage extends Sprite {
 	private var __canvas:CanvasElement;
 	private var __clearBeforeRender:Bool;
 	private var __context:CanvasRenderingContext2D;
+	private var __eventQueue:Array<js.html.Event>;
 	//private var __dirty:Bool;
 	private var __renderSession:RenderSession;
+	private var __stack:Array<InteractiveObject>;
 	private var __stats:Dynamic;
 	private var __transparent:Bool;
 	
@@ -58,6 +64,8 @@ class Stage extends Sprite {
 		this.parent = this;
 		
 		__clearBeforeRender = true;
+		__eventQueue = [];
+		__stack = [];
 		
 		__renderSession = new RenderSession ();
 		__renderSession.context = __context;
@@ -68,17 +76,83 @@ class Stage extends Sprite {
 		__stats.domElement.style.top = "0px";
 		Browser.document.body.appendChild (__stats.domElement);
 		
-		Browser.window.addEventListener ("keydown", window_onKey, false);
-		Browser.window.addEventListener ("keyup", window_onKey, false);
+		var windowEvents = [ "keydown", "keyup" ];
+		var canvasEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup" ];
 		
-		__canvas.addEventListener ("touchstart", canvas_onTouch, true);
-		__canvas.addEventListener ("touchmove", canvas_onTouch, true);
-		__canvas.addEventListener ("touchend", canvas_onTouch, true);
-		__canvas.addEventListener ("mousedown", canvas_onMouse, true);
-		__canvas.addEventListener ("mousemove", canvas_onMouse, true);
-		__canvas.addEventListener ("mouseup", canvas_onMouse, true);
+		for (event in windowEvents) {
+			
+			Browser.window.addEventListener (event, __queueEvent, false);
+			
+		}
+		
+		for (event in canvasEvents) {
+			
+			__canvas.addEventListener (event, __queueEvent, true);
+			
+		}
 		
 		Browser.window.requestAnimationFrame (cast __render);
+		
+	}
+	
+	
+	private function __fireEvent (event:Event, stack:Array<InteractiveObject>):Void {
+		
+		var l = stack.length;
+		
+		if (l > 0) {
+			
+			// First, the "capture" phase ...
+			event.eventPhase = EventPhase.CAPTURING_PHASE;
+			stack.reverse ();
+			event.target = stack[0];
+			
+			for (obj in stack) {
+				
+				event.currentTarget = obj;
+				obj.dispatchEvent (event);
+				
+				if (event.__isCancelled) {
+					
+					return;
+					
+				}
+				
+			}
+			
+		}
+		
+		// Next, the "target"
+		event.eventPhase = EventPhase.AT_TARGET;
+		event.currentTarget = this;
+		dispatchEvent (event);
+		
+		if (event.__isCancelled) {
+			
+			return;
+			
+		}
+		
+		// Last, the "bubbles" phase
+		if (event.bubbles) {
+			
+			event.eventPhase = EventPhase.BUBBLING_PHASE;
+			stack.reverse ();
+			
+			for (obj in stack) {
+				
+				event.currentTarget = obj;
+				obj.dispatchEvent (event);
+				
+				if (event.__isCancelled) {
+					
+					return;
+					
+				}
+				
+			}
+			
+		}
 		
 	}
 	
@@ -87,11 +161,11 @@ class Stage extends Sprite {
 		
 		__stats.begin ();
 		
-		var event = new Event (Event.ENTER_FRAME);
-		__broadcast (event);
-		
 		__renderable = true;
 		__update ();
+		
+		var event = new Event (Event.ENTER_FRAME);
+		__broadcast (event);
 		
 		__context.setTransform (1, 0, 0, 1, 0, 0);
 		__context.globalAlpha = 1;
@@ -132,6 +206,35 @@ class Stage extends Sprite {
 		__stats.end ();
 		
 		Browser.window.requestAnimationFrame (cast __render);
+		
+	}
+	
+	
+	private function __queueEvent (event:js.html.Event):Void {
+		
+		__eventQueue.push (event);
+		
+	}
+	
+	
+	private override function __update ():Void {
+		
+		super.__update ();
+		
+		for (event in __eventQueue) {
+			
+			switch (event.type) {
+				
+				case "keydown", "keyup": window_onKey (cast event);
+				case "touchstart", "touchend", "touchmove": canvas_onTouch (cast event);
+				case "mousedown", "mouseup", "mousemove": canvas_onMouse (cast event);
+				default:
+				
+			}
+			
+		}
+		
+		untyped __eventQueue.length = 0;
 		
 	}
 	
@@ -227,6 +330,34 @@ class Stage extends Sprite {
 	
 	
 	private function canvas_onMouse (event:js.html.MouseEvent):Void {
+		
+		var rect = __canvas.getBoundingClientRect ();
+		
+		mouseX = (event.clientX - rect.left) * (__canvas.width / rect.width);
+		mouseY = (event.clientY - rect.top) * (__canvas.height / rect.height);
+		
+		__stack = [];
+		
+		var type = switch (event.type) {
+			
+			case "mousedown": MouseEvent.MOUSE_DOWN;
+			case "mouseup": MouseEvent.MOUSE_UP;
+			case "mousemove": MouseEvent.MOUSE_MOVE;
+			default: null;
+			
+		}
+		
+		if (__hitTest (mouseX, mouseY, false, __stack)) {
+			
+			var target = __stack[__stack.length - 1];
+			__fireEvent (MouseEvent.__create (type, event, target.globalToLocal (new Point (mouseX, mouseY)), target), __stack);
+			
+		} else {
+			
+			__fireEvent (MouseEvent.__create (type, event, new Point (mouseX, mouseY), this), [ this ]);
+			
+		}
+		
 		
 		/*case "mousemove":
 				

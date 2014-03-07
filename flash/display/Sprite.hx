@@ -24,6 +24,31 @@ class Sprite extends DisplayObjectContainer {
 	}
 	
 	
+	private override function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<InteractiveObject>):Bool {
+		
+		if (!visible || !mouseEnabled) return false;
+		
+		if (super.__hitTest (x, y, shapeFlag, stack)) {
+			
+			return true;
+			
+		} else if (__graphics != null && __graphics.__hitTest (x, y, shapeFlag, __worldTransform)) {
+			
+			if (stack != null) {
+				
+				stack.push (this);
+				
+			}
+			
+			return true;
+			
+		}
+		
+		return false;
+		
+	}
+	
+	
 	private override function __renderCanvas (renderSession:RenderSession):Void {
 		
 		if (!__renderable) return;
