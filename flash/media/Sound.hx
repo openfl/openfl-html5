@@ -15,4 +15,11 @@ class Sound {
 	}
 	
 	
+	public function play (startTime:Float = 0, loops:Int = 0, sndTransform:SoundTransform = null):SoundChannel {
+		
+		return new SoundChannel ();
+		
+	}
+	
+	
 }

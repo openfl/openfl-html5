@@ -184,6 +184,20 @@ class DisplayObject extends EventDispatcher {
 	}
 	
 	
+	private function __getBounds (rect:Rectangle, matrix:Matrix):Void {
+		
+		
+		
+	}
+	
+	
+	private function __getLocalBounds (rect:Rectangle):Void {
+		
+		
+		
+	}
+	
+	
 	private function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<InteractiveObject>):Bool {
 		
 		return false;

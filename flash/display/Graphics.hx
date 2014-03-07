@@ -43,7 +43,7 @@ class Graphics {
 	}
 	
 	
-	public function beginFill (rgb:Int, alpha:Int = 0xFF):Void {
+	public function beginFill (rgb:Int, alpha:Float = 1):Void {
 		
 		__commands.push (BeginFill (rgb, alpha));
 		
@@ -113,6 +113,14 @@ class Graphics {
 	public function lineStyle (thickness:Null<Float> = null, color:Null<Int> = null, alpha:Null<Float> = null, pixelHinting:Null<Bool> = null, scaleMode:LineScaleMode = null, caps:CapsStyle = null, joints:JointStyle = null, miterLimit:Null<Float> = null):Void {
 		
 		__commands.push (LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit));
+		
+	}
+	
+	
+	private function __getBounds (rect:Rectangle, matrix:Matrix):Void {
+		
+		var bounds = __bounds.clone ().transform (matrix);
+		rect.__expand (bounds.x, bounds.y, bounds.width, bounds.height);
 		
 	}
 	
@@ -211,7 +219,7 @@ class Graphics {
 						
 						case BeginFill (rgb, alpha):
 							
-							if (alpha == 0xFF) {
+							if (alpha == 1) {
 								
 								__context.fillStyle = "#" + StringTools.hex (rgb, 6);
 								
@@ -221,7 +229,7 @@ class Graphics {
 								var g = (rgb & 0x00FF00) >>> 8;
 								var b = (rgb & 0x0000FF);
 								
-								__context.fillStyle = "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+								__context.fillStyle = "rgba(" + r + ", " + g + ", " + b + ", " + (alpha / 255) + ")";
 								
 							}
 							
@@ -276,7 +284,7 @@ class Graphics {
 						
 						case DrawRect (x, y, width, height):
 							
-							if (width <= bitmapFill.width && height <= bitmapFill.height) {
+							if (bitmapFill != null && width <= bitmapFill.width && height <= bitmapFill.height) {
 								
 								// TODO: Need to handle fill matrix
 								

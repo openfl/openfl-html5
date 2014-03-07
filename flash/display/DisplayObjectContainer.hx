@@ -3,6 +3,8 @@ package flash.display;
 
 import flash.display.Stage;
 import flash.events.Event;
+import flash.geom.Matrix;
+import flash.geom.Rectangle;
 
 
 class DisplayObjectContainer extends InteractiveObject {
@@ -133,6 +135,48 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
+	private override function __getBounds (rect:Rectangle, matrix:Matrix):Void {
+		
+		if (__children.length == 0) return;
+		
+		// TODO the bounds have already been calculated this render session so return what we have
+		
+		if (matrix != null) {
+			
+			var matrixCache = __worldTransform;
+			__worldTransform = matrix;
+			__update ();
+			__worldTransform = matrixCache;
+			
+		}
+		
+		for (child in __children) {
+			
+			if (!child.__renderable) continue;
+			child.__getBounds (rect, matrix);
+			
+		}
+		
+	}
+	
+	
+	private override function __getLocalBounds (rect:Rectangle):Void {
+		
+		var matrixCache = __worldTransform;
+		__worldTransform = new Matrix ();
+		
+		for (child in __children) {
+			
+			child.__update ();
+			
+		}
+		
+		__getBounds (rect, null);
+		__worldTransform = matrixCache;
+		
+	}
+	
+	
 	private override function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<InteractiveObject>):Bool {
 		
 		if (!visible || !mouseEnabled) return false;
@@ -238,6 +282,73 @@ class DisplayObjectContainer extends InteractiveObject {
 			child.__update ();
 			
 		}
+		
+	}
+	
+	
+	
+	
+	// Get & Set Methods
+	
+	
+	
+	
+	private override function get_height ():Float {
+		
+		// TODO: More efficient way to do this?
+		
+		var bounds = new Rectangle ();
+		__getLocalBounds (bounds);
+		
+		return bounds.height;
+		
+	}
+	
+	
+	private override function set_height (value:Float):Float {
+		
+		// TODO: More efficient way to do this?
+		
+		var bounds = new Rectangle ();
+		__getLocalBounds (bounds);
+		
+		if (value != bounds.height) {
+			
+			scaleY = value / bounds.height;
+			
+		}
+		
+		return value;
+		
+	}
+	
+	
+	private override function get_width ():Float {
+		
+		// TODO: More efficient way to do this?
+		
+		var bounds = new Rectangle ();
+		__getLocalBounds (bounds);
+		
+		return bounds.height;
+		
+	}
+	
+	
+	private override function set_width (value:Float):Float {
+		
+		// TODO: More efficient way to do this?
+		
+		var bounds = new Rectangle ();
+		__getLocalBounds (bounds);
+		
+		if (value != bounds.width) {
+			
+			scaleX = value / bounds.width;
+			
+		}
+		
+		return value;
 		
 	}
 	

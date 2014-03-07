@@ -2,7 +2,9 @@ package flash.display;
 
 
 import flash.display.Stage;
+import flash.geom.Matrix;
 import flash.geom.Point;
+import flash.geom.Rectangle;
 
 
 @:access(flash.display.BitmapData)
@@ -13,6 +15,9 @@ class Bitmap extends DisplayObjectContainer {
 	public var pixelSnapping:PixelSnapping;
 	public var smoothing:Bool;
 	
+	private var __height:Null<Float>;
+	private var __width:Null<Float>;
+	
 	
 	public function new (bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) {
 		
@@ -22,11 +27,24 @@ class Bitmap extends DisplayObjectContainer {
 		this.pixelSnapping = pixelSnapping;
 		this.smoothing = smoothing;
 		
+		__width = null;
+		__height = null;
+		
 		if (pixelSnapping == null) {
 			
 			pixelSnapping = PixelSnapping.AUTO;
 			
 		}
+		
+	}
+	
+	
+	private override function __getBounds (rect:Rectangle, matrix:Matrix):Void {
+		
+		var bounds = new Rectangle (0, 0, width, height);
+		bounds.transform (__worldTransform);
+		
+		rect.__expand (bounds.x, bounds.y, bounds.width, bounds.height);
 		
 	}
 	
@@ -164,14 +182,64 @@ class Bitmap extends DisplayObjectContainer {
 	
 	private override function get_height ():Float {
 		
-		return bitmapData.height;
+		if (bitmapData != null) {
+			
+			return bitmapData.height * scaleY;
+			
+		}
+		
+		return 0;
+		
+	}
+	
+	
+	private override function set_height (value:Float):Float {
+		
+		if (bitmapData != null) {
+			
+			if (value != bitmapData.height) {
+				
+				scaleY = value / bitmapData.height;
+				
+			}
+			
+			return value;
+			
+		}
+		
+		return 0;
 		
 	}
 	
 	
 	private override function get_width ():Float {
 		
-		return bitmapData.width;
+		if (bitmapData != null) {
+			
+			return bitmapData.width * scaleX;
+			
+		}
+		
+		return 0;
+		
+	}
+	
+	
+	private override function set_width (value:Float):Float {
+		
+		if (bitmapData != null) {
+			
+			if (value != bitmapData.width) {
+				
+				scaleX = value / bitmapData.width;
+				
+			}
+			
+			return value;
+			
+		}
+		
+		return 0;
 		
 	}
 	

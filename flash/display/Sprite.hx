@@ -2,6 +2,8 @@ package flash.display;
 
 
 import flash.display.Stage;
+import flash.geom.Matrix;
+import flash.geom.Rectangle;
 import js.Browser;
 
 
@@ -20,6 +22,19 @@ class Sprite extends DisplayObjectContainer {
 		super ();
 		
 		//__interactive = true;
+		
+	}
+	
+	
+	private override function __getBounds (rect:Rectangle, matrix:Matrix):Void {
+		
+		super.__getBounds (rect, matrix);
+		
+		if (__graphics != null) {
+			
+			__graphics.__getBounds (rect, __worldTransform);
+			
+		}
 		
 	}
 	
