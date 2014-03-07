@@ -6,11 +6,20 @@ import flash.geom.Rectangle;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
 import js.Browser;
+import openfl.display.Tilesheet;
 
 
 @:access(flash.display.BitmapData)
 class Graphics {
 	
+	
+	public static inline var TILE_SCALE = 0x0001;
+	public static inline var TILE_ROTATION = 0x0002;
+	public static inline var TILE_RGB = 0x0004;
+	public static inline var TILE_ALPHA = 0x0008;
+	public static inline var TILE_TRANS_2x2 = 0x0010;
+	public static inline var TILE_BLEND_NORMAL = 0x00000000;
+	public static inline var TILE_BLEND_ADD = 0x00010000;
 	
 	private var __bounds:Rectangle;
 	private var __canvas:CanvasElement;
@@ -73,6 +82,22 @@ class Graphics {
 		__commands.push (DrawRect (x, y, width, height));
 		
 		__dirty = true;
+		
+	}
+	
+	
+	public function drawTiles (sheet:Tilesheet, tileData:Array<Float>, smooth:Bool = false, flags:Int = 0):Void {
+		
+		// Checking each tile for extents did not include rotation or scale, and could overflow the maximum canvas
+		// size of some mobile browsers. Always use the full stage size for drawTiles instead?
+		
+		__inflateBounds (0, 0);
+		__inflateBounds (Lib.current.stage.stageWidth, Lib.current.stage.stageHeight);
+		
+		__commands.push (DrawTiles (sheet, tileData, smooth, flags));
+		
+		__dirty = true;
+		
 		
 	}
 	
@@ -221,6 +246,103 @@ class Graphics {
 							
 							__context.fillRect (x - offsetX, y - offsetY, width, height);
 						
+						case DrawTiles (sheet, tileData, smooth, flags):
+							
+							var useScale = (flags & TILE_SCALE) > 0;
+							var useRotation = (flags & TILE_ROTATION) > 0;
+							var useTransform = (flags & TILE_TRANS_2x2) > 0;
+							var useRGB = (flags & TILE_RGB) > 0;
+							var useAlpha = (flags & TILE_ALPHA) > 0;
+							
+							if (useTransform) { useScale = false; useRotation = false; }
+							
+							var scaleIndex = 0;
+							var rotationIndex = 0;
+							var rgbIndex = 0;
+							var alphaIndex = 0;
+							var transformIndex = 0;
+							
+							var numValues = 3;
+							
+							if (useScale) { scaleIndex = numValues; numValues ++; }
+							if (useRotation) { rotationIndex = numValues; numValues ++; }
+							if (useTransform) { transformIndex = numValues; numValues += 4; }
+							if (useRGB) { rgbIndex = numValues; numValues += 3; }
+							if (useAlpha) { alphaIndex = numValues; numValues ++; }
+							
+							var totalCount = tileData.length;
+							var itemCount = Std.int(totalCount / numValues);
+							var index = 0;
+							
+							var rect = null;
+							var center = null;
+							var previousTileID = -1;
+							
+							var surface:Dynamic;
+							
+							if (sheet.__bitmap.__sourceImage != null) {
+								
+								surface = sheet.__bitmap.__sourceImage;
+								
+							} else {
+								
+								surface = sheet.__bitmap.__sourceCanvas;
+								
+							}
+							
+							while (index < totalCount) {
+								
+								var tileID = Std.int (tileData[index + 2]);
+								
+								if (tileID != previousTileID) {
+									
+									rect = sheet.__tileRects[tileID];
+									center = sheet.__centerPoints[tileID];
+									
+									previousTileID = tileID;
+									
+								}
+								
+								if (rect != null && center != null) {
+									
+									__context.save ();
+									__context.translate (tileData[index], tileData[index + 1]);
+									
+									if (useRotation) {
+										
+										__context.rotate (tileData[index + rotationIndex]);
+										
+									}
+									
+									var scale = 1.0;
+									
+									if (useScale) {
+										
+										scale = tileData[index + scaleIndex];
+										
+									}
+									
+									if (useTransform) {
+										
+										__context.transform (tileData[index + transformIndex], tileData[index + transformIndex + 1], tileData[index + transformIndex + 2], tileData[index + transformIndex + 3], 0, 0);
+										
+									}
+									
+									if (useAlpha) {
+										
+										__context.globalAlpha = tileData[index + alphaIndex];
+										
+									}
+									
+									__context.drawImage (surface, rect.x, rect.y, rect.width, rect.height, -center.x * scale, -center.y * scale, rect.width * scale, rect.height * scale);
+									__context.restore ();
+									
+								}
+								
+								index += numValues;
+								
+							}
+						
 					}
 					
 				}
@@ -243,6 +365,7 @@ enum DrawCommand {
 	BeginFill (rgb:Int, alpha:Float);
 	DrawCircle (x:Float, y:Float, radius:Float);
 	DrawRect (x:Float, y:Float, width:Float, height:Float);
+	DrawTiles (sheet:Tilesheet, tileData:Array<Float>, smooth:Bool, flags:Int);
 	LineStyle (thickness:Null<Float>, color:Null<Int>, alpha:Null<Float>, pixelHinting:Null<Bool>, scaleMode:LineScaleMode, caps:CapsStyle, joints:JointStyle, miterLimit:Null<Float>);
 	
 }
