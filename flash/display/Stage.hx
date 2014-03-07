@@ -18,8 +18,6 @@ class Stage extends Sprite {
 	
 	
 	public var backgroundColor (get, set):Int;
-	public var mouseX (default, null):Float;
-	public var mouseY (default, null):Float;
 	public var stageHeight (default, null):Int;
 	public var stageWidth (default, null):Int;
 	

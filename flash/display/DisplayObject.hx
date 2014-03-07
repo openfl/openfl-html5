@@ -7,20 +7,31 @@ import flash.events.EventDispatcher;
 import flash.filters.BitmapFilter;
 import flash.geom.Matrix;
 import flash.geom.Point;
+import flash.geom.Rectangle;
+import flash.geom.Transform;
 
 
 class DisplayObject extends EventDispatcher {
 	
 	
 	public var alpha:Float;
-	public var height (get, set):Float;
+	public var blendMode:BlendMode;
+	public var cacheAsBitmap:Bool;
 	public var filters (get, set):Array<BitmapFilter>;
+	public var height (get, set):Float;
+	public var loaderInfo:LoaderInfo;
+	public var mask:DisplayObject;
+	public var mouseX:Float;
+	public var mouseY:Float;
 	public var name:String;
 	public var parent (default, null):DisplayObjectContainer;
 	public var rotation:Float;
+	public var scale9Grid:Rectangle;
 	public var scaleX:Float;
 	public var scaleY:Float;
+	public var scrollRect:Rectangle;
 	public var stage (default, null):Stage;
+	public var transform:Transform;
 	public var visible:Bool;
 	public var width (get, set):Float;
 	public var x:Float;
@@ -54,6 +65,36 @@ class DisplayObject extends EventDispatcher {
 	}
 	
 	
+	public function getBounds (targetCoordinateSpace:DisplayObject):Rectangle {
+		
+		/*if (_matrixInvalid || _matrixChainInvalid) __validateMatrix ();
+		if (_boundsInvalid) validateBounds ();
+		
+		var m = __getFullMatrix ();
+		
+		// perhaps inverse should be stored and updated lazily?
+		if (targetCoordinateSpace != null) {
+			
+			// will be null when target space is stage and this is not on stage
+			m.concat(targetCoordinateSpace.__getFullMatrix ().invert ());
+			
+		}
+		
+		var rect = __boundsRect.transform (m);	// transform does cloning
+		return rect;*/
+		return null;
+		
+	}
+	
+	
+	public function getRect (targetCoordinateSpace:DisplayObject):Rectangle {
+		
+		// should not account for stroke widths, but is that possible?
+		return getBounds (targetCoordinateSpace);
+		
+	}
+	
+	
 	public function globalToLocal (pos:Point):Point {
 		
 		return __worldTransform.clone ().invert ().transformPoint (pos);
@@ -61,9 +102,66 @@ class DisplayObject extends EventDispatcher {
 	}
 	
 	
-	public function hitTestPoint (x:Float, y:Float, shapeFlag:Bool = false):Bool {
+	public function hitTestObject (obj:DisplayObject):Bool {
+		
+		/*if (obj != null && obj.parent != null && parent != null) {
+			
+			var currentBounds = getBounds (this);
+			var targetBounds = obj.getBounds (this);
+			
+			return currentBounds.intersects (targetBounds);
+			
+		}*/
 		
 		return false;
+		
+	}
+	
+	
+	public function hitTestPoint (x:Float, y:Float, shapeFlag:Bool = false):Bool {
+		
+		/*var boundingBox = (shapeFlag == null ? true : !shapeFlag);
+		
+		if (!boundingBox) {
+			
+			return __getObjectUnderPoint (new Point (x, y)) != null;
+			
+		} else {
+			
+			var gfx = __getGraphics ();
+			
+			if (gfx != null) {
+				
+				var extX = gfx.__extent.x;
+				var extY = gfx.__extent.y;
+				var local = globalToLocal (new Point (x, y));
+				
+				if (local.x - extX < 0 || local.y - extY < 0 || (local.x - extX) * scaleX > width || (local.y - extY) * scaleY > height) {
+					
+					return false;
+					
+				} else {
+					
+					return true;
+					
+				}
+				
+			}
+			
+			return false;
+			
+		}*/
+		
+		return false;
+		
+	}
+	
+	
+	public function localToGlobal (point:Point):Point {
+		
+		return __worldTransform.transformPoint (point);
+		//if (_matrixInvalid || _matrixChainInvalid) __validateMatrix ();
+		//return __getFullMatrix ().transformPoint (point);
 		
 	}
 	
