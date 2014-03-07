@@ -205,13 +205,22 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	private override function __setStageReference (stage:Stage):Void {
 		
-		this.stage = stage;
-		
-		//if (__interactive) stage.__dirty = true;
-		
-		for (child in __children) {
+		if (this.stage != stage) {
 			
-			child.__setStageReference (stage);
+			this.stage = stage;
+			
+			if (stage != null) {
+				
+				var evt = new Event (Event.ADDED_TO_STAGE, false, false);
+				dispatchEvent (evt);
+				
+			}
+			
+			for (child in __children) {
+				
+				child.__setStageReference (stage);
+				
+			}
 			
 		}
 		

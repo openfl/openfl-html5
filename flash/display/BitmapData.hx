@@ -38,6 +38,7 @@ class BitmapData {
 			
 			this.width = width;
 			this.height = height;
+			rect = new Rectangle (0, 0, width, height);
 			
 			__sourceCanvas = cast Browser.window.document.createElement ("canvas");
 			__sourceCanvas.width = width;
@@ -430,39 +431,42 @@ class BitmapData {
 			
 		}
 		
+		trace ("hey?");
+		trace (rect);
 		if (rect == null || rect.width <= 0 || rect.height <= 0) return;
 		
+		trace ("yo");
 		if (rect.x == 0 && rect.y == 0 && rect.width == width && rect.height == height) {
 			
-			if ((transparent && color >>> 24 == 0) || !transparent) {
+			trace ("Hello!");
+			
+			if (__sourceImage != null) {
 				
-				if (__sourceImage != null) {
+				if (__sourceCanvas == null) {
 					
-					if (__sourceCanvas == null) {
-						
-						__sourceCanvas = cast Browser.document.createElement ("canvas");
-						__sourceCanvas.width = width;
-						__sourceCanvas.height = height;
-						__sourceContext = __sourceCanvas.getContext ("2d");
-						
-						__fillRect (new Rectangle (0, 0, width, height), color);
-						
-					}
-					
-					__sourceImage = null;
+					__sourceCanvas = cast Browser.document.createElement ("canvas");
+					__sourceCanvas.width = width;
+					__sourceCanvas.height = height;
+					__sourceContext = __sourceCanvas.getContext ("2d");
 					
 				}
 				
-				__fillRect (new Rectangle (0, 0, width, height), color);
+				__sourceImage = null;
 				
-			} else {
+			}
+			
+			if (transparent && ((color & 0xFF000000) == 0)) {
 				
-				__convertToCanvas ();
-				__fillRect (new Rectangle (0, 0, width, height), color);
+				trace ("clear!");
+				__sourceCanvas.width = width;
+				return;
 				
 			}
 			
 		}
+		
+		__convertToCanvas ();
+		__fillRect (rect, color);
 		
 	}
 	

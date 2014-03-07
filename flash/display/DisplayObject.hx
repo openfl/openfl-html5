@@ -200,9 +200,18 @@ class DisplayObject extends EventDispatcher {
 	
 	private function __setStageReference (stage:Stage):Void {
 		
-		this.stage = stage;
-		
-		//if (__interactive) stage.__dirty = true;
+		if (this.stage != stage) {
+			
+			this.stage = stage;
+			
+			if (stage != null) {
+				
+				var evt = new Event (Event.ADDED_TO_STAGE, false, false);
+				dispatchEvent (evt);
+				
+			}
+			
+		}
 		
 	}
 	

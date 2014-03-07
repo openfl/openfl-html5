@@ -8,6 +8,7 @@ import js.html.CanvasRenderingContext2D;
 import js.Browser;
 
 
+@:access(flash.display.BitmapData)
 class Graphics {
 	
 	
@@ -22,6 +23,13 @@ class Graphics {
 		
 		__commands = new Array ();
 		
+	}
+	
+	
+	public function beginBitmapFill (bitmap:BitmapData, matrix:Matrix = null, repeat:Bool = true, smooth:Bool = false):Void {
+		
+		__commands.push (BeginBitmapFill (bitmap, matrix, repeat, smooth));
+			
 	}
 	
 	
@@ -65,6 +73,13 @@ class Graphics {
 		__commands.push (DrawRect (x, y, width, height));
 		
 		__dirty = true;
+		
+	}
+	
+	
+	public function endFill ():Void {
+		
+		
 		
 	}
 	
@@ -149,6 +164,18 @@ class Graphics {
 					
 					switch (command) {
 						
+						case BeginBitmapFill (bitmap, matrix, repeat, smooth):
+							
+							if (bitmap.__sourceImage != null) {
+								
+								__context.fillStyle = __context.createPattern (bitmap.__sourceImage, repeat ? "repeat" : "no-repeat");
+								
+							} else {
+								
+								__context.fillStyle = __context.createPattern (bitmap.__sourceCanvas, repeat ? "repeat" : "no-repeat");
+								
+							}
+						
 						case BeginFill (rgb, alpha):
 							
 							if (alpha == 0xFF) {
@@ -212,6 +239,7 @@ class Graphics {
 
 enum DrawCommand {
 	
+	BeginBitmapFill (bitmap:BitmapData, matrix:Matrix, repeat:Bool, smooth:Bool);
 	BeginFill (rgb:Int, alpha:Float);
 	DrawCircle (x:Float, y:Float, radius:Float);
 	DrawRect (x:Float, y:Float, width:Float, height:Float);
