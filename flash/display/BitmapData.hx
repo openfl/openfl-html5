@@ -76,11 +76,11 @@ class BitmapData implements IBitmapDrawable {
 		
 		if (__sourceImage != null) {
 			
-			return BitmapData.fromImage (__sourceImage);
+			return BitmapData.fromImage (__sourceImage, transparent);
 			
 		} else {
 			
-			return BitmapData.fromCanvas (__sourceCanvas);
+			return BitmapData.fromCanvas (__sourceCanvas, transparent);
 			
 		}
 		
