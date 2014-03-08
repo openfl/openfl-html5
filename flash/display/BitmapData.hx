@@ -46,6 +46,12 @@ class BitmapData implements IBitmapDrawable {
 			
 			__sourceContext = __sourceCanvas.getContext ("2d");
 			
+			if (!transparent) {
+				
+				fillColor = (0xFF << 24) | (fillColor & 0xFFFFFF);
+				
+			}
+			
 			__fillRect (new Rectangle (0, 0, width, height), fillColor);
 			
 		}
@@ -433,14 +439,9 @@ class BitmapData implements IBitmapDrawable {
 			
 		}
 		
-		trace ("hey?");
-		trace (rect);
 		if (rect == null || rect.width <= 0 || rect.height <= 0) return;
 		
-		trace ("yo");
 		if (rect.x == 0 && rect.y == 0 && rect.width == width && rect.height == height) {
-			
-			trace ("Hello!");
 			
 			if (__sourceImage != null) {
 				
@@ -605,6 +606,19 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function getPixels (rect:Rectangle):ByteArray {
 		
+		if (__sourceImageData == null) {
+			
+			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
+			
+		}
+		
+		var byteArray = new ByteArray ();
+		byteArray.length = __sourceImageData.data.length;
+		byteArray.byteView.set (__sourceImageData.data);
+		byteArray.position = 0;
+		
+		return byteArray;
+		
 		/*var len = Math.round (4 * rect.width * rect.height);
 		var byteArray = new ByteArray ();
 		byteArray.length = len;
@@ -648,7 +662,7 @@ class BitmapData implements IBitmapDrawable {
 		byteArray.position = 0;
 		return byteArray;*/
 		
-		return null;
+		//return null;
 		
 	}
 	
@@ -826,9 +840,15 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function setPixel (x:Int, y:Int, color:Int):Void {
 		
-		/*if (x < 0 || y < 0 || x >= this.width || y >= this.height) return;
+		if (x < 0 || y < 0 || x >= this.width || y >= this.height) return;
 		
-		if (!__locked) {
+		if (__sourceImageData == null) {
+			
+			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
+			
+		}
+		
+		/*if (!__locked) {
 			
 			__buildLease ();
 			
@@ -842,16 +862,16 @@ class BitmapData implements IBitmapDrawable {
 			
 			ctx.putImageData (imageData, x, y);
 			
-		} else {
+		} else {*/
 			
-			var offset = (4 * y * __imageData.width + x * 4);
+			var offset = (4 * y * width + x * 4);
 			
-			__imageData.data[offset] = (color & 0xFF0000) >>> 16;
-			__imageData.data[offset + 1] = (color & 0x00FF00) >>> 8;
-			__imageData.data[offset + 2] = (color & 0x0000FF);
-			if (__transparent) __imageData.data[offset + 3] = (0xFF);
+			__sourceImageData.data[offset] = (color & 0xFF0000) >>> 16;
+			__sourceImageData.data[offset + 1] = (color & 0x00FF00) >>> 8;
+			__sourceImageData.data[offset + 2] = (color & 0x0000FF);
+			if (transparent) __sourceImageData.data[offset + 3] = (0xFF);
 			
-			__imageDataChanged = true;
+			/*__imageDataChanged = true;
 			
 		}*/
 		
@@ -860,9 +880,15 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function setPixel32 (x:Int, y:Int, color:Int):Void {
 		
-		/*if (x < 0 || y < 0 || x >= this.width || y >= this.height) return;
+		if (x < 0 || y < 0 || x >= this.width || y >= this.height) return;
 		
-		if (!__locked) {
+		if (__sourceImageData == null) {
+			
+			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
+			
+		}
+		
+		/*if (!__locked) {
 			
 			__buildLease ();
 			
@@ -885,25 +911,25 @@ class BitmapData implements IBitmapDrawable {
 			
 			ctx.putImageData (imageData, x, y);
 			
-		} else {
+		} else {*/
 			
-			var offset = (4 * y * __imageData.width + x * 4);
+			var offset = (4 * y * width + x * 4);
 			
-			__imageData.data[offset] = (color & 0x00FF0000) >>> 16;
-			__imageData.data[offset + 1] = (color & 0x0000FF00) >>> 8;
-			__imageData.data[offset + 2] = (color & 0x000000FF);
+			__sourceImageData.data[offset] = (color & 0x00FF0000) >>> 16;
+			__sourceImageData.data[offset + 1] = (color & 0x0000FF00) >>> 8;
+			__sourceImageData.data[offset + 2] = (color & 0x000000FF);
 			
-			if (__transparent) {
+			if (transparent) {
 				
-				__imageData.data[offset + 3] = (color & 0xFF000000) >>> 24;
+				__sourceImageData.data[offset + 3] = (color & 0xFF000000) >>> 24;
 				
 			} else {
 				
-				__imageData.data[offset + 3] = (0xFF);
+				__sourceImageData.data[offset + 3] = (0xFF);
 				
 			}
 			
-			__imageDataChanged = true;
+			/*__imageDataChanged = true;
 			
 		}*/
 		
@@ -912,12 +938,24 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function setPixels (rect:Rectangle, byteArray:ByteArray):Void {
 		
-		/*rect = __clipRect (rect);
+		rect = __clipRect (rect);
 		if (rect == null) return;
 		
 		var len = Math.round (4 * rect.width * rect.height);
 		
-		if (!__locked) {
+		if (__sourceImageData == null) {
+			
+			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
+			
+		}
+		
+		if (rect.x == 0 && rect.y == 0 && rect.width == width && rect.height == height) {
+			
+			__sourceImageData.data.set (byteArray.byteView);
+			
+		} else {
+		
+		/*if (!__locked) {
 			
 			var ctx:CanvasRenderingContext2D = ___textureBuffer.getContext ('2d');
 			var imageData = ctx.createImageData (rect.width, rect.height);
@@ -930,28 +968,29 @@ class BitmapData implements IBitmapDrawable {
 			
 			ctx.putImageData (imageData, rect.x, rect.y);
 			
-		} else {
+		} else {*/
 			
-			var offset = Math.round (4 * __imageData.width * rect.y + rect.x * 4);
+			var offset = Math.round (4 * width * rect.y + rect.x * 4);
 			var pos = offset;
 			var boundR = Math.round (4 * (rect.x + rect.width));
+			var data = __sourceImageData.data;
 			
 			for (i in 0...len) {
 				
-				if (((pos) % (__imageData.width * 4)) > boundR - 1) {
+				if (((pos) % (width * 4)) > boundR - 1) {
 					
-					pos += __imageData.width * 4 - boundR;
+					pos += width * 4 - boundR;
 					
 				}
 				
-				__imageData.data[pos] = byteArray.readByte();
+				data[pos] = byteArray.readByte ();
 				pos++;
 				
 			}
 			
-			__imageDataChanged = true;
+			//__imageDataChanged = true;
 			
-		}*/
+		}
 		
 	}
 	
@@ -1196,6 +1235,13 @@ class BitmapData implements IBitmapDrawable {
 	
 	
 	public function __renderCanvas (renderSession:RenderSession):Void {
+		
+		if (__sourceImageData != null) {
+			
+			__sourceContext.putImageData (__sourceImageData, 0, 0);
+			__sourceImageData = null;
+			
+		}
 		
 		var context = renderSession.context;
 		
