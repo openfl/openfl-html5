@@ -26,7 +26,7 @@ class Bitmap extends DisplayObjectContainer {
 		
 		if (pixelSnapping == null) {
 			
-			pixelSnapping = PixelSnapping.AUTO;
+			this.pixelSnapping = PixelSnapping.AUTO;
 			
 		}
 		
