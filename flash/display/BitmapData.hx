@@ -2,6 +2,7 @@ package flash.display;
 
 
 import flash.display.Stage;
+import flash.errors.IOError;
 import flash.filters.BitmapFilter;
 import flash.geom.ColorTransform;
 import flash.geom.Matrix;
@@ -16,6 +17,7 @@ import js.html.Uint8ClampedArray;
 import js.Browser;
 
 
+@:autoBuild(openfl.Assets.embedBitmap())
 class BitmapData implements IBitmapDrawable {
 	
 	
@@ -1065,7 +1067,7 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
-	/*private static function __base64Encode (bytes:ByteArray) {
+	private static function __base64Encode (bytes:ByteArray) {
 		
 		var blob = "";
 		var codex = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
@@ -1114,7 +1116,7 @@ class BitmapData implements IBitmapDrawable {
 		
 		return blob;
 		
-	}*/
+	}
 	
 	
 	private function __clipRect (r:Rectangle):Rectangle {
@@ -1257,6 +1259,116 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
+	private static function __isJPG (bytes:ByteArray) {
+		
+		bytes.position = 0;
+		return bytes.readByte () == 0xFF && bytes.readByte () == 0xD8;
+		
+	}
+	
+	
+	private static function __isPNG (bytes:ByteArray) {
+		
+		bytes.position = 0;
+		return (bytes.readByte () == 0x89 && bytes.readByte () == 0x50 && bytes.readByte () == 0x4E && bytes.readByte () == 0x47 && bytes.readByte () == 0x0D && bytes.readByte () == 0x0A && bytes.readByte () == 0x1A && bytes.readByte () == 0x0A);
+		
+	}
+	
+	private static function __isGIF (bytes:ByteArray) {
+		
+		bytes.position = 0;
+		
+		//GIF8
+		if (bytes.readByte () == 0x47 && bytes.readByte () == 0x49 && bytes.readByte () == 0x46 && bytes.readByte () == 38) {
+			
+			var b = bytes.readByte ();
+			return ((b == 7 || b == 9) && bytes.readByte () == 0x61); //(7|8)a
+			
+		}
+		
+		return false;
+		
+	}
+	
+	
+	private inline function __loadFromBase64 (base64:String, type:String, ?onload:BitmapData -> Void):Void {
+		
+		__sourceImage = cast Browser.document.createElement ("img");
+		
+		var image_onLoaded = function (_) {
+			
+			width = __sourceImage.width;
+			height = __sourceImage.height;
+			
+			if (onload != null) {
+				
+				onload (this);
+				
+			}
+			
+		}
+		
+		__sourceImage.addEventListener ("load", image_onLoaded, false);
+		__sourceImage.src = "data:" + type + ";base64," + base64;
+		
+	}
+	
+	
+	private inline function __loadFromBytes (bytes:ByteArray, rawAlpha:ByteArray = null, ?onload:BitmapData -> Void):Void {
+		
+		var type = "";
+		
+		if (__isPNG (bytes)) {
+			
+			type = "image/png";
+			
+		} else if (__isJPG (bytes)) {
+			
+			type = "image/jpeg";
+			
+		} else if (__isGIF (bytes)) {
+			
+			type = "image/gif";
+			
+		} else {
+			
+			throw new IOError ("BitmapData tried to read a PNG/JPG ByteArray, but found an invalid header.");
+			
+		}
+		
+		if (rawAlpha != null) {
+			
+			__loadFromBase64 (__base64Encode (bytes), type, function (_) {
+				
+				__convertToCanvas ();
+				
+				var pixels = __sourceContext.getImageData (0, 0, width, height);
+				
+				for (i in 0...rawAlpha.length) {
+					
+					pixels.data[i * 4 + 3] = rawAlpha.readUnsignedByte ();
+					
+				}
+				
+				__sourceContext.putImageData (pixels, 0, 0);
+				
+				if (onload != null) {
+					
+					onload (this);
+					
+				}
+				
+			});
+			
+		} else {
+			
+			__loadFromBase64 (__base64Encode (bytes), type, onload);
+			
+		}
+		
+	}
+	
+	
 	public function __renderCanvas (renderSession:RenderSession):Void {
 		
 		if (__sourceImageData != null) {
@@ -1368,116 +1480,7 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
-	/*private inline function __loadFromBase64 (base64:String, type:String, ?onload:BitmapData -> Void):Void {
-		
-		var img:ImageElement = cast Browser.document.createElement ("img");
-		var canvas = ___textureBuffer;
-		
-		var drawImage = function (_) {
-			
-			canvas.width = img.width;
-			canvas.height = img.height;
-			
-			var ctx = canvas.getContext ('2d');
-			ctx.drawImage (img, 0, 0);
-			
-			rect = new Rectangle (0, 0, canvas.width, canvas.height);
-			
-			if (onload != null) {
-				
-				onload (this);
-				
-			}
-			
-		}
-		
-		img.addEventListener ("load", drawImage, false);
-		img.src = "data:" + type + ";base64," + base64;
-		
-	}
-	
-	
-	private inline function __loadFromBytes (bytes:ByteArray, inRawAlpha:ByteArray = null, ?onload:BitmapData -> Void):Void {
-		
-		var type = "";
-		
-		if (__isPNG (bytes)) {
-			
-			type = "image/png";
-			
-		} else if (__isJPG (bytes)) {
-			
-			type = "image/jpeg";
-		} else if (__isGIF (bytes)) {
-			
-			type = "image/gif";
-		} else {
-			
-			throw new IOError ("BitmapData tried to read a PNG/JPG ByteArray, but found an invalid header.");
-			
-		}
-		
-		if (inRawAlpha != null) {
-			
-			__loadFromBase64 (__base64Encode (bytes), type, function (_) {
-				
-				var ctx = ___textureBuffer.getContext ('2d');
-				var pixels = ctx.getImageData (0, 0, ___textureBuffer.width, ___textureBuffer.height);
-				
-				for (i in 0...inRawAlpha.length) {
-					
-					pixels.data[i * 4 + 3] = inRawAlpha.readUnsignedByte ();
-					
-				}
-				
-				ctx.putImageData (pixels, 0, 0);
-				
-				if (onload != null) {
-					
-					onload (this);
-					
-				}
-				
-			});
-			
-		} else {
-			
-			__loadFromBase64 (__base64Encode (bytes), type, onload);
-			
-		}
-		
-	}*/
-	
-	
-	/*private static function __isJPG (bytes:ByteArray) {
-		
-		bytes.position = 0;
-		return bytes.readByte () == 0xFF && bytes.readByte () == 0xD8;
-		
-	}
-	
-	
-	private static function __isPNG (bytes:ByteArray) {
-		
-		bytes.position = 0;
-		return (bytes.readByte () == 0x89 && bytes.readByte () == 0x50 && bytes.readByte () == 0x4E && bytes.readByte () == 0x47 && bytes.readByte () == 0x0D && bytes.readByte () == 0x0A && bytes.readByte () == 0x1A && bytes.readByte () == 0x0A);
-		
-	}
-	
-	private static function __isGIF (bytes:ByteArray) {
-		
-		bytes.position = 0;
-		
-		//GIF8
-		if  (bytes.readByte () == 0x47 && bytes.readByte () == 0x49 && bytes.readByte () == 0x46 && bytes.readByte () == 38 )
-		{
-			var b = bytes.readByte();
-			
-			return ((b==7 || b==9) && bytes.readByte()==0x61 ); //(7|8)a
-		}
-		
-		return false;
-	}
+	/*
 	
 	
 	public function __loadFromFile (inFilename:String, inLoader:LoaderInfo = null) {
