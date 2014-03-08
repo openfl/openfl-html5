@@ -63,9 +63,13 @@ import js.html.Image;
 	
 	private static function start ():Void {
 		
-		var stage = new flash.display.Stage (::WIN_WIDTH::, ::WIN_HEIGHT::);
-		flash.Lib.current = new flash.display.MovieClip ();
-		stage.addChild (flash.Lib.current);
+		#if munit
+		var element = null;
+		#else
+		var element = js.Browser.document.getElementById ("openfl-embed");
+		#end
+		
+		flash.Lib.create (::WIN_WIDTH::, ::WIN_HEIGHT::, element);
 		
 		var hasMain = false;
 		
