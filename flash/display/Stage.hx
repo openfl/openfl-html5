@@ -30,7 +30,7 @@ class Stage extends Sprite {
 	private var __eventQueue:Array<js.html.Event>;
 	//private var __dirty:Bool;
 	private var __renderSession:RenderSession;
-	private var __stack:Array<InteractiveObject>;
+	private var __stack:Array<DisplayObject>;
 	#if stats
 	private var __stats:Dynamic;
 	#end
@@ -101,7 +101,7 @@ class Stage extends Sprite {
 	}
 	
 	
-	private function __fireEvent (event:Event, stack:Array<InteractiveObject>):Void {
+	private function __fireEvent (event:Event, stack:Array<DisplayObject>):Void {
 		
 		var l = stack.length;
 		
@@ -356,10 +356,10 @@ class Stage extends Sprite {
 			
 		}
 		
-		if (__hitTest (mouseX, mouseY, false, __stack)) {
+		if (__hitTest (mouseX, mouseY, false, __stack, true)) {
 			
 			var target = __stack[__stack.length - 1];
-			__fireEvent (MouseEvent.__create (type, event, target.globalToLocal (new Point (mouseX, mouseY)), target), __stack);
+			__fireEvent (MouseEvent.__create (type, event, target.globalToLocal (new Point (mouseX, mouseY)), cast target), __stack);
 			
 		} else {
 			

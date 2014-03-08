@@ -141,9 +141,11 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	public function getObjectsUnderPoint (point:Point):Array<DisplayObject> {
 		
-		var result = new Array<DisplayObject> ();
-		//__getObjectsUnderPoint (point, result);
-		return result;
+		point = localToGlobal (point);
+		var stack = new Array<DisplayObject> ();
+		__hitTest (point.x, point.y, false, stack, false);
+		stack.shift ();
+		return stack;
 		
 	}
 	
@@ -308,17 +310,17 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
-	private override function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<InteractiveObject>):Bool {
+	private override function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool):Bool {
 		
-		if (!visible || !mouseEnabled) return false;
+		if (!visible || (interactiveOnly && !mouseEnabled)) return false;
 		
 		var i = __children.length - 1;
 		
-		if (stack == null || !mouseChildren) {
+		if (interactiveOnly && (stack == null || !mouseChildren)) {
 			
 			while (i >= 0) {
 				
-				if (__children[i].__hitTest (x, y, shapeFlag, null)) {
+				if (__children[i].__hitTest (x, y, shapeFlag, null, interactiveOnly)) {
 					
 					if (stack != null) {
 						
@@ -340,7 +342,7 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 			while (i >= 0) {
 				
-				if (__children[i].__hitTest (x, y, shapeFlag, stack)) {
+				if (__children[i].__hitTest (x, y, shapeFlag, stack, interactiveOnly)) {
 					
 					stack.insert (length, this);
 					

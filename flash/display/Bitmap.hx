@@ -43,13 +43,13 @@ class Bitmap extends DisplayObjectContainer {
 	}
 	
 	
-	private override function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<InteractiveObject>):Bool {
+	private override function __hitTest (x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool):Bool {
 		
 		if (!visible || bitmapData == null) return false;
 		
 		var point = globalToLocal (new Point (x, y));
 		
-		if (point.x >= 0 && point.y >= 0 && point.x <= bitmapData.width && point.y <= bitmapData.height) {
+		if (point.x > 0 && point.y > 0 && point.x <= bitmapData.width && point.y <= bitmapData.height) {
 			
 			if (stack != null) {
 				
