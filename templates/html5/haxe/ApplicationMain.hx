@@ -1,12 +1,17 @@
 package;
 
 
+import openfl.Assets;
+
+
+#if (!macro && !display)
+
+
 import flash.display.Loader;
 import flash.net.URLLoader;
 import js.html.Image;
 
-
-class ApplicationMain {
+@:access(flash.Lib) class ApplicationMain {
 	
 	
 	public static var images (default, null) = new Map<String, Image> ();
@@ -49,7 +54,45 @@ class ApplicationMain {
 		
 		if (total == 0) {
 			
-			new DocumentClass ();
+			start ();
+			
+		}
+		
+	}
+	
+	
+	private static function start ():Void {
+		
+		var stage = new flash.display.Stage (::WIN_WIDTH::, ::WIN_HEIGHT::);
+		flash.Lib.current = new flash.display.MovieClip ();
+		stage.addChild (flash.Lib.current);
+		
+		var hasMain = false;
+		
+		for (methodName in Type.getClassFields (::APP_MAIN::)) {
+			
+			if (methodName == "main") {
+				
+				hasMain = true;
+				break;
+				
+			}
+			
+		}
+			
+		if (hasMain) {
+			
+			Reflect.callMethod (::APP_MAIN::, Reflect.field (::APP_MAIN::, "main"), []);
+			
+		} else {
+			
+			var instance:DocumentClass = Type.createInstance(DocumentClass, []);
+			
+			if (Std.is (instance, flash.display.DisplayObject)) {
+				
+				flash.Lib.current.addChild (cast instance);
+				
+			}
 			
 		}
 		
@@ -62,7 +105,7 @@ class ApplicationMain {
 		
 		if (assetsLoaded == total) {
 			
-			new DocumentClass ();
+			start ();
 			
 		}
 		
@@ -70,3 +113,67 @@ class ApplicationMain {
 	
 	
 }
+
+
+@:build(DocumentClass.build())
+@:keep class DocumentClass extends ::APP_MAIN:: {}
+
+
+#elseif macro
+
+
+import haxe.macro.Context;
+import haxe.macro.Expr;
+
+
+class DocumentClass {
+	
+	
+	macro public static function build ():Array<Field> {
+		
+		var classType = Context.getLocalClass ().get ();
+		var searchTypes = classType;
+		
+		while (searchTypes.superClass != null) {
+			
+			if (searchTypes.pack.length == 2 && searchTypes.pack[1] == "display" && searchTypes.name == "DisplayObject") {
+				
+				var fields = Context.getBuildFields ();
+				var method = macro { this.stage = flash.Lib.current.stage; super (); }
+				
+				fields.push ({ name: "new", access: [ APublic ], kind: FFun({ args: [], expr: method, params: [], ret: macro :Void }), pos: Context.currentPos () });
+				return fields;
+				
+			}
+			
+			searchTypes = searchTypes.superClass.t.get ();
+			
+		}
+		
+		return null;
+		
+	}
+	
+	
+}
+
+
+#else
+
+
+import ::APP_MAIN::;
+
+class ApplicationMain {
+	
+	
+	public static function main () {
+		
+		
+		
+	}
+	
+	
+}
+
+
+#end

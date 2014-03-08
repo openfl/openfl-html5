@@ -73,6 +73,20 @@ class Graphics {
 	}
 	
 	
+	public function drawEllipse (x:Float, y:Float, width:Float, height:Float):Void {
+		
+		if (width <= 0 || height <= 0) return;
+		
+		__inflateBounds (x, y);
+		__inflateBounds (x + width, y + height);
+		
+		__commands.push (DrawEllipse (x, y, width, height));
+		
+		__dirty = true;
+		
+	}
+	
+	
 	public function drawRect (x:Float, y:Float, width:Float, height:Float):Void {
 		
 		if (width <= 0 || height <= 0) return;
@@ -283,6 +297,47 @@ class Graphics {
 							__context.fill();
 							__context.closePath();
 						
+						case DrawEllipse (x, y, width, height):
+							
+							if (!setFill && bitmapFill != null) {
+								
+								if (pattern == null) {
+									
+									if (bitmapFill.__sourceImage != null) {
+										
+										pattern = __context.createPattern (bitmapFill.__sourceImage, bitmapRepeat ? "repeat" : "no-repeat");
+										
+									} else {
+										
+										pattern = __context.createPattern (bitmapFill.__sourceCanvas, bitmapRepeat ? "repeat" : "no-repeat");
+										
+									}
+									
+								}
+								
+								__context.fillStyle = pattern;
+								setFill = true;
+								
+							}
+							
+							var kappa = .5522848,
+								ox = (width / 2) * kappa, // control point offset horizontal
+								oy = (height / 2) * kappa, // control point offset vertical
+								xe = x + width - offsetX,           // x-end
+								ye = y + height - offsetY,           // y-end
+								xm = x + width / 2 - offsetX,       // x-middle
+								ym = y + height / 2 - offsetY;       // y-middle
+							
+							__context.beginPath();
+							__context.moveTo(x, ym);
+							__context.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+							__context.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+							__context.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+							__context.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+							__context.fill ();
+							__context.closePath();
+							//__context.stroke();
+						
 						case DrawRect (x, y, width, height):
 							
 							if (bitmapFill != null && width <= bitmapFill.width && height <= bitmapFill.height) {
@@ -323,6 +378,7 @@ class Graphics {
 								}
 								
 								__context.fillRect (x - offsetX, y - offsetY, width, height);
+								//__context.stroke ();
 								
 							}
 						
@@ -444,6 +500,7 @@ enum DrawCommand {
 	BeginBitmapFill (bitmap:BitmapData, matrix:Matrix, repeat:Bool, smooth:Bool);
 	BeginFill (rgb:Int, alpha:Float);
 	DrawCircle (x:Float, y:Float, radius:Float);
+	DrawEllipse (x:Float, y:Float, width:Float, height:Float);
 	DrawRect (x:Float, y:Float, width:Float, height:Float);
 	DrawTiles (sheet:Tilesheet, tileData:Array<Float>, smooth:Bool, flags:Int);
 	LineStyle (thickness:Null<Float>, color:Null<Int>, alpha:Null<Float>, pixelHinting:Null<Bool>, scaleMode:LineScaleMode, caps:CapsStyle, joints:JointStyle, miterLimit:Null<Float>);
