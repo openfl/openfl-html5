@@ -374,6 +374,8 @@ class BitmapData implements IBitmapDrawable {
 		__sourceImage = null;
 		__sourceCanvas = null;
 		__sourceContext = null;
+		width = 0;
+		height = 0;
 		
 	}
 	
