@@ -226,7 +226,7 @@ class Stage extends Sprite {
 	}
 	
 	
-	private override function __update ():Void {
+	public override function __update ():Void {
 		
 		super.__update ();
 		

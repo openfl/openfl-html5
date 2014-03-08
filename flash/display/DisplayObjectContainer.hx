@@ -410,7 +410,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
-	private override function __update ():Void {
+	public override function __update ():Void {
 		
 		super.__update ();
 		

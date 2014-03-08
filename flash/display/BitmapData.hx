@@ -24,6 +24,8 @@ class BitmapData implements IBitmapDrawable {
 	public var transparent (default, null):Bool;
 	public var width (default, null):Int;
 	
+	public var __worldTransform:Matrix;
+	
 	private var __sourceCanvas:CanvasElement;
 	private var __sourceContext:CanvasRenderingContext2D;
 	private var __sourceImage:Image;
@@ -390,9 +392,24 @@ class BitmapData implements IBitmapDrawable {
 		
 		__convertToCanvas ();
 		
+		if (__sourceImageData != null) {
+			
+			__sourceContext.putImageData (__sourceImageData, 0, 0);
+			__sourceImageData = null;
+			
+		}
+		
 		var renderSession = new RenderSession ();
 		renderSession.context = __sourceContext;
 		renderSession.roundPixels = true;
+		
+		var matrixCache = source.__worldTransform;
+		source.__worldTransform = matrix != null ? matrix : new Matrix ();
+		source.__update ();
+		source.__worldTransform = matrixCache;
+		
+		__convertToCanvas ();
+		source.__renderCanvas (renderSession);
 		
 		// TODO: Need to handle matrix properly, etc.
 		
@@ -436,6 +453,7 @@ class BitmapData implements IBitmapDrawable {
 		if (__sourceImageData != null) {
 			
 			__sourceContext.putImageData (__sourceImageData, 0, 0);
+			__sourceImageData = null;
 			
 		}
 		
@@ -460,7 +478,6 @@ class BitmapData implements IBitmapDrawable {
 			
 			if (transparent && ((color & 0xFF000000) == 0)) {
 				
-				trace ("clear!");
 				__sourceCanvas.width = width;
 				return;
 				
@@ -1258,8 +1275,10 @@ class BitmapData implements IBitmapDrawable {
 			
 		}*/
 		
+		if (__worldTransform == null) __worldTransform = new Matrix ();
+		
 		context.globalAlpha = 1;
-		var transform = new Matrix ();
+		var transform = __worldTransform;
 		
 		if (renderSession.roundPixels) {
 			
@@ -1332,6 +1351,13 @@ class BitmapData implements IBitmapDrawable {
 		{
 		renderSession.maskManager.popMask(renderSession.context);
 		}*/
+		
+	}
+	
+	
+	public function __update ():Void {
+		
+		
 		
 	}
 	

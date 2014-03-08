@@ -45,7 +45,7 @@ class Graphics {
 	
 	public function beginFill (rgb:Int, alpha:Float = 1):Void {
 		
-		__commands.push (BeginFill (rgb, alpha));
+		__commands.push (BeginFill (rgb & 0xFFFFFF, alpha));
 		
 	}
 	
