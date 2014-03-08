@@ -43,7 +43,7 @@ class Shape extends DisplayObject {
 	}
 	
 	
-	private override function __renderCanvas (renderSession:RenderSession):Void {
+	public override function __renderCanvas (renderSession:RenderSession):Void {
 		
 		if (!__renderable) return;
 		

@@ -31,7 +31,9 @@ class Stage extends Sprite {
 	//private var __dirty:Bool;
 	private var __renderSession:RenderSession;
 	private var __stack:Array<InteractiveObject>;
+	#if stats
 	private var __stats:Dynamic;
+	#end
 	private var __transparent:Bool;
 	
 	
@@ -52,7 +54,9 @@ class Stage extends Sprite {
 		__canvas.style.transform = "translatez(0)";
 		__canvas.style.position = "absolute";
 		
+		#if !munit
 		Browser.document.body.appendChild (__canvas);
+		#end
 		
 		stageWidth = width;
 		stageHeight = height;
@@ -70,10 +74,12 @@ class Stage extends Sprite {
 		__renderSession.context = __context;
 		__renderSession.roundPixels = true;
 		
+		#if stats
 		__stats = untyped __js__("new Stats ()");
 		__stats.domElement.style.position = "absolute";
 		__stats.domElement.style.top = "0px";
 		Browser.document.body.appendChild (__stats.domElement);
+		#end
 		
 		var windowEvents = [ "keydown", "keyup" ];
 		var canvasEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup" ];
@@ -158,7 +164,9 @@ class Stage extends Sprite {
 	
 	private function __render ():Void {
 		
+		#if stats
 		__stats.begin ();
+		#end
 		
 		__renderable = true;
 		__update ();
@@ -202,7 +210,9 @@ class Stage extends Sprite {
 			
 		}*/
 		
+		#if stats
 		__stats.end ();
+		#end
 		
 		Browser.window.requestAnimationFrame (cast __render);
 		

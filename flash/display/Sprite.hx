@@ -66,7 +66,7 @@ class Sprite extends DisplayObjectContainer {
 	}
 	
 	
-	private override function __renderCanvas (renderSession:RenderSession):Void {
+	public override function __renderCanvas (renderSession:RenderSession):Void {
 		
 		if (!__renderable) return;
 		

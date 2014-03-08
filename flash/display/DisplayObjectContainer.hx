@@ -2,8 +2,10 @@ package flash.display;
 
 
 import flash.display.Stage;
+import flash.errors.RangeError;
 import flash.events.Event;
 import flash.geom.Matrix;
+import flash.geom.Point;
 import flash.geom.Rectangle;
 
 
@@ -11,6 +13,8 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	
 	public var mouseChildren:Bool;
+	public var numChildren (get, null):Int;
+	public var tabChildren:Bool;
 	
 	private var __children:Array<DisplayObject>;
 	
@@ -89,6 +93,13 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
+	public function contains (child:DisplayObject):Bool {
+		
+		return __children.indexOf (child) > -1;
+		
+	}
+	
+	
 	public function getChildAt (index:Int):DisplayObject {
 		
 		if (index >= 0 && index < __children.length) {
@@ -98,6 +109,41 @@ class DisplayObjectContainer extends InteractiveObject {
 		}
 		
 		return null;
+		
+	}
+	
+	
+	public function getChildByName (name:String):DisplayObject {
+		
+		for (child in __children) {
+			
+			if (child.name == name) return child;
+			
+		}
+		
+		return null;
+		
+	}
+	
+	
+	public function getChildIndex (child:DisplayObject):Int {
+		
+		for (i in 0...__children.length) {
+			
+			if (__children[i] == child) return i;
+			
+		}
+		
+		return -1;
+		
+	}
+	
+	
+	public function getObjectsUnderPoint (point:Point):Array<DisplayObject> {
+		
+		var result = new Array<DisplayObject> ();
+		//__getObjectsUnderPoint (point, result);
+		return result;
 		
 	}
 	
@@ -118,6 +164,91 @@ class DisplayObjectContainer extends InteractiveObject {
 		}
 		
 		return child;
+		
+	}
+	
+	
+	public function removeChildAt (index:Int):DisplayObject {
+		
+		if (index >= 0 && index < __children.length) {
+			
+			return removeChild (__children[index]);
+			
+		}
+		
+		return null;
+		
+	}
+	
+	
+	public function removeChildren (beginIndex:Int = 0, endIndex:Int = 0x7FFFFFFF):Void {
+		
+		if (endIndex == 0x7FFFFFFF) { 
+			
+			endIndex = __children.length - 1;
+			
+			if (endIndex < 0) {
+				
+				return;
+				
+			}
+			
+		}
+		
+		if (beginIndex > __children.length - 1) {
+			
+			return;
+			
+		} else if (endIndex < beginIndex || beginIndex < 0 || endIndex > __children.length) {
+			
+			throw new RangeError ("The supplied index is out of bounds.");
+			
+		}
+		
+		var numRemovals = endIndex - beginIndex;
+		while (numRemovals >= 0) {
+			
+			removeChildAt (beginIndex);
+			numRemovals--;
+			
+		}
+		
+	}
+	
+	
+	public function setChildIndex (child:DisplayObject, index:Int) {
+		
+		if (index >= 0 && index <= __children.length && child.parent == this) {
+			
+			__children.remove (child);
+			__children.insert (index, child);
+			
+		}
+		
+	}
+	
+	
+	public function swapChildren (child1:DisplayObject, child2:DisplayObject):Void {
+		
+		if (child1.parent == this && child2.parent == this) {
+			
+			var index1 = __children.indexOf (child1);
+			var index2 = __children.indexOf (child2);
+			
+			__children[index1] = child2;
+			__children[index2] = child1;
+			
+		}
+		
+	}
+	
+	
+	public function swapChildrenAt (child1:Int, child2:Int):Void {
+		
+		var swap:DisplayObject = __children[child1];
+		__children[child1] = __children[child2];
+		__children[child2] = swap;
+		swap = null;
 		
 	}
 	
@@ -228,7 +359,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
-	private override function __renderCanvas (renderSession:RenderSession):Void {
+	public override function __renderCanvas (renderSession:RenderSession):Void {
 		
 		if (!__renderable) return;
 		
@@ -325,6 +456,13 @@ class DisplayObjectContainer extends InteractiveObject {
 		}
 		
 		return value;
+		
+	}
+	
+	
+	private function get_numChildren ():Int {
+		
+		return __children.length;
 		
 	}
 	

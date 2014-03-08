@@ -11,7 +11,7 @@ import flash.geom.Rectangle;
 import flash.geom.Transform;
 
 
-class DisplayObject extends EventDispatcher {
+class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	
 	public var alpha:Float;
@@ -205,7 +205,7 @@ class DisplayObject extends EventDispatcher {
 	}
 	
 	
-	private function __renderCanvas (renderSession:RenderSession):Void {
+	public function __renderCanvas (renderSession:RenderSession):Void {
 		
 		
 		
