@@ -589,6 +589,8 @@ class BitmapData implements IBitmapDrawable {
 		
 		if (x < 0 || y < 0 || x >= width || y >= height) return 0;
 		
+		__convertToCanvas ();
+		
 		if (__sourceImageData == null) {
 			
 			var pixel = __sourceContext.getImageData (x, y, 1, 1);
@@ -608,6 +610,8 @@ class BitmapData implements IBitmapDrawable {
 		
 		if (x < 0 || y < 0 || x >= width || y >= height) return 0;
 		
+		__convertToCanvas ();
+		
 		if (__sourceImageData == null) {
 			
 			return __getInt32 (0, __sourceContext.getImageData (x, y, 1, 1).data);
@@ -622,6 +626,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	
 	public function getPixels (rect:Rectangle):ByteArray {
+		
+		__convertToCanvas ();
 		
 		if (__sourceImageData == null) {
 			

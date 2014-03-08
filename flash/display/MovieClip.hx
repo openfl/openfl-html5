@@ -8,6 +8,8 @@ class MovieClip extends Sprite {
 		
 		super ();
 		
+		loaderInfo = LoaderInfo.create (null);
+		
 	}
 	
 	

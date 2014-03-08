@@ -3,6 +3,7 @@ package flash;
 
 import flash.display.MovieClip;
 import flash.display.Stage;
+import flash.net.URLRequest;
 import haxe.Timer;
 import js.html.Element;
 import js.Browser;
@@ -15,6 +16,20 @@ import js.Browser;
 	
 	private static var __startTime:Float = Timer.stamp ();
 	
+	
+	public static function as<T> (v:Dynamic, c:Class<T>):Null<T> {
+		
+		return Std.is (v, c) ? v : null;
+		
+	}
+	
+	
+	public static function attach (name:String):MovieClip {
+		
+		return new MovieClip ();
+		
+	}
+
 	
 	public static function create (width:Int, height:Int, element:Element):Void {
 		
@@ -66,6 +81,26 @@ import js.Browser;
 	public static function getTimer ():Int {
 		
 		return Std.int ((Timer.stamp () - __startTime) * 1000);
+		
+	}
+	
+	
+	public static function getURL (request:URLRequest, target:String = null) {
+		
+		if (target == null) {
+			
+			target = "_blank";
+			
+		}
+		
+		Browser.window.open (request.url, target);
+		
+	}
+	
+	
+	public static function trace (arg:Dynamic):Void {
+		
+		haxe.Log.trace (arg);
 		
 	}
 	
