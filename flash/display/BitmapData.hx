@@ -107,7 +107,7 @@ class BitmapData implements IBitmapDrawable {
 		
 		// TODO, could we handle this with 'destination-atop' or 'source-atop' composition modes instead?
 		
-		if (rect == null) return;
+		if (rect == null || __loading) return;
 		rect = __clipRect (rect);
 		
 		if (__sourceImageData == null) {
@@ -139,6 +139,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	
 	public function copyChannel (sourceBitmapData:BitmapData, sourceRect:Rectangle, destPoint:Point, sourceChannel:Int, destChannel:Int):Void {
+		
+		if (__loading) return;
 		
 		// TODO: Re-use __sourceImageData
 		
@@ -259,6 +261,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	
 	public function copyPixels (sourceBitmapData:BitmapData, sourceRect:Rectangle, destPoint:Point, alphaBitmapData:BitmapData = null, alphaPoint:Point = null, mergeAlpha:Bool = false):Void {
+		
+		if (__loading) return;
 		
 		//if (sourceBitmapData.handle () == null || ___textureBuffer == null || sourceBitmapData.handle ().width == 0 || sourceBitmapData.handle ().height == 0 || sourceRect.width <= 0 || sourceRect.height <= 0 ) return;
 		if (sourceRect.x + sourceRect.width > sourceBitmapData.width) sourceRect.width = sourceBitmapData.width - sourceRect.x;
@@ -398,6 +402,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function draw (source:IBitmapDrawable, matrix:Matrix = null, colorTransform:ColorTransform = null, blendMode:BlendMode = null, clipRect:Rectangle = null, smoothing:Bool = false):Void {
 		
+		if (__loading) return;
+		
 		__convertToCanvas ();
 		
 		if (__sourceImageData != null) {
@@ -455,6 +461,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	
 	public function fillRect (rect:Rectangle, color:Int):Void {
+		
+		if (__loading) return;
 		
 		// TODO: Re-use __sourceImageData if in use?
 		
@@ -652,6 +660,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	
 	public function getPixels (rect:Rectangle):ByteArray {
+		
+		if (__loading) return null;
 		
 		__convertToCanvas ();
 		
@@ -871,7 +881,7 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function setPixel (x:Int, y:Int, color:Int):Void {
 		
-		if (x < 0 || y < 0 || x >= this.width || y >= this.height) return;
+		if (x < 0 || y < 0 || x >= this.width || y >= this.height || __loading) return;
 		
 		if (__sourceImageData == null) {
 			
@@ -911,7 +921,7 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function setPixel32 (x:Int, y:Int, color:Int):Void {
 		
-		if (x < 0 || y < 0 || x >= this.width || y >= this.height) return;
+		if (x < 0 || y < 0 || x >= this.width || y >= this.height || __loading) return;
 		
 		if (__sourceImageData == null) {
 			
@@ -970,7 +980,7 @@ class BitmapData implements IBitmapDrawable {
 	public function setPixels (rect:Rectangle, byteArray:ByteArray):Void {
 		
 		rect = __clipRect (rect);
-		if (rect == null) return;
+		if (rect == null || __loading) return;
 		
 		var len = Math.round (4 * rect.width * rect.height);
 		
@@ -1137,6 +1147,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	private function __convertToCanvas ():Void {
 		
+		if (__loading) return;
+		
 		if (__sourceImage != null) {
 			
 			if (__sourceCanvas == null) {
@@ -1271,7 +1283,13 @@ class BitmapData implements IBitmapDrawable {
 		__loading = true;
 		__sourceImage = cast Browser.document.createElement ("img");
 		
-		var image_onLoaded = function (_) {
+		var image_onLoaded = function (event) {
+			
+			if (__sourceImage == null) {
+				
+				__sourceImage = event.target;
+				
+			}
 			
 			width = __sourceImage.width;
 			height = __sourceImage.height;
