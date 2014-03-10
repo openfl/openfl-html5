@@ -23,8 +23,8 @@ import js.Browser;
 class BitmapData implements IBitmapDrawable {
 	
 	
-	private static var base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-	private static var base64Encoder:BaseCode;
+	private static var __base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	private static var __base64Encoder:BaseCode;
 	
 	public var height (default, null):Int;
 	public var rect (default, null):Rectangle;
@@ -33,6 +33,7 @@ class BitmapData implements IBitmapDrawable {
 	
 	public var __worldTransform:Matrix;
 	
+	private var __loading:Bool;
 	private var __sourceCanvas:CanvasElement;
 	private var __sourceContext:CanvasRenderingContext2D;
 	private var __sourceImage:Image;
@@ -566,6 +567,24 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
+	public static function fromBase64 (base64:String, type:String, onload:BitmapData -> Void):BitmapData
+		
+		var bitmapData = new BitmapData (0, 0);
+		bitmapData.__loadFromBase64 (base64, type, onload);
+		return bitmapData;
+		
+	}
+	
+	
+	public static function fromBytes (bytes:ByteArray, rawAlpha:ByteArray = null, onload:BitmapData -> Void):BitmapData {
+		
+		var bitmapData = new BitmapData (0, 0);
+		bitmapData.__loadFromBytes (bytes, rawAlpha, onload);
+		return bitmapData;
+		
+	}
+	
+	
 	public static function fromImage (image:Image, transparent:Bool = true):BitmapData {
 		
 		var bitmapData = new BitmapData (0, 0, transparent);
@@ -594,7 +613,7 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function getPixel (x:Int, y:Int):Int {
 		
-		if (x < 0 || y < 0 || x >= width || y >= height) return 0;
+		if (x < 0 || y < 0 || x >= width || y >= height || __loading) return 0;
 		
 		__convertToCanvas ();
 		
@@ -615,7 +634,7 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function getPixel32 (x:Int, y:Int) {
 		
-		if (x < 0 || y < 0 || x >= width || y >= height) return 0;
+		if (x < 0 || y < 0 || x >= width || y >= height || __loading) return 0;
 		
 		__convertToCanvas ();
 		
@@ -789,24 +808,6 @@ class BitmapData implements IBitmapDrawable {
 		return false;
 		
 	}
-	
-	
-	/*public static function loadFromBase64 (base64:String, type:String, onload:BitmapData -> Void) {
-		
-		var bitmapData = new BitmapData (0, 0);
-		bitmapData.__loadFromBase64 (base64, type, onload);
-		return bitmapData;
-		
-	}
-	
-	
-	public static function loadFromBytes (bytes:ByteArray, inRawAlpha:ByteArray = null, onload:BitmapData -> Void) {
-		
-		var bitmapData = new BitmapData (0, 0);
-		bitmapData.__loadFromBytes (bytes, inRawAlpha, onload);
-		return bitmapData;
-		
-	}*/
 	
 	
 	public function lock ():Void {
@@ -1082,13 +1083,13 @@ class BitmapData implements IBitmapDrawable {
 			
 		}
 		
-		if (base64Encoder == null) {
+		if (__base64Encoder == null) {
 			
-			base64Encoder = new BaseCode (Bytes.ofString (base64Chars));
+			__base64Encoder = new BaseCode (Bytes.ofString (__base64Chars));
 			
 		}
 		
-		return base64Encoder.encodeBytes (Bytes.ofData (cast bytes.byteView)).toString () + extension;
+		return __base64Encoder.encodeBytes (Bytes.ofData (cast bytes.byteView)).toString () + extension;
 		
 	}
 	
@@ -1267,12 +1268,15 @@ class BitmapData implements IBitmapDrawable {
 	
 	private inline function __loadFromBase64 (base64:String, type:String, ?onload:BitmapData -> Void):Void {
 		
+		__loading = true;
 		__sourceImage = cast Browser.document.createElement ("img");
 		
 		var image_onLoaded = function (_) {
 			
 			width = __sourceImage.width;
 			height = __sourceImage.height;
+			
+			__loading = false;
 			
 			if (onload != null) {
 				
