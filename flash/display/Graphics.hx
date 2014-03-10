@@ -141,6 +141,8 @@ class Graphics {
 	
 	private function __hitTest (x:Float, y:Float, shapeFlag:Bool, matrix:Matrix):Bool {
 		
+		if (__bounds == null) return false;
+		
 		var bounds = __bounds.clone ().transform (matrix);
 		return (x > bounds.x && y > bounds.y && x <= bounds.right && y <= bounds.bottom);
 		

@@ -43,7 +43,13 @@ class Sprite extends DisplayObjectContainer {
 		
 		if (!visible || (interactiveOnly && !mouseEnabled)) return false;
 		
-		var length = stack.length;
+		var length = 0;
+		
+		if (stack != null) {
+			
+			length = stack.length;
+			
+		}
 		
 		if (super.__hitTest (x, y, shapeFlag, stack, interactiveOnly)) {
 			
