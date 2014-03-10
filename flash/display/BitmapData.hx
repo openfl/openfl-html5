@@ -567,7 +567,7 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
-	public static function fromBase64 (base64:String, type:String, onload:BitmapData -> Void):BitmapData
+	public static function fromBase64 (base64:String, type:String, onload:BitmapData -> Void):BitmapData {
 		
 		var bitmapData = new BitmapData (0, 0);
 		bitmapData.__loadFromBase64 (base64, type, onload);
