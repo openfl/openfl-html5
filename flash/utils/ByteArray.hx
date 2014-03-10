@@ -380,6 +380,7 @@ class ByteArray implements ArrayAccess<Int> {
 		byteView = untyped __new__("Uint8Array", inBytes.getData ());
 		length = byteView.length;
 		allocated = length;
+		
 	}
    
    

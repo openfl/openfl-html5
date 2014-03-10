@@ -9,6 +9,8 @@ import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
 import flash.utils.ByteArray;
+import haxe.crypto.BaseCode;
+import haxe.io.Bytes;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
 import js.html.Image;
@@ -20,6 +22,9 @@ import js.Browser;
 @:autoBuild(openfl.Assets.embedBitmap())
 class BitmapData implements IBitmapDrawable {
 	
+	
+	private static var base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	private static var base64Encoder:BaseCode;
 	
 	public var height (default, null):Int;
 	public var rect (default, null):Rectangle;
@@ -1067,54 +1072,23 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
-	private static function __base64Encode (bytes:ByteArray) {
+	private static function __base64Encode (bytes:ByteArray):String {
 		
-		var blob = "";
-		var codex = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-		bytes.position = 0;
-		
-		while (bytes.position < bytes.length) {
+		var extension = switch (bytes.length % 3) {
 			
-			var by1 = 0, by2 = 0, by3 = 0;
-			
-			by1 = bytes.readByte ();
-			
-			if (bytes.position < bytes.length) by2 = bytes.readByte ();
-			if (bytes.position < bytes.length) by3 = bytes.readByte ();
-			
-			var by4 = 0, by5 = 0, by6 = 0, by7 = 0;
-			
-			by4 = by1 >> 2;
-			by5 = ((by1 & 0x3) << 4) | (by2 >> 4);
-			by6 = ((by2 & 0xF) << 2) | (by3 >> 6);
-			by7 = by3 & 0x3F;
-			
-			blob += codex.charAt (by4);
-			blob += codex.charAt (by5);
-			
-			if (bytes.position < bytes.length) {
-				
-				blob += codex.charAt (by6);
-				
-			} else {
-				
-				blob += "=";
-				
-			}
-			
-			if (bytes.position < bytes.length) {
-				
-				blob += codex.charAt (by7);
-				
-			} else {
-				
-				blob += "=";
-				
-			}
+			case 1: "==";
+			case 2: "=";
+			default: "";
 			
 		}
 		
-		return blob;
+		if (base64Encoder == null) {
+			
+			base64Encoder = new BaseCode (Bytes.ofString (base64Chars));
+			
+		}
+		
+		return base64Encoder.encodeBytes (Bytes.ofData (cast bytes.byteView)).toString () + extension;
 		
 	}
 	
