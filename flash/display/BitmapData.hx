@@ -509,68 +509,69 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function floodFill (x:Int, y:Int, color:Int):Void {
 		
-		// TODO
+		if (__loading) return;
 		
-		/*var wasLocked = __locked;
-		if (!__locked) lock ();
+		__convertToCanvas ();
 		
-		var queue = new Array<Point> ();
-		queue.push (new Point (x, y));
-		
-		var old = getPixel32 (x, y);
-		var iterations = 0;
-		
-		var search = new Array ();
-		
-		for (i in 0...width + 1) {
+		if (__sourceImageData == null) {
 			
-			var column = new Array ();
-			
-			for (i in 0...height + 1) {
-				
-				column.push (false);
-				
-			}
-			
-			search.push (column);
+			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
 			
 		}
 		
-		var currPoint, newPoint;
+		var data = __sourceImageData.data;
+		
+		var offset = ((y * (width * 4)) + (x * 4));
+        var hitColor = data[offset + 0] << 24;
+        hitColor |= data[offset + 1] << 16;
+        hitColor |= data[offset + 2] << 8;
+        if (transparent) hitColor |= data[offset + 3];
+        
+		var dx = [ 0, -1, 1, 0 ];
+		var dy = [ -1, 0, 0, 1 ];
+		
+		var queue = new Array<Int> ();
+		queue.push (x);
+		queue.push (y);
+		
+		var r = (color & 0xFF0000) >>> 16;
+		var g = (color & 0x00FF00) >>> 8;
+		var b = (color & 0x0000FF);
+		var a = transparent ? (color & 0xFF000000) >>> 24 : 0xFF;
 		
 		while (queue.length > 0) {
 			
-			currPoint = queue.shift ();
-			++iterations;
+			var curPointY = queue.pop ();
+			var curPointX = queue.pop ();
 			
-			var x = Std.int (currPoint.x);
-			var y = Std.int (currPoint.y);
-			
-			if (x < 0 || x >= width) continue;
-			if (y < 0 || y >= height) continue;
-			
-			search[x][y] = true;
-			
-			if (getPixel32 (x, y) == old) {
+			for (i in 0...4) {
 				
-				setPixel32 (x, y, color);
+				var nextPointX = curPointX + dx[i];
+				var nextPointY = curPointY + dy[i];
 				
-				if (!search[x + 1][y]) {
-					queue.push (new Point (x + 1, y));
-				} 
-				if (!search[x][y + 1]) {
-					queue.push (new Point (x, y + 1));
-				} 
-				if (x > 0 && !search[x - 1][y]) {
-					queue.push (new Point (x - 1, y));
-				} 
-				if (y > 0 && !search[x][y - 1]) {
-					queue.push (new Point (x, y - 1));
+				if (nextPointX < 0 || nextPointY < 0 || nextPointX >= width || nextPointY >= height) {
+					
+					continue;
+					
 				}
+				
+				var nextPointOffset = (nextPointY * width + nextPointX) * 4;
+				
+				if (data[nextPointOffset + 0] == ((hitColor >> 24) & 0xFF) && data[nextPointOffset + 1] == ((hitColor >> 16) & 0xFF) && data[nextPointOffset + 2] == ((hitColor >> 8) & 0xFF) && data[nextPointOffset + 3] == ((hitColor) & 0xFF)) {
+					
+					data[nextPointOffset + 0] = r;
+					data[nextPointOffset + 1] = g;
+					data[nextPointOffset + 2] = b;
+					data[nextPointOffset + 3] = a;
+				    
+					queue.push(nextPointX);
+					queue.push(nextPointY);
+					
+				}
+				
 			}
+			
 		}
-		
-		if (!wasLocked) unlock ();*/
 		
 	}
 	
