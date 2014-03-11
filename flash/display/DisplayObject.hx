@@ -263,10 +263,12 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			b10 = parentTransform.c, b11 = parentTransform.d;
 
 			worldTransform.a = b00 * a00 + b01 * a10;
-			worldTransform.b = b00 * a01 + b01 * a11;
+			//worldTransform.b = b00 * a01 + b01 * a11;
+			worldTransform.c = b00 * a01 + b01 * a11;
 			worldTransform.tx = b00 * a02 + b01 * a12 + parentTransform.tx;
 
-			worldTransform.c = b10 * a00 + b11 * a10;
+			//worldTransform.c = b10 * a00 + b11 * a10;
+			worldTransform.b = b10 * a00 + b11 * a10;
 			worldTransform.d = b10 * a01 + b11 * a11;
 			worldTransform.ty = b10 * a02 + b11 * a12 + parentTransform.ty;
 			

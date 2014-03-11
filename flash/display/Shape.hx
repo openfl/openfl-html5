@@ -72,11 +72,11 @@ class Shape extends DisplayObject {
 				
 				if (renderSession.roundPixels) {
 					
-					context.setTransform (transform.a, transform.c, transform.b, transform.d, untyped (transform.tx || 0), untyped (transform.ty || 0));
+					context.setTransform (transform.a, transform.b, transform.c, transform.d, untyped (transform.tx || 0), untyped (transform.ty || 0));
 					
 				} else {
 					
-					context.setTransform (transform.a, transform.c, transform.b, transform.d, transform.tx, transform.ty);
+					context.setTransform (transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty);
 					
 				}
 				
