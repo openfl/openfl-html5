@@ -12,10 +12,14 @@ class TextField extends InteractiveObject {
 	public var defaultTextFormat:TextFormat;
 	public var embedFonts:Bool;
 	public var gridFitType:GridFitType;
+	public var multiline:Bool;
 	public var selectable:Bool;
 	public var sharpness:Float;
 	public var text:String;
 	public var textColor:Int;
+	public var textHeight:Float;
+	public var textWidth:Float;
+	public var wordWrap:Bool;
 	
 	
 	public function new () {
@@ -23,6 +27,21 @@ class TextField extends InteractiveObject {
 		super ();
 		
 		defaultTextFormat = new TextFormat ();
+		
+	}
+	
+	
+	public function getTextFormat (beginIndex:Int = 0, endIndex:Int = 0):TextFormat {
+		
+		//return new TextFormat (mFace, mTextHeight, mTextColour);
+		return new TextFormat ();
+		
+	}
+	
+	
+	public function setTextFormat (inFmt:TextFormat, beginIndex:Int = 0, endIndex:Int = 0) {
+		
+		
 		
 	}
 	

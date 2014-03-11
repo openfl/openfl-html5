@@ -53,8 +53,14 @@ class Graphics {
 	public function clear ():Void {
 		
 		__commands = new Array ();
+		
+		if (__bounds != null) {
+			
+			__dirty = true;
+			
+		}
+		
 		__bounds = null;
-		__dirty = true;
 		
 	}
 	
@@ -101,6 +107,13 @@ class Graphics {
 	}
 	
 	
+	public function drawRoundRect (x:Float, y:Float, width:Float, height:Float, rx:Float, ry:Float = -1):Void {
+		
+		// TODO
+		
+	}
+	
+	
 	public function drawTiles (sheet:Tilesheet, tileData:Array<Float>, smooth:Bool = false, flags:Int = 0):Void {
 		
 		// Checking each tile for extents did not include rotation or scale, and could overflow the maximum canvas
@@ -127,6 +140,20 @@ class Graphics {
 	public function lineStyle (thickness:Null<Float> = null, color:Null<Int> = null, alpha:Null<Float> = null, pixelHinting:Null<Bool> = null, scaleMode:LineScaleMode = null, caps:CapsStyle = null, joints:JointStyle = null, miterLimit:Null<Float> = null):Void {
 		
 		__commands.push (LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit));
+		
+	}
+	
+	
+	public function lineTo (inX:Float, inY:Float):Void {
+		
+		// TODO
+		
+	}
+	
+	
+	public function moveTo (inX:Float, inY:Float):Void {
+		
+		// TODO
 		
 	}
 	

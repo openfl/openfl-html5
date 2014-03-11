@@ -17,9 +17,12 @@ import js.Browser;
 class Stage extends Sprite {
 	
 	
+	public var align:StageAlign;
 	public var backgroundColor (get, set):Int;
+	public var displayState:StageDisplayState;
 	public var focus:InteractiveObject;
 	public var frameRate:Float;
+	public var scaleMode:StageScaleMode;
 	public var stageHeight (default, null):Int;
 	public var stageWidth (default, null):Int;
 	

@@ -303,7 +303,7 @@ class BitmapData implements IBitmapDrawable {
 				
 				__sourceContext.drawImage (sourceBitmapData.__sourceImage, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height, destPoint.x, destPoint.y, sourceRect.width, sourceRect.height);
 				
-			} else {
+			} else if (sourceBitmapData.__sourceCanvas != null) {
 				
 				__sourceContext.drawImage (sourceBitmapData.__sourceCanvas, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height, destPoint.x, destPoint.y, sourceRect.width, sourceRect.height);
 				

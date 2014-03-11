@@ -16,7 +16,11 @@ class Transform {
 	
 	public function new (displayObject:DisplayObject) {
 		
-		
+		colorTransform = new ColorTransform ();
+		concatenatedColorTransform = new ColorTransform ();
+		concatenatedMatrix = new Matrix ();
+		matrix = new Matrix ();
+		pixelBounds = new Rectangle ();
 		
 	}
 	

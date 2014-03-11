@@ -31,7 +31,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public var scaleY:Float;
 	public var scrollRect:Rectangle;
 	public var stage (default, null):Stage;
-	public var transform:Transform;
+	public var transform (get, set):Transform;
 	public var visible:Bool;
 	public var width (get, set):Float;
 	public var x:Float;
@@ -318,6 +318,20 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private function set_height (value:Float):Float {
 		
 		return 0;
+		
+	}
+	
+	
+	private function get_transform ():Transform {
+		
+		return new Transform (this);
+		
+	}
+	
+	
+	private function set_transform (value:Transform):Transform {
+		
+		return value;
 		
 	}
 	
