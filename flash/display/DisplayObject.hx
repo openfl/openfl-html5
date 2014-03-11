@@ -239,8 +239,9 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		if (rotation != __rotationCache) {
 			
 			__rotationCache = rotation;
-			__rotationSine = Math.sin (rotation);
-			__rotationCosine = Math.cos (rotation);
+			var radians = rotation * (Math.PI / 180);
+			__rotationSine = Math.sin (radians);
+			__rotationCosine = Math.cos (radians);
 			
 		}
 		

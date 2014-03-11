@@ -87,10 +87,11 @@ class Bitmap extends DisplayObjectContainer {
 		
 		if (bitmapData != null) {
 			
-			if (bitmapData.__sourceImageData != null) {
+			if (bitmapData.__sourceImageDataChanged) {
 				
 				bitmapData.__sourceContext.putImageData (bitmapData.__sourceImageData, 0, 0);
-				//__sourceImageData = null;
+				bitmapData.__sourceImageData = null;
+				bitmapData.__sourceImageDataChanged = false;
 				
 			}
 			

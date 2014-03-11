@@ -38,6 +38,7 @@ class BitmapData implements IBitmapDrawable {
 	private var __sourceContext:CanvasRenderingContext2D;
 	private var __sourceImage:Image;
 	private var __sourceImageData:ImageData;
+	private var __sourceImageDataChanged:Bool;
 	
 	
 	public function new (width:Int, height:Int, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF) {
@@ -135,127 +136,107 @@ class BitmapData implements IBitmapDrawable {
 			
 		}
 		
+		__sourceImageDataChanged = true;
+		
 	}
 	
 	
 	public function copyChannel (sourceBitmapData:BitmapData, sourceRect:Rectangle, destPoint:Point, sourceChannel:Int, destChannel:Int):Void {
 		
-		if (__loading) return;
-		
-		// TODO: Re-use __sourceImageData
-		
-		rect = __clipRect (rect);
-		if (rect == null) return;
+		if (__loading || sourceRect == null) return;
+		sourceRect = __clipRect (sourceRect);
 		
 		if (destChannel == BitmapDataChannel.ALPHA && !transparent) return;
 		if (sourceRect.width <= 0 || sourceRect.height <= 0) return;
 		if (sourceRect.x + sourceRect.width > sourceBitmapData.width) sourceRect.width = sourceBitmapData.width - sourceRect.x;
 		if (sourceRect.y + sourceRect.height > sourceBitmapData.height) sourceRect.height = sourceBitmapData.height - sourceRect.y;
 		
-		if (sourceBitmapData.__sourceImage != null && sourceBitmapData.__sourceCanvas == null) {
+		var destIdx = -1;
+		
+		if (destChannel == BitmapDataChannel.ALPHA) { 
 			
-			sourceBitmapData.__sourceCanvas = cast Browser.document.createElement ("canvas");
-			sourceBitmapData.__sourceCanvas.width = sourceBitmapData.__sourceImage.width;
-			sourceBitmapData.__sourceCanvas.height = sourceBitmapData.__sourceImage.height;
-			sourceBitmapData.__sourceContext = sourceBitmapData.__sourceCanvas.getContext ("2d");
-			sourceBitmapData.__sourceContext.drawImage (sourceBitmapData.__sourceImage, 0, 0);
+			destIdx = 3;
+			
+		} else if (destChannel == BitmapDataChannel.BLUE) {
+			
+			destIdx = 2;
+			
+		} else if (destChannel == BitmapDataChannel.GREEN) {
+			
+			destIdx = 1;
+			
+		} else if (destChannel == BitmapDataChannel.RED) {
+			
+			destIdx = 0;
+			
+		} else {
+			
+			throw "Invalid destination BitmapDataChannel passed to BitmapData::copyChannel.";
 			
 		}
 		
-		var doChannelCopy = function (imageData:ImageData) {
+		var srcIdx = -1;
+		
+		if (sourceChannel == BitmapDataChannel.ALPHA) {
 			
-			var srcCtx = sourceBitmapData.__sourceContext;
-			var srcImageData = srcCtx.getImageData (sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height);
+			srcIdx = 3;
 			
-			var destIdx = -1;
+		} else if (sourceChannel == BitmapDataChannel.BLUE) {
 			
-			if (destChannel == BitmapDataChannel.ALPHA) { 
-				
-				destIdx = 3;
-				
-			} else if (destChannel == BitmapDataChannel.BLUE) {
-				
-				destIdx = 2;
-				
-			} else if (destChannel == BitmapDataChannel.GREEN) {
-				
-				destIdx = 1;
-				
-			} else if (destChannel == BitmapDataChannel.RED) {
-				
-				destIdx = 0;
-				
-			} else {
-				
-				throw "Invalid destination BitmapDataChannel passed to BitmapData::copyChannel.";
-				
-			}
+			srcIdx = 2;
 			
-			var pos = 4 * (Math.round (destPoint.x) + (Math.round (destPoint.y) * imageData.width)) + destIdx;
-			var boundR = Math.round (4 * (destPoint.x + sourceRect.width));
+		} else if (sourceChannel == BitmapDataChannel.GREEN) {
 			
-			var setPos = function (val:Int) {
-				
-				if ((pos % (imageData.width * 4)) > boundR - 1) {
-					
-					pos += imageData.width * 4 - boundR;
-					
-				}
-				
-				imageData.data[pos] = val;
-				pos += 4;
-				
-			}
+			srcIdx = 1;
 			
-			var srcIdx = -1;
+		} else if (sourceChannel == BitmapDataChannel.RED) {
 			
-			if (sourceChannel == BitmapDataChannel.ALPHA) {
-				
-				srcIdx = 3;
-				
-			} else if (sourceChannel == BitmapDataChannel.BLUE) {
-				
-				srcIdx = 2;
-				
-			} else if (sourceChannel == BitmapDataChannel.GREEN) {
-				
-				srcIdx = 1;
-				
-			} else if (sourceChannel == BitmapDataChannel.RED) {
-				
-				srcIdx = 0;
-				
-			} else {
-				
-				throw "Invalid source BitmapDataChannel passed to BitmapData::copyChannel.";
-				
-			}
+			srcIdx = 0;
 			
-			while (srcIdx < srcImageData.data.length) {
-				
-				setPos (srcImageData.data[srcIdx]);
-				srcIdx += 4;
-				
-			}
+		} else {
+			
+			throw "Invalid source BitmapDataChannel passed to BitmapData::copyChannel.";
 			
 		}
 		
-		/*if (!__locked) {
+		__convertToCanvas ();
+		
+		if (__sourceImageData == null) {
 			
-			__buildLease ();
+			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
 			
-			var ctx:CanvasRenderingContext2D = ___textureBuffer.getContext ('2d');*/
-			var imageData = __sourceContext.getImageData (0, 0, width, height);
+		}
+		
+		/*sourceBitmapData.__convertToCanvas ();
+		
+		if (sourceBitmapData.__sourceImageData == null) {
 			
-			doChannelCopy (imageData);
-			__sourceContext.putImageData (imageData, 0, 0);
-			
-		/*} else {
-			
-			doChannelCopy (__imageData);
-			__imageDataChanged = true;
+			sourceBitmapData.__sourceImageData = sourceBitmapData.__sourceContext.getImageData (0, 0, sourceBitmapData.width, sourceBitmapData.height);
 			
 		}*/
+		
+		var data = __sourceImageData.data;
+		sourceBitmapData.__convertToCanvas ();
+		var sourceData = sourceBitmapData.__sourceContext.getImageData (sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height).data;
+		
+		var pos = 4 * (Math.round (destPoint.x) + (Math.round (destPoint.y) * width)) + destIdx;
+		var boundR = Math.round (4 * (destPoint.x + sourceRect.width));
+		
+		while (srcIdx < sourceData.length) {
+			
+			if ((pos % (width * 4)) > boundR - 1) {
+				
+				pos += width * 4 - boundR;
+				
+			}
+			
+			data[pos] = sourceData[srcIdx];
+			pos += 4;
+			srcIdx += 4;
+			
+		}
+	
+		__sourceImageDataChanged = true;
 		
 	}
 	
@@ -272,22 +253,31 @@ class BitmapData implements IBitmapDrawable {
 			
 			if (alphaPoint == null) alphaPoint = new Point ();
 			
-			var bitmapData = new BitmapData (sourceBitmapData.width, sourceBitmapData.height, true);
-			bitmapData.copyPixels (sourceBitmapData, sourceRect, new Point (sourceRect.x, sourceRect.y));
-			bitmapData.copyChannel (alphaBitmapData, new Rectangle (alphaPoint.x, alphaPoint.y, sourceRect.width, sourceRect.height), new Point (sourceRect.x, sourceRect.y), BitmapDataChannel.ALPHA, BitmapDataChannel.ALPHA);
-			
-			sourceBitmapData = bitmapData;
+			var tempData = clone ();
+			tempData.copyChannel (alphaBitmapData, new Rectangle (alphaPoint.x, alphaPoint.y, sourceRect.width, sourceRect.height), new Point (sourceRect.x, sourceRect.y), BitmapDataChannel.ALPHA, BitmapDataChannel.ALPHA);
+			sourceBitmapData = tempData;
 			
 		}
 		
 		// TODO: Would it be faster to stick with image data, if we're already using it?
 		
-		if (__sourceImageData != null) {
+		//__convertToCanvas ();
+		
+		if (__sourceImageDataChanged) {
 			
 			__sourceContext.putImageData (__sourceImageData, 0, 0);
 			__sourceImageData = null;
+			__sourceImageDataChanged = false;
 			
 		}
+		
+		/*if (__sourceImageData == null) {
+			
+			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
+			
+		}*/
+		
+		//if (__sourceImageData == null) {
 		
 		/*if (!__locked) {
 			
@@ -319,71 +309,90 @@ class BitmapData implements IBitmapDrawable {
 				
 			}
 			
+			//__sourceImageData = null;
+			
 			
 		/*} else {
 			
-			//var ctx:CanvasRenderingContext2D = ___textureBuffer.getContext ('2d');
-			//ctx.putImageData (sourceBitmapData.___textureBuffer.getContext ('2d').getImageData (sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height), destPoint.x, destPoint.y);
+			var offsetX = Std.int (destPoint.x - sourceRect.x);
+			var offsetY = Std.int (destPoint.y - sourceRect.y);
+			var sourceRectX = Std.int (sourceRect.x);
+			var sourceRectY = Std.int (sourceRect.y);
+			var sourceRectWidth = Std.int (sourceRect.width);
+			var sourceRectHeight = Std.int (sourceRect.height);
+			var targetData = __sourceImageData.data;
 			
+			if (sourceBitmapData.__sourceImageData == null) {
+				
+				sourceBitmapData.__convertToCanvas ();
+				
+				if (sourceBitmapData.__sourceImageData == null) {
+					
+					sourceBitmapData.__sourceImageData = sourceBitmapData.__sourceContext.getImageData (0, 0, sourceBitmapData.width, sourceBitmapData.height);
+					
+				}
+				
+			}
 			
-			//var offsetX = Std.int (destPoint.x - sourceRect.x);
-			//var offsetY = Std.int (destPoint.y - sourceRect.y);
-			//
-			//var wasLocked = sourceBitmapData.__locked;
-			//if (!wasLocked) sourceBitmapData.lock();
-			//
-			//var sourceRectX = Std.int (sourceRect.x);
-			//var sourceRectY = Std.int (sourceRect.y);
-			//var sourceRectWidth = Std.int (sourceRect.width);
-			//var sourceRectHeight = Std.int (sourceRect.height);
-			//var targetData = __imageData.data;
-			//var sourceData = sourceBitmapData.__imageData.data;
-			//var targetWidth = width;
-			//var sourceWidth = sourceBitmapData.width;
-			//
-			//if (sourceBitmapData.__imageData != null) {
-				//
-				//for (sourceX in sourceRectX...sourceRectWidth + 1) {
-					//
-					//for (sourceY in sourceRectY...sourceRectHeight + 1) {
-						//
-						//var sourceOffset = ((sourceX * sourceWidth) * 4 + sourceX * 4);
-						//var targetOffset = (((sourceX + offsetX) * targetWidth) * 4 + (sourceX + offsetX) * 4);
-						//
-						//targetData[targetOffset] = sourceData[sourceOffset];
-						//targetData[targetOffset+1] = sourceData[sourceOffset+1];
-						//targetData[targetOffset+2] = sourceData[sourceOffset+2];
-						//targetData[targetOffset+3] = sourceData[sourceOffset+3];
-						//
-					//}
-					//
-				//}
-				//
-			//}
-			//
-			//if (!wasLocked) sourceBitmapData.unlock();
+			var sourceData = sourceBitmapData.__sourceImageData.data;
+			var targetWidth = width;
+			var sourceWidth = sourceBitmapData.width;
 			
-			//
-			//
-			//
-			//__imageData.data[offset] = (color & 0x00FF0000) >>> 16;
-			//__imageData.data[offset + 1] = (color & 0x0000FF00) >>> 8;
-			//__imageData.data[offset + 2] = (color & 0x000000FF);
-			//
-			//if (__transparent) {
-				//
-				//__imageData.data[offset + 3] = (color & 0xFF000000) >>> 24;
-				//
-			//} else {
-				//
-				//__imageData.data[offset + 3] = (0xFF);
-				//
-			//}
-			//
-			//__imageDataChanged = true;
-			//
-			__copyPixelList[__copyPixelList.length] = { handle: sourceBitmapData.handle (), transparentFiller: (mergeAlpha ? null : sourceBitmapData.__transparentFiller), sourceX: sourceRect.x, sourceY: sourceRect.y, sourceWidth: sourceRect.width, sourceHeight: sourceRect.height, destX: destPoint.x, destY: destPoint.y };
+			if (alphaBitmapData != null && alphaBitmapData.transparent) {
+				
+				if (alphaPoint == null) alphaPoint = new Point ();
+				
+				alphaBitmapData.__convertToCanvas ();
+				
+				if (alphaBitmapData.__sourceImageData == null) {
+					
+					alphaBitmapData.__sourceImageData = alphaBitmapData.__sourceContext.getImageData (0, 0, alphaBitmapData.width, alphaBitmapData.height);
+					
+				}
+				//trace ("hey");
+				var alphaOffsetX = Std.int (destPoint.x - alphaPoint.x);
+				var alphaOffsetY = Std.int (destPoint.y - alphaPoint.y);
+				var alphaData = alphaBitmapData.__sourceImageData.data;
+				
+				for (sourceX in sourceRectX...sourceRectWidth + 1) {
+					
+					for (sourceY in sourceRectY...sourceRectHeight + 1) {
+						
+						var sourceOffset = ((sourceX * sourceWidth) * 4 + sourceX * 4);
+						var targetOffset = (((sourceX + offsetX) * targetWidth) * 4 + (sourceX + offsetX) * 4);
+						var alphaOffset = ((sourceX * sourceWidth) * 4 + sourceX * 4);
+						
+						targetData[targetOffset] = sourceData[sourceOffset];
+						targetData[targetOffset+1] = sourceData[sourceOffset+1];
+						targetData[targetOffset+2] = sourceData[sourceOffset+2];
+						targetData[targetOffset+3] = sourceData[alphaOffset+3];
+						
+					}
+					
+				}
+				
+				
+			} else {
+				
+				for (sourceX in sourceRectX...sourceRectWidth + 1) {
+					
+					for (sourceY in sourceRectY...sourceRectHeight + 1) {
+						
+						var sourceOffset = ((sourceX * sourceWidth) * 4 + sourceX * 4);
+						var targetOffset = (((sourceX + offsetX) * targetWidth) * 4 + (sourceX + offsetX) * 4);
+						
+						targetData[targetOffset] = sourceData[sourceOffset];
+						targetData[targetOffset+1] = sourceData[sourceOffset+1];
+						targetData[targetOffset+2] = sourceData[sourceOffset+2];
+						targetData[targetOffset+3] = sourceData[sourceOffset+3];
+						
+					}
+					
+				}
+				
+			}
 			
+			__sourceImageDataChanged = true;
 		}*/
 		
 	}
@@ -573,6 +582,8 @@ class BitmapData implements IBitmapDrawable {
 			
 		}
 		
+		__sourceImageDataChanged = true;
+		
 	}
 	
 	
@@ -628,15 +639,21 @@ class BitmapData implements IBitmapDrawable {
 		
 		if (__sourceImageData == null) {
 			
+			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
+			
+		}
+		
+		/*if (__sourceImageData == null) {
+			
 			var pixel = __sourceContext.getImageData (x, y, 1, 1);
 			return (pixel.data[0] << 16) | (pixel.data[1] << 8) | (pixel.data[2]);
 			
-		} else {
+		} else {*/
 			
 			var offset = (4 * y * width + x * 4);
 			return (__sourceImageData.data[offset] << 16) | (__sourceImageData.data[offset + 1] << 8) | (__sourceImageData.data[offset + 2]);
 			
-		}
+		//}
 		
 	}
 	
@@ -649,13 +666,19 @@ class BitmapData implements IBitmapDrawable {
 		
 		if (__sourceImageData == null) {
 			
+			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
+			
+		}
+		
+		/*if (__sourceImageData == null) {
+			
 			return __getInt32 (0, __sourceContext.getImageData (x, y, 1, 1).data);
 			
-		} else {
+		} else {*/
 			
 			return __getInt32 ((4 * y * width + x * 4), __sourceImageData.data);
 			
-		}
+		//}
 		
 	}
 	
@@ -917,6 +940,8 @@ class BitmapData implements IBitmapDrawable {
 			
 		}*/
 		
+		__sourceImageDataChanged = true;
+		
 	}
 	
 	
@@ -974,6 +999,8 @@ class BitmapData implements IBitmapDrawable {
 			/*__imageDataChanged = true;
 			
 		}*/
+		
+		__sourceImageDataChanged = true;
 		
 	}
 	
@@ -1033,6 +1060,8 @@ class BitmapData implements IBitmapDrawable {
 			//__imageDataChanged = true;
 			
 		}
+		
+		__sourceImageDataChanged = true;
 		
 	}
 	
@@ -1368,10 +1397,11 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function __renderCanvas (renderSession:RenderSession):Void {
 		
-		if (__sourceImageData != null) {
+		if (__sourceImageDataChanged) {
 			
 			__sourceContext.putImageData (__sourceImageData, 0, 0);
 			__sourceImageData = null;
+			__sourceImageDataChanged = false;
 			
 		}
 		
