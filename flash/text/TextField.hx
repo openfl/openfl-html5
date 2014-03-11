@@ -12,6 +12,7 @@ class TextField extends InteractiveObject {
 	public var defaultTextFormat:TextFormat;
 	public var embedFonts:Bool;
 	public var gridFitType:GridFitType;
+	public var htmlText:String;
 	public var multiline:Bool;
 	public var selectable:Bool;
 	public var sharpness:Float;
