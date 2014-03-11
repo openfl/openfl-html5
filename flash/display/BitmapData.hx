@@ -278,6 +278,8 @@ class BitmapData implements IBitmapDrawable {
 				
 				if (transparent && sourceBitmapData.transparent) {
 					
+					__sourceContext.clearRect (destPoint.x, destPoint.y, sourceRect.width, sourceRect.height);
+					
 					// TODO: Handle alpha merge. Better way to do this?
 					
 					//var trpCtx:CanvasRenderingContext2D = sourceBitmapData.__transparentFiller.getContext ('2d');
@@ -550,7 +552,7 @@ class BitmapData implements IBitmapDrawable {
 	
 	public static function fromBase64 (base64:String, type:String, onload:BitmapData -> Void):BitmapData {
 		
-		var bitmapData = new BitmapData (0, 0);
+		var bitmapData = new BitmapData (0, 0, true);
 		bitmapData.__loadFromBase64 (base64, type, onload);
 		return bitmapData;
 		
@@ -559,7 +561,7 @@ class BitmapData implements IBitmapDrawable {
 	
 	public static function fromBytes (bytes:ByteArray, rawAlpha:ByteArray = null, onload:BitmapData -> Void):BitmapData {
 		
-		var bitmapData = new BitmapData (0, 0);
+		var bitmapData = new BitmapData (0, 0, true);
 		bitmapData.__loadFromBytes (bytes, rawAlpha, onload);
 		return bitmapData;
 		

@@ -14,6 +14,7 @@ class TextField extends InteractiveObject {
 	public var gridFitType:GridFitType;
 	public var htmlText:String;
 	public var multiline:Bool;
+	public var numLines:Int;
 	public var selectable:Bool;
 	public var sharpness:Float;
 	public var text:String;
