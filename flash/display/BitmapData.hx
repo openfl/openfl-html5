@@ -39,6 +39,7 @@ class BitmapData implements IBitmapDrawable {
 	private var __sourceImage:Image;
 	private var __sourceImageData:ImageData;
 	private var __sourceImageDataChanged:Bool;
+	private var __valid:Bool;
 	
 	
 	public function new (width:Int, height:Int, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF) {
@@ -51,11 +52,7 @@ class BitmapData implements IBitmapDrawable {
 			this.height = height;
 			rect = new Rectangle (0, 0, width, height);
 			
-			__sourceCanvas = cast Browser.window.document.createElement ("canvas");
-			__sourceCanvas.width = width;
-			__sourceCanvas.height = height;
-			
-			__sourceContext = __sourceCanvas.getContext ("2d");
+			__createCanvas (width, height);
 			
 			if (!transparent) {
 				
@@ -71,6 +68,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	
 	public function applyFilter (sourceBitmapData:BitmapData, sourceRect:Rectangle, destPoint:Point, filter:BitmapFilter):Void {
+		
+		if (!__valid) return;
 		
 		/*if (sourceBitmapData == this && sourceRect.x == destPoint.x && sourceRect.y == destPoint.y) {
 			
@@ -91,7 +90,11 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function clone ():BitmapData {
 		
-		if (__sourceImage != null) {
+		if (!__valid) {
+			
+			return new BitmapData (width, height, transparent);
+			
+		} else if (__sourceImage != null) {
 			
 			return BitmapData.fromImage (__sourceImage, transparent);
 			
@@ -104,18 +107,15 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
-	public function colorTransform (rect:Rectangle, colorTransform:ColorTransform) {
+	public function colorTransform (rect:Rectangle, colorTransform:ColorTransform):Void {
 		
 		// TODO, could we handle this with 'destination-atop' or 'source-atop' composition modes instead?
 		
-		if (rect == null || __loading) return;
 		rect = __clipRect (rect);
+		if (!__valid || rect == null) return;
 		
-		if (__sourceImageData == null) {
-			
-			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
-			
-		}
+		__convertToCanvas ();
+		__createImageData ();
 		
 		var data = __sourceImageData.data;
 		var stride = width * 4;
@@ -143,8 +143,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function copyChannel (sourceBitmapData:BitmapData, sourceRect:Rectangle, destPoint:Point, sourceChannel:Int, destChannel:Int):Void {
 		
-		if (__loading || sourceRect == null) return;
 		sourceRect = __clipRect (sourceRect);
+		if (!__valid || sourceRect == null) return;
 		
 		if (destChannel == BitmapDataChannel.ALPHA && !transparent) return;
 		if (sourceRect.width <= 0 || sourceRect.height <= 0) return;
@@ -200,12 +200,7 @@ class BitmapData implements IBitmapDrawable {
 		}
 		
 		__convertToCanvas ();
-		
-		if (__sourceImageData == null) {
-			
-			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
-			
-		}
+		__createImageData ();
 		
 		/*sourceBitmapData.__convertToCanvas ();
 		
@@ -243,7 +238,7 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function copyPixels (sourceBitmapData:BitmapData, sourceRect:Rectangle, destPoint:Point, alphaBitmapData:BitmapData = null, alphaPoint:Point = null, mergeAlpha:Bool = false):Void {
 		
-		if (__loading) return;
+		if (!__valid) return;
 		
 		//if (sourceBitmapData.handle () == null || ___textureBuffer == null || sourceBitmapData.handle ().width == 0 || sourceBitmapData.handle ().height == 0 || sourceRect.width <= 0 || sourceRect.height <= 0 ) return;
 		if (sourceRect.x + sourceRect.width > sourceBitmapData.width) sourceRect.width = sourceBitmapData.width - sourceRect.x;
@@ -263,13 +258,7 @@ class BitmapData implements IBitmapDrawable {
 		
 		//__convertToCanvas ();
 		
-		if (__sourceImageDataChanged) {
-			
-			__sourceContext.putImageData (__sourceImageData, 0, 0);
-			__sourceImageData = null;
-			__sourceImageDataChanged = false;
-			
-		}
+		__syncImageData ();
 		
 		/*if (__sourceImageData == null) {
 			
@@ -405,22 +394,17 @@ class BitmapData implements IBitmapDrawable {
 		__sourceContext = null;
 		width = 0;
 		height = 0;
+		__valid = false;
 		
 	}
 	
 	
 	public function draw (source:IBitmapDrawable, matrix:Matrix = null, colorTransform:ColorTransform = null, blendMode:BlendMode = null, clipRect:Rectangle = null, smoothing:Bool = false):Void {
 		
-		if (__loading) return;
+		if (!__valid) return;
 		
 		__convertToCanvas ();
-		
-		if (__sourceImageData != null) {
-			
-			__sourceContext.putImageData (__sourceImageData, 0, 0);
-			__sourceImageData = null;
-			
-		}
+		__syncImageData ();
 		
 		var renderSession = new RenderSession ();
 		renderSession.context = __sourceContext;
@@ -471,35 +455,17 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function fillRect (rect:Rectangle, color:Int):Void {
 		
-		if (__loading) return;
+		if (!__valid) return;
 		
 		// TODO: Re-use __sourceImageData if in use?
 		
-		if (__sourceImageData != null) {
-			
-			__sourceContext.putImageData (__sourceImageData, 0, 0);
-			__sourceImageData = null;
-			
-		}
+		__syncImageData ();
 		
 		if (rect == null || rect.width <= 0 || rect.height <= 0) return;
 		
 		if (rect.x == 0 && rect.y == 0 && rect.width == width && rect.height == height) {
 			
-			if (__sourceImage != null) {
-				
-				if (__sourceCanvas == null) {
-					
-					__sourceCanvas = cast Browser.document.createElement ("canvas");
-					__sourceCanvas.width = width;
-					__sourceCanvas.height = height;
-					__sourceContext = __sourceCanvas.getContext ("2d");
-					
-				}
-				
-				__sourceImage = null;
-				
-			}
+			__convertToCanvas ();
 			
 			if (transparent && ((color & 0xFF000000) == 0)) {
 				
@@ -518,15 +484,10 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function floodFill (x:Int, y:Int, color:Int):Void {
 		
-		if (__loading) return;
+		if (!__valid) return;
 		
 		__convertToCanvas ();
-		
-		if (__sourceImageData == null) {
-			
-			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
-			
-		}
+		__createImageData ();
 		
 		var data = __sourceImageData.data;
 		
@@ -611,6 +572,7 @@ class BitmapData implements IBitmapDrawable {
 		bitmapData.__sourceImage = image;
 		bitmapData.width = image.width;
 		bitmapData.height = image.height;
+		bitmapData.__valid = true;
 		
 		return bitmapData;
 		
@@ -620,10 +582,7 @@ class BitmapData implements IBitmapDrawable {
 	public static function fromCanvas (canvas:CanvasElement, transparent:Bool = true):BitmapData {
 		
 		var bitmapData = new BitmapData (0, 0, transparent);
-		bitmapData.__sourceCanvas = cast Browser.document.createElement ("canvas");
-		bitmapData.__sourceCanvas.width = bitmapData.width = canvas.width;
-		bitmapData.__sourceCanvas.height = bitmapData.height = canvas.height;
-		bitmapData.__sourceContext = bitmapData.__sourceCanvas.getContext ("2d");
+		bitmapData.__createCanvas (canvas.width, canvas.height);
 		bitmapData.__sourceContext.drawImage (canvas, 0, 0);
 		
 		return bitmapData;
@@ -633,15 +592,10 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function getPixel (x:Int, y:Int):Int {
 		
-		if (x < 0 || y < 0 || x >= width || y >= height || __loading) return 0;
+		if (!__valid || x < 0 || y < 0 || x >= width || y >= height) return 0;
 		
 		__convertToCanvas ();
-		
-		if (__sourceImageData == null) {
-			
-			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
-			
-		}
+		__createImageData ();
 		
 		/*if (__sourceImageData == null) {
 			
@@ -660,15 +614,10 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function getPixel32 (x:Int, y:Int) {
 		
-		if (x < 0 || y < 0 || x >= width || y >= height || __loading) return 0;
+		if (!__valid || x < 0 || y < 0 || x >= width || y >= height) return 0;
 		
 		__convertToCanvas ();
-		
-		if (__sourceImageData == null) {
-			
-			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
-			
-		}
+		__createImageData ();
 		
 		/*if (__sourceImageData == null) {
 			
@@ -685,15 +634,10 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function getPixels (rect:Rectangle):ByteArray {
 		
-		if (__loading) return null;
+		if (!__valid) return null;
 		
 		__convertToCanvas ();
-		
-		if (__sourceImageData == null) {
-			
-			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
-			
-		}
+		__createImageData ();
 		
 		var byteArray = new ByteArray ();
 		byteArray.length = __sourceImageData.data.length;
@@ -751,6 +695,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	
 	public function hitTest(firstPoint:Point, firstAlphaThreshold:Int, secondObject:Dynamic, secondBitmapDataPoint:Point = null, secondAlphaThreshold:Int = 1):Bool {
+		
+		if (!__valid) return false;
 		
 		/*var type = Type.getClassName (Type.getClass (secondObject));
 		firstAlphaThreshold = firstAlphaThreshold & 0xFFFFFFFF;
@@ -857,6 +803,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function noise (randomSeed:Int, low:Int = 0, high:Int = 255, channelOptions:Int = 7, grayScale:Bool = false):Void {
 		
+		if (!__valid) return;
+		
 		/*var generator = new MinstdGenerator (randomSeed);
 		var ctx:CanvasRenderingContext2D = ___textureBuffer.getContext ('2d');
 		
@@ -905,13 +853,10 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function setPixel (x:Int, y:Int, color:Int):Void {
 		
-		if (x < 0 || y < 0 || x >= this.width || y >= this.height || __loading) return;
+		if (!__valid || x < 0 || y < 0 || x >= this.width || y >= this.height) return;
 		
-		if (__sourceImageData == null) {
-			
-			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
-			
-		}
+		__convertToCanvas ();
+		__createImageData ();
 		
 		/*if (!__locked) {
 			
@@ -947,13 +892,10 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function setPixel32 (x:Int, y:Int, color:Int):Void {
 		
-		if (x < 0 || y < 0 || x >= this.width || y >= this.height || __loading) return;
+		if (!__valid || x < 0 || y < 0 || x >= this.width || y >= this.height) return;
 		
-		if (__sourceImageData == null) {
-			
-			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
-			
-		}
+		__convertToCanvas ();
+		__createImageData ();
 		
 		/*if (!__locked) {
 			
@@ -1008,15 +950,12 @@ class BitmapData implements IBitmapDrawable {
 	public function setPixels (rect:Rectangle, byteArray:ByteArray):Void {
 		
 		rect = __clipRect (rect);
-		if (rect == null || __loading) return;
+		if (!__valid || rect == null) return;
+		
+		__convertToCanvas ();
+		__createImageData ();
 		
 		var len = Math.round (4 * rect.width * rect.height);
-		
-		if (__sourceImageData == null) {
-			
-			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
-			
-		}
 		
 		if (rect.x == 0 && rect.y == 0 && rect.width == width && rect.height == height) {
 			
@@ -1136,6 +1075,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	private function __clipRect (r:Rectangle):Rectangle {
 		
+		if (r == null) return null;
+		
 		if (r.x < 0) {
 			
 			r.width -= -r.x;
@@ -1183,15 +1124,34 @@ class BitmapData implements IBitmapDrawable {
 			
 			if (__sourceCanvas == null) {
 				
-				__sourceCanvas = cast Browser.document.createElement ("canvas");
-				__sourceCanvas.width = __sourceImage.width;
-				__sourceCanvas.height = __sourceImage.height;
-				__sourceContext = __sourceCanvas.getContext ("2d");
+				__createCanvas (__sourceImage.width, __sourceImage.height);
 				__sourceContext.drawImage (__sourceImage, 0, 0);
 				
 			}
 			
 			__sourceImage = null;
+			
+		}
+		
+	}
+	
+	
+	private function __createCanvas (width:Int, height:Int):Void {
+		
+		__sourceCanvas = cast Browser.document.createElement ("canvas");
+		__sourceCanvas.width = width;
+		__sourceCanvas.height = height;
+		__sourceContext = __sourceCanvas.getContext ("2d");
+		__valid = true;
+		
+	}
+	
+	
+	private function __createImageData ():Void {
+		
+		if (__sourceImageData == null) {
+			
+			__sourceImageData = __sourceContext.getImageData (0, 0, width, height);
 			
 		}
 		
@@ -1310,7 +1270,6 @@ class BitmapData implements IBitmapDrawable {
 	
 	private inline function __loadFromBase64 (base64:String, type:String, ?onload:BitmapData -> Void):Void {
 		
-		__loading = true;
 		__sourceImage = cast Browser.document.createElement ("img");
 		
 		var image_onLoaded = function (event) {
@@ -1324,7 +1283,7 @@ class BitmapData implements IBitmapDrawable {
 			width = __sourceImage.width;
 			height = __sourceImage.height;
 			
-			__loading = false;
+			__valid = true;
 			
 			if (onload != null) {
 				
@@ -1397,13 +1356,9 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function __renderCanvas (renderSession:RenderSession):Void {
 		
-		if (__sourceImageDataChanged) {
-			
-			__sourceContext.putImageData (__sourceImageData, 0, 0);
-			__sourceImageData = null;
-			__sourceImageDataChanged = false;
-			
-		}
+		if (!__valid) return;
+		
+		__syncImageData ();
 		
 		var context = renderSession.context;
 		
@@ -1496,6 +1451,19 @@ class BitmapData implements IBitmapDrawable {
 		{
 		renderSession.maskManager.popMask(renderSession.context);
 		}*/
+		
+	}
+	
+	
+	private function __syncImageData ():Void {
+		
+		if (__sourceImageDataChanged) {
+			
+			__sourceContext.putImageData (__sourceImageData, 0, 0);
+			__sourceImageData = null;
+			__sourceImageDataChanged = false;
+			
+		}
 		
 	}
 	

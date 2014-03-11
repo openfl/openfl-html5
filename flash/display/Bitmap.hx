@@ -85,15 +85,9 @@ class Bitmap extends DisplayObjectContainer {
 			
 		}*/
 		
-		if (bitmapData != null) {
+		if (bitmapData != null && bitmapData.__valid) {
 			
-			if (bitmapData.__sourceImageDataChanged) {
-				
-				bitmapData.__sourceContext.putImageData (bitmapData.__sourceImageData, 0, 0);
-				bitmapData.__sourceImageData = null;
-				bitmapData.__sourceImageDataChanged = false;
-				
-			}
+			bitmapData.__syncImageData ();
 			
 			context.globalAlpha = __worldAlpha;
 			var transform = __worldTransform;
