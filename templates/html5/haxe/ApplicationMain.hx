@@ -12,6 +12,7 @@ import flash.events.Event;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
 import js.html.Image;
+import flash.Lib;
 
 @:access(flash.Lib) class ApplicationMain {
 	
@@ -20,6 +21,7 @@ import js.html.Image;
 	public static var urlLoaders = new Map <String, URLLoader> ();
 	
 	private static var assetsLoaded = 0;
+	private static var preloader:::PRELOADER_NAME::;
 	private static var total = 0;
 	
 	//public static var loaders:Map <String, Loader>;
@@ -28,17 +30,26 @@ import js.html.Image;
 	
 	static function main () {
 		
-		var id;
+		#if munit
+		var element = null;
+		#else
+		var element = js.Browser.document.getElementById ("openfl-embed");
+		#end
 		
+		flash.Lib.create (::WIN_WIDTH::, ::WIN_HEIGHT::, element);
+		
+		preloader = ::if (PRELOADER_NAME != "")::new ::PRELOADER_NAME::::else::NMEPreloader::end:: ();
+		Lib.current.addChild (preloader);
+		preloader.onInit ();
+		
+		var id;
 		::foreach assets::::if (embed)::
 		::if (type == "image")::
-		
 		var image = new Image ();
 		id = "::resourceName::";
 		images.set (id, image);
 		image.onload = image_onLoad;
 		image.src = id;
-		
 		//var loader:Loader = new Loader();
 		//loaders.set("::resourceName::", loader);
 		total ++;
@@ -76,13 +87,47 @@ import js.html.Image;
 	
 	private static function start ():Void {
 		
-		#if munit
-		var element = null;
-		#else
-		var element = js.Browser.document.getElementById ("openfl-embed");
-		#end
+		preloader.addEventListener (Event.COMPLETE, preloader_onComplete);
+		preloader.onLoaded ();
 		
-		flash.Lib.create (::WIN_WIDTH::, ::WIN_HEIGHT::, element);
+	}
+	
+	
+	private static function image_onLoad (_):Void {
+		
+		assetsLoaded++;
+		
+		preloader.onUpdate (assetsLoaded, total);
+		
+		if (assetsLoaded == total) {
+			
+			start ();
+			
+		}
+		
+	}
+	
+	
+	private static function loader_onComplete (event:Event):Void {
+		
+		assetsLoaded++;
+		
+		preloader.onUpdate (assetsLoaded, total);
+		
+		if (assetsLoaded == total) {
+			
+			start ();
+			
+		}
+		
+	}
+	
+	
+	private static function preloader_onComplete (event:Event):Void {
+		
+		preloader.removeEventListener (Event.COMPLETE, preloader_onComplete);
+		Lib.current.removeChild (preloader);
+		preloader = null;
 		
 		var hasMain = false;
 		
@@ -110,32 +155,6 @@ import js.html.Image;
 				flash.Lib.current.addChild (cast instance);
 				
 			}
-			
-		}
-		
-	}
-	
-	
-	private static function image_onLoad (_):Void {
-		
-		assetsLoaded++;
-		
-		if (assetsLoaded == total) {
-			
-			start ();
-			
-		}
-		
-	}
-	
-	
-	private static function loader_onComplete (event:Event):Void {
-		
-		assetsLoaded++;
-		
-		if (assetsLoaded == total) {
-			
-			start ();
 			
 		}
 		
