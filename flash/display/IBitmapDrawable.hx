@@ -10,6 +10,6 @@ interface IBitmapDrawable {
 	var __worldTransform:Matrix;
 	
 	function __renderCanvas (renderSession:RenderSession):Void;
-	function __update ():Void;
+	function __updateChildren ():Void;
 	
 }

@@ -412,23 +412,11 @@ class BitmapData implements IBitmapDrawable {
 		renderSession.context = __sourceContext;
 		renderSession.roundPixels = true;
 		
-		// TODO: Change __renderCanvas to use a, b, c, d, not a, c, b, d
-		
-		if (matrix == null) matrix = new Matrix ();
-		
 		var matrixCache = source.__worldTransform;
-		var parentCache = untyped (source).parent;
-		untyped (source).parent = null;
-		source.__worldTransform = matrix;
-		source.__update ();
+		source.__worldTransform = matrix != null ? matrix : new Matrix ();
+		source.__updateChildren ();
 		source.__renderCanvas (renderSession);
 		source.__worldTransform = matrixCache;
-		
-		untyped (source).parent = parentCache;
-		//source.__update ();
-		// TODO: Need to handle matrix properly, etc.
-		
-		//source.__renderCanvas (__sourceCanvas);
 		
 		/*
 		__buildLease ();
@@ -1476,7 +1464,7 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
-	public function __update ():Void {
+	public function __updateChildren ():Void {
 		
 		
 		

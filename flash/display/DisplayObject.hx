@@ -289,6 +289,13 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
+	public function __updateChildren ():Void {
+		
+		
+		
+	}
+	
+	
 	
 	
 	// Get & Set Methods
