@@ -418,6 +418,8 @@ class BitmapData implements IBitmapDrawable {
 		source.__renderCanvas (renderSession);
 		source.__worldTransform = matrixCache;
 		
+		__sourceContext.setTransform (1, 0, 0, 1, 0, 0);
+		
 		/*
 		__buildLease ();
 		source.drawToSurface (handle (), matrix, colorTransform, blendMode, clipRect, smoothing);
@@ -451,17 +453,13 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function fillRect (rect:Rectangle, color:Int):Void {
 		
-		if (!__valid) return;
+		rect = __clipRect (rect);
+		if (!__valid || rect == null) return;
 		
-		// TODO: Re-use __sourceImageData if in use?
-		
+		__convertToCanvas ();
 		__syncImageData ();
 		
-		if (rect == null || rect.width <= 0 || rect.height <= 0) return;
-		
 		if (rect.x == 0 && rect.y == 0 && rect.width == width && rect.height == height) {
-			
-			__convertToCanvas ();
 			
 			if (transparent && ((color & 0xFF000000) == 0)) {
 				
@@ -472,7 +470,6 @@ class BitmapData implements IBitmapDrawable {
 			
 		}
 		
-		__convertToCanvas ();
 		__fillRect (rect, color);
 		
 	}
@@ -1161,10 +1158,10 @@ class BitmapData implements IBitmapDrawable {
 		var ctx:CanvasRenderingContext2D = ___textureBuffer.getContext ('2d');
 		*/
 		
-		var r = (color & 0xFF0000) >>> 16;
-		var g = (color & 0x00FF00) >>> 8;
-		var b = (color & 0x0000FF);
-		var a = (transparent) ? (color >>> 24) : 0xFF;
+		var a = (transparent) ? ((color & 0xFF000000) >>> 24) : 0xFF;
+		var r = (color & 0x00FF0000) >>> 16;
+		var g = (color & 0x0000FF00) >>> 8;
+		var b = (color & 0x000000FF);
 		
 		//if (!__locked) {
 			
