@@ -250,29 +250,39 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			var parentTransform = parent.__worldTransform;
 			var worldTransform = __worldTransform;
 			
-			var px = 0;
-			var py = 0;
+			//var px = 0;
+			//var py = 0;
 			
 			var a00 = __rotationCosine * scaleX,
-			a01 = -__rotationSine * scaleY,
-			a10 = __rotationSine * scaleX,
+			a01 = __rotationSine * scaleX,
+			a10 = -__rotationSine * scaleY,
 			a11 = __rotationCosine * scaleY,
-			a02 = x - a00 * px - py * a01,
-			a12 = y - a11 * py - px * a10,
+			//a02 = x - a00 * px - py * a01,
+			//a12 = y - a11 * py - px * a10,
+			a02 = x,
+			a12 = y,
 			b00 = parentTransform.a, b01 = parentTransform.b,
 			b10 = parentTransform.c, b11 = parentTransform.d;
-
-			worldTransform.a = b00 * a00 + b01 * a10;
-			//worldTransform.b = b00 * a01 + b01 * a11;
-			worldTransform.c = b00 * a01 + b01 * a11;
-			worldTransform.tx = b00 * a02 + b01 * a12 + parentTransform.tx;
-
-			//worldTransform.c = b10 * a00 + b11 * a10;
-			worldTransform.b = b10 * a00 + b11 * a10;
-			worldTransform.d = b10 * a01 + b11 * a11;
-			worldTransform.ty = b10 * a02 + b11 * a12 + parentTransform.ty;
+			
+			worldTransform.a = a00 * b00 + a01 * b10;
+			worldTransform.b = a00 * b01 + a01 * b11;
+			worldTransform.c = a10 * b00 + a11 * b10;
+			worldTransform.d = a10 * b01 + a11 * b11;
+			worldTransform.tx = a02 * b00 + a12 * b10 + parentTransform.tx;
+			worldTransform.ty = a02 * b01 + a12 * b11 + parentTransform.ty;
 			
 			__worldAlpha = alpha * parent.__worldAlpha;
+			
+		} else {
+			
+			__worldTransform.a = __rotationCosine * scaleX;
+			__worldTransform.c = -__rotationSine * scaleY;
+			__worldTransform.tx = x;
+			__worldTransform.b = __rotationSine * scaleX;
+			__worldTransform.d = __rotationCosine * scaleY;
+			__worldTransform.ty = y;
+			
+			__worldAlpha = alpha;
 			
 		}
 		

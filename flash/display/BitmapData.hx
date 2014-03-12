@@ -414,20 +414,18 @@ class BitmapData implements IBitmapDrawable {
 		
 		// TODO: Change __renderCanvas to use a, b, c, d, not a, c, b, d
 		
-		if (matrix != null || false) {
-			
-			var matrixCache = source.__worldTransform;
-			source.__worldTransform = matrix;
-			source.__update ();
-			source.__renderCanvas (renderSession);
-			source.__worldTransform = matrixCache;
-			
-		} else {
-			
-			source.__renderCanvas (renderSession);
-			
-		}
+		if (matrix == null) matrix = new Matrix ();
 		
+		var matrixCache = source.__worldTransform;
+		var parentCache = untyped (source).parent;
+		untyped (source).parent = null;
+		source.__worldTransform = matrix;
+		source.__update ();
+		source.__renderCanvas (renderSession);
+		source.__worldTransform = matrixCache;
+		
+		untyped (source).parent = parentCache;
+		//source.__update ();
 		// TODO: Need to handle matrix properly, etc.
 		
 		//source.__renderCanvas (__sourceCanvas);
