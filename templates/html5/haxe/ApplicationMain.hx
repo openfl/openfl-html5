@@ -8,13 +8,16 @@ import openfl.Assets;
 
 
 import flash.display.Loader;
+import flash.events.Event;
 import flash.net.URLLoader;
+import flash.net.URLRequest;
 import js.html.Image;
 
 @:access(flash.Lib) class ApplicationMain {
 	
 	
 	public static var images (default, null) = new Map<String, Image> ();
+	public static var urlLoaders = new Map <String, URLLoader> ();
 	
 	private static var assetsLoaded = 0;
 	private static var total = 0;
@@ -40,21 +43,31 @@ import js.html.Image;
 		//loaders.set("::resourceName::", loader);
 		total ++;
 		::elseif (type == "binary")::
-		//var urlLoader:URLLoader = new URLLoader();
-		//urlLoader.dataFormat = BINARY;
-		//urlLoaders.set("::resourceName::", urlLoader);
-		//total ++;
+		var urlLoader = new URLLoader ();
+		urlLoader.dataFormat = BINARY;
+		urlLoaders.set("::resourceName::", urlLoader);
+		total ++;
 		::elseif (type == "text")::
-		//var urlLoader:URLLoader = new URLLoader();
-		//urlLoader.dataFormat = BINARY;
-		//urlLoaders.set("::resourceName::", urlLoader);
-		//total ++;
+		var urlLoader = new URLLoader ();
+		urlLoader.dataFormat = BINARY;
+		urlLoaders.set("::resourceName::", urlLoader);
+		total ++;
 		::end::
 		::end::::end::
 		
 		if (total == 0) {
 			
 			start ();
+			
+		} else {
+			
+			for (path in urlLoaders.keys ()) {
+				
+				var urlLoader = urlLoaders.get (path);
+				urlLoader.addEventListener ("complete", loader_onComplete);
+				urlLoader.load (new URLRequest (path));
+				
+			}
 			
 		}
 		
@@ -104,6 +117,19 @@ import js.html.Image;
 	
 	
 	private static function image_onLoad (_):Void {
+		
+		assetsLoaded++;
+		
+		if (assetsLoaded == total) {
+			
+			start ();
+			
+		}
+		
+	}
+	
+	
+	private static function loader_onComplete (event:Event):Void {
 		
 		assetsLoaded++;
 		
