@@ -69,21 +69,17 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function applyFilter (sourceBitmapData:BitmapData, sourceRect:Rectangle, destPoint:Point, filter:BitmapFilter):Void {
 		
-		if (!__valid) return;
+		if (!__valid || sourceBitmapData == null || !sourceBitmapData.__valid) return;
 		
-		/*if (sourceBitmapData == this && sourceRect.x == destPoint.x && sourceRect.y == destPoint.y) {
-			
-			filter.__applyFilter (handle (), sourceRect);
-			
-		} else {
-			
-			var bitmapData = new BitmapData (Std.int (sourceRect.width), Std.int (sourceRect.height));
-			bitmapData.copyPixels (sourceBitmapData, sourceRect, new Point());
-			filter.__applyFilter (bitmapData.handle ());
-			
-			copyPixels (bitmapData, bitmapData.rect, destPoint);
-			
-		}*/
+		__convertToCanvas ();
+		__createImageData ();
+		
+		sourceBitmapData.__convertToCanvas ();
+		sourceBitmapData.__createImageData ();
+		
+		filter.__applyFilter (__sourceImageData, sourceBitmapData.__sourceImageData, sourceRect, destPoint);
+		
+		__sourceImageDataChanged = true;
 		
 	}
 	
@@ -946,16 +942,23 @@ class BitmapData implements IBitmapDrawable {
 		if (!__valid || rect == null) return;
 		
 		__convertToCanvas ();
-		__createImageData ();
 		
 		var len = Math.round (4 * rect.width * rect.height);
 		
 		if (rect.x == 0 && rect.y == 0 && rect.width == width && rect.height == height) {
 			
+			if (__sourceImageData == null) {
+				
+				__sourceImageData = __sourceContext.createImageData (width, height);
+				
+			}
+			
 			__sourceImageData.data.set (byteArray.byteView);
 			
 		} else {
-		
+			
+			__createImageData ();
+			
 		/*if (!__locked) {
 			
 			var ctx:CanvasRenderingContext2D = ___textureBuffer.getContext ('2d');
