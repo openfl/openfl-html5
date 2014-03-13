@@ -34,6 +34,7 @@ class Stage extends Sprite {
 	private var __color:Int;
 	private var __colorString:String;
 	private var __context:CanvasRenderingContext2D;
+	private var __cursor:String;
 	private var __element:HtmlElement;
 	private var __eventQueue:Array<js.html.Event>;
 	private var __fullscreen:Bool;
@@ -320,6 +321,17 @@ class Stage extends Sprite {
 	}
 	
 	
+	private function __setCursor (cursor:String):Void {
+		
+		if (__cursor != cursor) {
+			
+			__canvas.style.cursor = __cursor = cursor;
+			
+		}
+		
+	}
+	
+	
 	public override function __update ():Void {
 		
 		super.__update ();
@@ -534,10 +546,12 @@ class Stage extends Sprite {
 		if (__hitTest (mouseX, mouseY, false, __stack, true)) {
 			
 			var target = __stack[__stack.length - 1];
+			__setCursor (untyped (target).buttonMode ? "pointer" : "default");
 			__fireEvent (MouseEvent.__create (type, event, target.globalToLocal (new Point (mouseX, mouseY)), cast target), __stack);
 			
 		} else {
 			
+			__setCursor (buttonMode ? "pointer" : "default");
 			__fireEvent (MouseEvent.__create (type, event, new Point (mouseX, mouseY), this), [ this ]);
 			
 		}
