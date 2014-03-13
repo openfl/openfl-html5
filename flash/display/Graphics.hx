@@ -39,6 +39,8 @@ class Graphics {
 		
 		__commands = new Array ();
 		__halfStrokeWidth = 0;
+		__positionX = 0;
+		__positionY = 0;
 		
 	}
 	
@@ -82,7 +84,22 @@ class Graphics {
 	
 	public function curveTo (cx:Float, cy:Float, x:Float, y:Float):Void {
 		
-		// TODO
+		__inflateBounds (__positionX - __halfStrokeWidth, __positionY - __halfStrokeWidth);
+		__inflateBounds (__positionX + __halfStrokeWidth, __positionY + __halfStrokeWidth);
+		
+		// TODO: Be a little less lenient in canvas size?
+		
+		__inflateBounds (cx, cy);
+		
+		__positionX = x;
+		__positionY = y;
+		
+		__inflateBounds (__positionX - __halfStrokeWidth, __positionY - __halfStrokeWidth);
+		__inflateBounds (__positionX + __halfStrokeWidth, __positionY + __halfStrokeWidth);
+		
+		__commands.push (CurveTo (cx, cy, x, y));
+		
+		__dirty = true;
 		
 	}
 	
@@ -405,33 +422,12 @@ class Graphics {
 							setFill = true;
 							__hasFill = true;
 						
-						case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
+						case CurveTo (cx, cy, x, y):
 							
-							if (thickness == null) {
-								
-								__hasStroke = false;
-								
-							} else {
-								
-								__context.lineWidth = thickness;
-								__context.lineJoin = joints;
-								__context.lineCap = caps;
-								__context.miterLimit = miterLimit;
-								__context.strokeStyle =  "#" + StringTools.hex (color, 6);
-								
-								__hasStroke = true;
-								
-							}
-							
-							/*if (lj.grad != null) {
-								
-								ctx.strokeStyle = createCanvasGradient (ctx, lj.grad);
-								
-							} else {
-								
-								ctx.strokeStyle = createCanvasColor (lj.colour, lj.alpha);
-								
-							}*/
+							__beginPath ();
+							__context.quadraticCurveTo (cx, cy, x, y);
+							__positionX = x;
+							__positionY = y;
 						
 						case DrawCircle (x, y, radius):
 							
@@ -670,6 +666,34 @@ class Graphics {
 								
 							}
 						
+						case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
+							
+							if (thickness == null) {
+								
+								__hasStroke = false;
+								
+							} else {
+								
+								__context.lineWidth = thickness;
+								__context.lineJoin = joints;
+								__context.lineCap = caps;
+								__context.miterLimit = miterLimit;
+								__context.strokeStyle =  "#" + StringTools.hex (color, 6);
+								
+								__hasStroke = true;
+								
+							}
+							
+							/*if (lj.grad != null) {
+								
+								ctx.strokeStyle = createCanvasGradient (ctx, lj.grad);
+								
+							} else {
+								
+								ctx.strokeStyle = createCanvasColor (lj.colour, lj.alpha);
+								
+							}*/
+						
 						case LineTo (x, y):
 							
 							__beginPath ();
@@ -721,6 +745,7 @@ enum DrawCommand {
 	
 	BeginBitmapFill (bitmap:BitmapData, matrix:Matrix, repeat:Bool, smooth:Bool);
 	BeginFill (rgb:Int, alpha:Float);
+	CurveTo (cx:Float, cy:Float, x:Float, y:Float);
 	DrawCircle (x:Float, y:Float, radius:Float);
 	DrawEllipse (x:Float, y:Float, width:Float, height:Float);
 	DrawRect (x:Float, y:Float, width:Float, height:Float);
