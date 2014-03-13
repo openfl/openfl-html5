@@ -9,7 +9,9 @@ class TextField extends InteractiveObject {
 	
 	public var antiAliasType:AntiAliasType;
 	public var autoSize:TextFieldAutoSize;
+	public var border:Bool;
 	public var defaultTextFormat:TextFormat;
+	public var displayAsPassword:Bool;
 	public var embedFonts:Bool;
 	public var gridFitType:GridFitType;
 	public var htmlText:String;

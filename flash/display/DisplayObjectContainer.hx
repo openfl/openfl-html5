@@ -257,13 +257,24 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	private override function __broadcast (event:Event):Void {
 		
+		if (event.target == null) {
+			
+			event.target = this;
+			
+		}
+		
 		for (child in __children) {
 			
 			child.__broadcast (event);
 			
 		}
 		
-		dispatchEvent (event);
+		if (__eventMap != null && hasEventListener (event.type)) {
+			
+			event.currentTarget = this;
+			dispatchEvent (event);
+			
+		}
 		
 	}
 	

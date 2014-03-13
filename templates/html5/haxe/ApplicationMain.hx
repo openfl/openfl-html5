@@ -11,6 +11,7 @@ import flash.display.Loader;
 import flash.events.Event;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
+import js.html.HtmlElement;
 import js.html.Image;
 import flash.Lib;
 
@@ -33,7 +34,7 @@ import flash.Lib;
 		#if munit
 		var element = null;
 		#else
-		var element = js.Browser.document.getElementById ("openfl-embed");
+		var element:HtmlElement = cast js.Browser.document.getElementById ("openfl-embed");
 		#end
 		
 		flash.Lib.create (::WIN_WIDTH::, ::WIN_HEIGHT::, element, ::WIN_BACKGROUND::);

@@ -11,6 +11,7 @@ import flash.ui.Keyboard;
 import flash.ui.KeyLocation;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
+import js.html.HtmlElement;
 import js.Browser;
 
 
@@ -32,8 +33,11 @@ class Stage extends Sprite {
 	private var __color:Int;
 	private var __colorString:String;
 	private var __context:CanvasRenderingContext2D;
+	private var __element:HtmlElement;
 	private var __eventQueue:Array<js.html.Event>;
-	//private var __dirty:Bool;
+	private var __fullscreen:Bool;
+	private var __originalWidth:Int;
+	private var __originalHeight:Int;
 	private var __renderSession:RenderSession;
 	private var __stack:Array<DisplayObject>;
 	#if stats
@@ -43,11 +47,9 @@ class Stage extends Sprite {
 	
 	
 	
-	public function new (width:Int, height:Int) {
+	public function new (width:Int, height:Int, element:HtmlElement = null, color:Int = 0xFFFFFF) {
 		
 		super ();
-		
-		color = 0xFFFFFF;
 		
 		__canvas = cast Browser.document.createElement ("canvas");
 		
@@ -59,14 +61,43 @@ class Stage extends Sprite {
 		__canvas.style.transform = "translatez(0)";
 		__canvas.style.position = "absolute";
 		
-		#if !munit
-		Browser.document.body.appendChild (__canvas);
-		#end
+		__originalWidth = width;
+		__originalHeight = height;
+		
+		if (width == 0 && height == 0) {
+			
+			if (element != null) {
+				
+				width = element.clientWidth;
+				height = element.clientHeight;
+				
+			} else {
+				
+				width = Browser.window.innerWidth;
+				height = Browser.window.innerHeight;
+				
+			}
+			
+			__fullscreen = true;
+			
+		}
 		
 		stageWidth = width;
 		stageHeight = height;
 		__canvas.width = width;
 		__canvas.height = height;
+		
+		this.__element = element;
+		this.color = color;
+		
+		__resize ();
+		Browser.window.addEventListener ("resize", window_onResize);
+		
+		if (element != null) {
+			
+			element.appendChild (__canvas);
+			
+		}
 		
 		this.stage = this;
 		this.parent = this;
@@ -167,6 +198,13 @@ class Stage extends Sprite {
 	}
 	
 	
+	private function __queueEvent (event:js.html.Event):Void {
+		
+		__eventQueue.push (event);
+		
+	}
+	
+	
 	private function __render ():Void {
 		
 		#if stats
@@ -178,6 +216,13 @@ class Stage extends Sprite {
 		
 		var event = new Event (Event.ENTER_FRAME);
 		__broadcast (event);
+		
+		if (stageWidth != __canvas.width || stageHeight != __canvas.height) {
+			
+			__canvas.width = stageWidth;
+			__canvas.height = stageHeight;
+			
+		}
 		
 		__context.setTransform (1, 0, 0, 1, 0, 0);
 		__context.globalAlpha = 1;
@@ -224,9 +269,33 @@ class Stage extends Sprite {
 	}
 	
 	
-	private function __queueEvent (event:js.html.Event):Void {
+	private function __resize ():Void {
 		
-		__eventQueue.push (event);
+		if (__element != null) {
+			
+			if (__fullscreen) {
+				
+				stageWidth = __element.clientWidth;
+				stageHeight = __element.clientHeight;
+				__canvas.width = stageWidth;
+				__canvas.height = stageHeight;
+				
+			} else {
+				
+				var scaleX = __element.clientWidth / __originalWidth;
+				var scaleY = __element.clientHeight / __originalHeight;
+				
+				var currentRatio = scaleX / scaleY;
+				var targetRatio = Math.min (scaleX, scaleY);
+				
+				__canvas.style.width = __originalWidth * targetRatio + "px";
+				__canvas.style.height = __originalHeight * targetRatio + "px";
+				__canvas.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
+				__canvas.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
+				
+			}
+			
+		}
 		
 	}
 	
@@ -444,6 +513,16 @@ class Stage extends Sprite {
 		keyCode = Keyboard.__convertMozillaCode (keyCode);
 		
 		dispatchEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, event.keyLocation != null ? cast (event.keyLocation, KeyLocation) : KeyLocation.STANDARD, event.ctrlKey, event.altKey, event.shiftKey));
+		
+	}
+	
+	
+	private function window_onResize (event:js.html.Event):Void {
+		
+		__resize ();
+		
+		var event = new Event (Event.RESIZE);
+		__broadcast (event);
 		
 	}
 	

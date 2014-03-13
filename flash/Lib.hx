@@ -5,7 +5,7 @@ import flash.display.MovieClip;
 import flash.display.Stage;
 import flash.net.URLRequest;
 import haxe.Timer;
-import js.html.Element;
+import js.html.HtmlElement;
 import js.Browser;
 
 
@@ -31,7 +31,7 @@ import js.Browser;
 	}
 
 	
-	public static function create (width:Int, height:Int, element:Element, backgroundColor:Int):Void {
+	public static function create (width:Int, height:Int, element:HtmlElement, backgroundColor:Int):Void {
 		
 		untyped __js__ ("
 			var lastTime = 0;
@@ -60,14 +60,7 @@ import js.Browser;
 			window.requestAnimFrame = window.requestAnimationFrame;
 		");
 		
-		var stage = new Stage (width, height);
-		stage.color = backgroundColor;
-		
-		if (element != null) {
-			
-			element.appendChild (stage.__canvas);
-			
-		}
+		var stage = new Stage (width, height, element, backgroundColor);
 		
 		if (current == null) {
 			

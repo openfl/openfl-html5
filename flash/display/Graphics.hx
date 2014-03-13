@@ -414,7 +414,7 @@ class Graphics {
 								var g = (rgb & 0x00FF00) >>> 8;
 								var b = (rgb & 0x0000FF);
 								
-								__context.fillStyle = "rgba(" + r + ", " + g + ", " + b + ", " + (alpha / 255) + ")";
+								__context.fillStyle = "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 								
 							}
 							
