@@ -87,7 +87,7 @@ class Stage extends Sprite {
 		#end
 		
 		var windowEvents = [ "keydown", "keyup" ];
-		var canvasEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup" ];
+		var canvasEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup", "click", "dblclick" ];
 		
 		for (event in windowEvents) {
 			
@@ -241,7 +241,7 @@ class Stage extends Sprite {
 				
 				case "keydown", "keyup": window_onKey (cast event);
 				case "touchstart", "touchend", "touchmove": canvas_onTouch (cast event);
-				case "mousedown", "mouseup", "mousemove": canvas_onMouse (cast event);
+				case "mousedown", "mouseup", "mousemove", "click", "dblclick": canvas_onMouse (cast event);
 				default:
 				
 			}
@@ -357,6 +357,8 @@ class Stage extends Sprite {
 			case "mousedown": MouseEvent.MOUSE_DOWN;
 			case "mouseup": MouseEvent.MOUSE_UP;
 			case "mousemove": MouseEvent.MOUSE_MOVE;
+			case "click": MouseEvent.CLICK;
+			case "dblclick": MouseEvent.DOUBLE_CLICK;
 			default: null;
 			
 		}
