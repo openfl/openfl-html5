@@ -29,6 +29,8 @@ class TextField extends InteractiveObject {
 		super ();
 		
 		defaultTextFormat = new TextFormat ();
+		text = "";
+		htmlText = "";
 		
 	}
 	
