@@ -37,6 +37,8 @@ class Stage extends Sprite {
 	private var __element:HtmlElement;
 	private var __eventQueue:Array<js.html.Event>;
 	private var __fullscreen:Bool;
+	private var __mouseX:Float = 0;
+	private var __mouseY:Float = 0;
 	private var __originalWidth:Int;
 	private var __originalHeight:Int;
 	private var __renderSession:RenderSession;
@@ -51,6 +53,9 @@ class Stage extends Sprite {
 	public function new (width:Int, height:Int, element:HtmlElement = null, color:Int = 0xFFFFFF) {
 		
 		super ();
+		
+		__mouseX = 0;
+		__mouseY = 0;
 		
 		__canvas = cast Browser.document.createElement ("canvas");
 		
@@ -134,6 +139,20 @@ class Stage extends Sprite {
 		}
 		
 		Browser.window.requestAnimationFrame (cast __render);
+		
+	}
+	
+	
+	public override function globalToLocal (pos:Point):Point {
+		
+		return pos;
+		
+	}
+	
+	
+	public override function localToGlobal (pos:Point):Point {
+		
+		return pos;
 		
 	}
 	
@@ -325,6 +344,27 @@ class Stage extends Sprite {
 	
 	
 	
+	// Get & Set Methods
+	
+	
+	
+	
+	private override function get_mouseX ():Float {
+		
+		return __mouseX;
+		
+	}
+	
+	
+	private override function get_mouseY ():Float {
+		
+		return __mouseY;
+		
+	}
+	
+	
+	
+	
 	// Event Handlers
 	
 	
@@ -338,8 +378,8 @@ class Stage extends Sprite {
 		var touch = event.changedTouches[0];
 		var point = new Point (touch.pageX - rect.left, touch.pageY - rect.top);
 		
-		mouseX = point.x;
-		mouseY = point.y;
+		__mouseX = point.x;
+		__mouseY = point.y;
 		
 		__stack = [];
 		
@@ -475,8 +515,8 @@ class Stage extends Sprite {
 		
 		var rect = __canvas.getBoundingClientRect ();
 		
-		mouseX = (event.clientX - rect.left) * (__canvas.width / rect.width);
-		mouseY = (event.clientY - rect.top) * (__canvas.height / rect.height);
+		__mouseX = (event.clientX - rect.left) * (__canvas.width / rect.width);
+		__mouseY = (event.clientY - rect.top) * (__canvas.height / rect.height);
 		
 		__stack = [];
 		

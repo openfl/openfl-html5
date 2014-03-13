@@ -11,6 +11,7 @@ import flash.geom.Rectangle;
 import flash.geom.Transform;
 
 
+@:access(flash.display.Stage)
 class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	
@@ -21,8 +22,8 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public var height (get, set):Float;
 	public var loaderInfo:LoaderInfo;
 	public var mask:DisplayObject;
-	public var mouseX:Float;
-	public var mouseY:Float;
+	public var mouseX (get, null):Float;
+	public var mouseY (get, null):Float;
 	public var name:String;
 	public var parent (default, null):DisplayObjectContainer;
 	public var rotation:Float;
@@ -337,6 +338,20 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private function set_height (value:Float):Float {
 		
 		return 0;
+		
+	}
+	
+	
+	private function get_mouseX ():Float {
+		
+		return globalToLocal (new Point (stage.__mouseX, 0)).x;
+		
+	}
+	
+	
+	private function get_mouseY ():Float {
+		
+		return globalToLocal (new Point (0, stage.__mouseY)).y;
 		
 	}
 	
