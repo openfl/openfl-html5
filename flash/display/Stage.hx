@@ -5,6 +5,7 @@ import flash.events.Event;
 import flash.events.EventPhase;
 import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
+import flash.events.TouchEvent;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.ui.Keyboard;
@@ -332,6 +333,64 @@ class Stage extends Sprite {
 	private function canvas_onTouch (event:js.html.TouchEvent):Void {
 		
 		event.preventDefault ();
+		
+		var rect = __canvas.getBoundingClientRect ();
+		var touch = event.changedTouches[0];
+		var point = new Point (touch.pageX - rect.left, touch.pageY - rect.top);
+		
+		mouseX = point.x;
+		mouseY = point.y;
+		
+		__stack = [];
+		
+		var type = null;
+		var mouseType = null;
+		
+		switch (event.type) {
+			
+			case "touchstart":
+				
+				type = TouchEvent.TOUCH_BEGIN;
+				mouseType = MouseEvent.MOUSE_DOWN;
+			
+			case "touchmove":
+				
+				type = TouchEvent.TOUCH_MOVE;
+				mouseType = MouseEvent.MOUSE_MOVE;
+			
+			case "touchend":
+				
+				type = TouchEvent.TOUCH_END;
+				mouseType = MouseEvent.MOUSE_UP;
+			
+			default:
+			
+		}
+		
+		if (__hitTest (mouseX, mouseY, false, __stack, true)) {
+			
+			var target = __stack[__stack.length - 1];
+			var localPoint = target.globalToLocal (point);
+			
+			var touchEvent = TouchEvent.__create (type, event, touch, localPoint, cast target);
+			touchEvent.touchPointID = touch.identifier;
+			//touchEvent.isPrimaryTouchPoint = isPrimaryTouchPoint;
+			touchEvent.isPrimaryTouchPoint = true;
+			
+			__fireEvent (touchEvent, __stack);
+			__fireEvent (MouseEvent.__create (mouseType, cast event, localPoint, cast target), __stack);
+			
+		} else {
+			
+			var touchEvent = TouchEvent.__create (type, event, touch, point, this);
+			touchEvent.touchPointID = touch.identifier;
+			//touchEvent.isPrimaryTouchPoint = isPrimaryTouchPoint;
+			touchEvent.isPrimaryTouchPoint = true;
+			
+			__fireEvent (touchEvent, [ this ]);
+			__fireEvent (MouseEvent.__create (mouseType, cast event, point, this), [ this ]);
+			
+		}
 		
 		/*case "touchstart":
 				
