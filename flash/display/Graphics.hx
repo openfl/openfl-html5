@@ -27,11 +27,13 @@ class Graphics {
 	private var __commands:Array<DrawCommand>;
 	private var __context:CanvasRenderingContext2D;
 	private var __dirty:Bool;
+	private var __halfStrokeWidth:Float;
 	
 	
 	public function new () {
 		
 		__commands = new Array ();
+		__halfStrokeWidth = 0;
 		
 	}
 	
@@ -50,9 +52,17 @@ class Graphics {
 	}
 	
 	
+	public function beginGradientFill (type:GradientType, colors:Array<Dynamic>, alphas:Array<Dynamic>, ratios:Array<Dynamic>, matrix:Matrix = null, spreadMethod:Null<SpreadMethod> = null, interpolationMethod:Null<InterpolationMethod> = null, focalPointRatio:Null<Float> = null):Void {
+		
+		// TODO
+		
+	}
+	
+	
 	public function clear ():Void {
 		
 		__commands = new Array ();
+		__halfStrokeWidth = 0;
 		
 		if (__bounds != null) {
 			
@@ -65,12 +75,19 @@ class Graphics {
 	}
 	
 	
+	public function curveTo (cx:Float, cy:Float, x:Float, y:Float):Void {
+		
+		// TODO
+		
+	}
+	
+	
 	public function drawCircle (x:Float, y:Float, radius:Float):Void {
 		
 		if (radius <= 0) return;
 		
-		__inflateBounds (x - radius, y - radius);
-		__inflateBounds (x + radius, y + radius);
+		__inflateBounds (x - radius - __halfStrokeWidth, y - radius - __halfStrokeWidth);
+		__inflateBounds (x + radius + __halfStrokeWidth, y + radius + __halfStrokeWidth);
 		
 		__commands.push (DrawCircle (x, y, radius));
 		
@@ -83,8 +100,8 @@ class Graphics {
 		
 		if (width <= 0 || height <= 0) return;
 		
-		__inflateBounds (x, y);
-		__inflateBounds (x + width, y + height);
+		__inflateBounds (x - __halfStrokeWidth, y - __halfStrokeWidth);
+		__inflateBounds (x + width + __halfStrokeWidth, y + height + __halfStrokeWidth);
 		
 		__commands.push (DrawEllipse (x, y, width, height));
 		
@@ -93,12 +110,19 @@ class Graphics {
 	}
 	
 	
+	public function drawGraphicsData (graphicsData:Vector<IGraphicsData>):Void {
+		
+		// TODO
+		
+	}
+	
+	
 	public function drawRect (x:Float, y:Float, width:Float, height:Float):Void {
 		
 		if (width <= 0 || height <= 0) return;
 		
-		__inflateBounds (x, y);
-		__inflateBounds (x + width, y + height);
+		__inflateBounds (x - __halfStrokeWidth, y - __halfStrokeWidth);
+		__inflateBounds (x + width + __halfStrokeWidth, y + height + __halfStrokeWidth);
 		
 		__commands.push (DrawRect (x, y, width, height));
 		
@@ -108,6 +132,13 @@ class Graphics {
 	
 	
 	public function drawRoundRect (x:Float, y:Float, width:Float, height:Float, rx:Float, ry:Float = -1):Void {
+		
+		// TODO
+		
+	}
+	
+	
+	public function drawRoundRectComplex (x:Float, y:Float, width:Float, height:Float, topLeftRadius:Float, topRightRadius:Float, bottomLeftRadius:Float, bottomRightRadius:Float):Void {
 		
 		// TODO
 		
@@ -130,30 +161,52 @@ class Graphics {
 	}
 	
 	
+	public function drawTriangles (vertices:Vector<Float>, indices:Vector<Int> = null, uvtData:Vector<Float> = null, culling:TriangleCulling):Void {
+		
+		// TODO
+		
+	}
+	
+	
 	public function endFill ():Void {
 		
+		__commands.push (EndFill);
 		
+	}
+	
+	
+	public function lineGradientStyle (type:GradientType, colors:Array<Dynamic>, alphas:Array<Dynamic>, ratios:Array<Dynamic>, matrix:Matrix = null, spreadMethod:SpreadMethod = null, interpolationMethod:InterpolationMethod = null, focalPointRatio:Null<Float> = null):Void {
+		
+		// TODO
 		
 	}
 	
 	
 	public function lineStyle (thickness:Null<Float> = null, color:Null<Int> = null, alpha:Null<Float> = null, pixelHinting:Null<Bool> = null, scaleMode:LineScaleMode = null, caps:CapsStyle = null, joints:JointStyle = null, miterLimit:Null<Float> = null):Void {
 		
+		__halfStrokeWidth = (thickness != null) ? thickness / 2 : 0;
 		__commands.push (LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit));
 		
 	}
 	
 	
-	public function lineTo (inX:Float, inY:Float):Void {
+	public function lineTo (x:Float, y:Float):Void {
 		
-		// TODO
+		// TODO: Should we consider the origin instead, instead of inflating in all directions?
+		
+		__inflateBounds (x - __halfStrokeWidth, y - __halfStrokeWidth);
+		__inflateBounds (x + __halfStrokeWidth, y + __halfStrokeWidth);
+		
+		__commands.push (LineTo (x, y));
+		
+		__dirty = true;
 		
 	}
 	
 	
-	public function moveTo (inX:Float, inY:Float):Void {
+	public function moveTo (x:Float, y:Float):Void {
 		
-		// TODO
+		__commands.push (MoveTo (x, y));
 		
 	}
 	
@@ -225,15 +278,18 @@ class Graphics {
 				
 			} else {
 				
+				var stroke = false;
+				
 				if (__canvas == null) {
 					
 					__canvas = cast Browser.document.createElement ("canvas");
 					__context = __canvas.getContext ("2d");
+					__context.lineWidth = 0;
 					
 				}
 				
-				__canvas.width = Math.round (__bounds.width);
-				__canvas.height = Math.round (__bounds.height);
+				__canvas.width = Math.ceil (__bounds.width);
+				__canvas.height = Math.ceil (__bounds.height);
 				
 				var offsetX = __bounds.x;
 				var offsetY = __bounds.y;
@@ -286,7 +342,7 @@ class Graphics {
 							__context.lineJoin = joints;
 							__context.lineCap = caps;
 							__context.miterLimit = miterLimit;
-							
+							__context.strokeStyle =  "#" + StringTools.hex (color, 6);
 							/*if (lj.grad != null) {
 								
 								ctx.strokeStyle = createCanvasGradient (ctx, lj.grad);
@@ -296,6 +352,8 @@ class Graphics {
 								ctx.strokeStyle = createCanvasColor (lj.colour, lj.alpha);
 								
 							}*/
+							
+							stroke = true;
 						
 						case DrawCircle (x, y, radius):
 							
@@ -323,8 +381,10 @@ class Graphics {
 							__context.beginPath();
 							__context.arc (x - offsetX, y - offsetY, radius, 0, Math.PI * 2, true);
 							//__context.fillStyle = "#FF0000";
-							__context.fill();
-							__context.closePath();
+							__context.fill ();
+							__context.closePath ();
+							
+							if (stroke) __context.stroke ();
 						
 						case DrawEllipse (x, y, width, height):
 							
@@ -365,7 +425,8 @@ class Graphics {
 							__context.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
 							__context.fill ();
 							__context.closePath();
-							//__context.stroke();
+							
+							if (stroke) __context.stroke ();
 						
 						case DrawRect (x, y, width, height):
 							
@@ -384,6 +445,8 @@ class Graphics {
 								}
 								
 							} else {
+								
+								__context.beginPath ();
 								
 								if (!setFill && bitmapFill != null) {
 									
@@ -406,8 +469,13 @@ class Graphics {
 									
 								}
 								
-								__context.fillRect (x - offsetX, y - offsetY, width, height);
-								//__context.stroke ();
+								//__context.fillRect (x - offsetX, y - offsetY, width, height);
+								__context.rect (x - offsetX, y - offsetY, width, height);
+								__context.fill ();
+								__context.closePath ();
+								
+								if (stroke)
+									__context.stroke ();
 								
 							}
 						
@@ -508,6 +576,10 @@ class Graphics {
 								
 							}
 						
+						case EndFill:
+							
+							stroke = false;
+						
 					}
 					
 				}
@@ -532,6 +604,9 @@ enum DrawCommand {
 	DrawEllipse (x:Float, y:Float, width:Float, height:Float);
 	DrawRect (x:Float, y:Float, width:Float, height:Float);
 	DrawTiles (sheet:Tilesheet, tileData:Array<Float>, smooth:Bool, flags:Int);
+	EndFill;
 	LineStyle (thickness:Null<Float>, color:Null<Int>, alpha:Null<Float>, pixelHinting:Null<Bool>, scaleMode:LineScaleMode, caps:CapsStyle, joints:JointStyle, miterLimit:Null<Float>);
+	LineTo (x:Float, y:Float);
+	MoveTo (x:Float, y:Float);
 	
 }
