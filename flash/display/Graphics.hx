@@ -28,6 +28,11 @@ class Graphics {
 	private var __context:CanvasRenderingContext2D;
 	private var __dirty:Bool;
 	private var __halfStrokeWidth:Float;
+	private var __hasFill:Bool;
+	private var __hasStroke:Bool;
+	private var __inPath:Bool;
+	private var __positionX:Float;
+	private var __positionY:Float;
 	
 	
 	public function new () {
@@ -194,8 +199,14 @@ class Graphics {
 		
 		// TODO: Should we consider the origin instead, instead of inflating in all directions?
 		
-		__inflateBounds (x - __halfStrokeWidth, y - __halfStrokeWidth);
-		__inflateBounds (x + __halfStrokeWidth, y + __halfStrokeWidth);
+		__inflateBounds (__positionX - __halfStrokeWidth, __positionY - __halfStrokeWidth);
+		__inflateBounds (__positionX + __halfStrokeWidth, __positionY + __halfStrokeWidth);
+		
+		__positionX = x;
+		__positionY = y;
+		
+		__inflateBounds (__positionX - __halfStrokeWidth, __positionY - __halfStrokeWidth);
+		__inflateBounds (__positionX + __halfStrokeWidth, __positionY + __halfStrokeWidth);
 		
 		__commands.push (LineTo (x, y));
 		
@@ -207,6 +218,54 @@ class Graphics {
 	public function moveTo (x:Float, y:Float):Void {
 		
 		__commands.push (MoveTo (x, y));
+		
+		__positionX = x;
+		__positionY = y;
+		
+	}
+	
+	
+	private function __beginPath ():Void {
+		
+		if (!__inPath) {
+			
+			__context.beginPath ();
+			__context.moveTo (__positionX, __positionY);
+			__inPath = true;
+			
+		}
+		
+	}
+	
+	
+	private function __closePath (closeFill:Bool):Void {
+		
+		if (__inPath) {
+			
+			if (__hasFill) {
+				
+				__context.fill ();
+				
+			}
+			
+			__context.closePath ();
+			
+			if (__hasStroke) {
+				
+				__context.stroke ();
+				
+			}
+			
+		}
+		
+		__inPath = false;
+		
+		if (closeFill) {
+			
+			__hasFill = false;
+			__hasStroke = false;
+			
+		}
 		
 	}
 	
@@ -271,14 +330,18 @@ class Graphics {
 		
 		if (__dirty) {
 			
+			__hasFill = false;
+			__hasStroke = false;
+			__inPath = false;
+			__positionX = 0;
+			__positionY = 0;
+			
 			if (__commands.length == 0) {
 				
 				__canvas = null;
 				__context = null;
 				
 			} else {
-				
-				var stroke = false;
 				
 				if (__canvas == null) {
 					
@@ -306,6 +369,8 @@ class Graphics {
 						
 						case BeginBitmapFill (bitmap, matrix, repeat, smooth):
 							
+							__closePath (false);
+							
 							if (bitmap != bitmapFill || repeat != bitmapRepeat) {
 								
 								bitmapFill = bitmap;
@@ -316,8 +381,11 @@ class Graphics {
 							}
 							
 							bitmapMatrix = matrix;
+							__hasFill = true;
 						
 						case BeginFill (rgb, alpha):
+							
+							__closePath (false);
 							
 							if (alpha == 1) {
 								
@@ -335,14 +403,26 @@ class Graphics {
 							
 							bitmapFill = null;
 							setFill = true;
+							__hasFill = true;
 						
 						case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 							
-							__context.lineWidth = thickness;
-							__context.lineJoin = joints;
-							__context.lineCap = caps;
-							__context.miterLimit = miterLimit;
-							__context.strokeStyle =  "#" + StringTools.hex (color, 6);
+							if (thickness == null) {
+								
+								__hasStroke = false;
+								
+							} else {
+								
+								__context.lineWidth = thickness;
+								__context.lineJoin = joints;
+								__context.lineCap = caps;
+								__context.miterLimit = miterLimit;
+								__context.strokeStyle =  "#" + StringTools.hex (color, 6);
+								
+								__hasStroke = true;
+								
+							}
+							
 							/*if (lj.grad != null) {
 								
 								ctx.strokeStyle = createCanvasGradient (ctx, lj.grad);
@@ -352,8 +432,6 @@ class Graphics {
 								ctx.strokeStyle = createCanvasColor (lj.colour, lj.alpha);
 								
 							}*/
-							
-							stroke = true;
 						
 						case DrawCircle (x, y, radius):
 							
@@ -378,13 +456,11 @@ class Graphics {
 								
 							}
 							
-							__context.beginPath();
+							__closePath (false);
+							__beginPath ();
 							__context.arc (x - offsetX, y - offsetY, radius, 0, Math.PI * 2, true);
 							//__context.fillStyle = "#FF0000";
-							__context.fill ();
-							__context.closePath ();
-							
-							if (stroke) __context.stroke ();
+							__closePath (false);
 						
 						case DrawEllipse (x, y, width, height):
 							
@@ -417,20 +493,20 @@ class Graphics {
 								xm = x + width / 2 - offsetX,       // x-middle
 								ym = y + height / 2 - offsetY;       // y-middle
 							
-							__context.beginPath();
+							__closePath (false);
+							__beginPath ();
 							__context.moveTo(x, ym);
 							__context.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
 							__context.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
 							__context.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
 							__context.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-							__context.fill ();
-							__context.closePath();
-							
-							if (stroke) __context.stroke ();
+							__closePath (false);
 						
 						case DrawRect (x, y, width, height):
 							
 							if (bitmapFill != null && width <= bitmapFill.width && height <= bitmapFill.height) {
+								
+								__closePath (false);
 								
 								// TODO: Need to handle fill matrix
 								
@@ -446,7 +522,8 @@ class Graphics {
 								
 							} else {
 								
-								__context.beginPath ();
+								__closePath (false);
+								__beginPath ();
 								
 								if (!setFill && bitmapFill != null) {
 									
@@ -471,15 +548,13 @@ class Graphics {
 								
 								//__context.fillRect (x - offsetX, y - offsetY, width, height);
 								__context.rect (x - offsetX, y - offsetY, width, height);
-								__context.fill ();
-								__context.closePath ();
-								
-								if (stroke)
-									__context.stroke ();
+								__closePath (false);
 								
 							}
 						
 						case DrawTiles (sheet, tileData, smooth, flags):
+							
+							__closePath (false);
 							
 							var useScale = (flags & TILE_SCALE) > 0;
 							var useRotation = (flags & TILE_ROTATION) > 0;
@@ -578,7 +653,36 @@ class Graphics {
 						
 						case EndFill:
 							
-							stroke = false;
+							if (__inPath) {
+								
+								if (__hasFill) {
+									
+									__context.fill ();
+									__context.closePath ();
+									
+								}
+								
+								if (__hasStroke) {
+									
+									__context.stroke ();
+									
+								}
+								
+							}
+						
+						case LineTo (x, y):
+							
+							__beginPath ();
+							__context.lineTo (x, y);
+							__positionX = x;
+							__positionY = y;
+							
+						case MoveTo (x, y):
+							
+							__beginPath ();
+							__context.moveTo (x, y);
+							__positionX = x;
+							__positionY = y;
 						
 					}
 					
@@ -587,6 +691,23 @@ class Graphics {
 			}
 			
 			__dirty = false;
+			
+			if (__inPath) {
+				
+				if (__hasFill) {
+					
+					__context.fill ();
+					__context.closePath ();
+					
+				}
+				
+				if (__hasStroke) {
+					
+					__context.stroke ();
+					
+				}
+				
+			}
 			
 		}
 		
