@@ -555,6 +555,34 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
+	public static function fromFile (path:String, onload:BitmapData -> Void = null):BitmapData {
+		
+		var bitmapData = new BitmapData (0, 0, true);
+		bitmapData.__sourceImage = new Image ();	
+		bitmapData.__sourceImage.onload = function (_) {
+			
+			bitmapData.width = bitmapData.__sourceImage.width;
+			bitmapData.height = bitmapData.__sourceImage.height;
+			bitmapData.__valid = true;
+			
+			if (onload != null) {
+				
+				onload (bitmapData);
+				
+			}
+			
+		}
+		bitmapData.__sourceImage.src = path;
+		
+		// Another IE9 bug: loading 20+ images fails unless this line is added.
+		// (issue #1019768)
+		if (bitmapData.__sourceImage.complete) { }
+		
+		return bitmapData;
+		
+	}
+	
+	
 	public static function fromImage (image:Image, transparent:Bool = true):BitmapData {
 		
 		var bitmapData = new BitmapData (0, 0, transparent);
@@ -1469,32 +1497,6 @@ class BitmapData implements IBitmapDrawable {
 		
 		
 	}
-	
-	
-	/*
-	
-	
-	public function __loadFromFile (inFilename:String, inLoader:LoaderInfo = null) {
-		
-		var image:ImageElement = cast Browser.document.createElement ("img");
-		
-		if (inLoader != null) {
-			
-			var data:LoadData = { image: image, texture: ___textureBuffer, inLoader: inLoader, bitmapData: this };
-			
-			image.addEventListener ("load", __onLoad.bind (data), false);
-			// IE9 bug, force a load, if error called and complete is false.
-			image.addEventListener ("error", function(e) { if (!image.complete) __onLoad (data, e); }, false);
-			
-		}
-		
-		image.src = inFilename;
-		
-		// Another IE9 bug: loading 20+ images fails unless this line is added.
-		// (issue #1019768)
-		if (image.complete) { }
-		
-	}*/
 	
 	
 	

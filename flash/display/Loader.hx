@@ -15,6 +15,7 @@ import flash.system.LoaderContext;
 import flash.utils.ByteArray;
 
 
+@:access(flash.display.LoaderInfo)
 class Loader extends Sprite {
 	
 	
@@ -71,9 +72,21 @@ class Loader extends Sprite {
 			
 		}
 		
-		mImage = new BitmapData (0, 0, transparent);
+		var onload = function (bitmapData:BitmapData):Void {
+			
+			contentLoaderInfo.content = new Bitmap (bitmapData);
+			addChild (contentLoaderInfo.content);
+			
+			var event = new Event (Event.COMPLETE);
+			event.target = contentLoaderInfo;
+			event.currentTarget = contentLoaderInfo;
+			contentLoaderInfo.dispatchEvent (event);
+			
+		}
 		
-		try {
+		var bitmapData = BitmapData.fromFile (request.url, onload);
+		
+		/*try {
 			
 			contentLoaderInfo.addEventListener (Event.COMPLETE, handleLoad, false, 2147483647);
 			
@@ -99,7 +112,7 @@ class Loader extends Sprite {
 			mShape = new Shape ();
 			addChild (mShape);
 			
-		}
+		}*/
 		
 	}
 	

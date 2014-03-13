@@ -31,7 +31,7 @@ import js.Browser;
 	}
 
 	
-	public static function create (width:Int, height:Int, element:Element):Void {
+	public static function create (width:Int, height:Int, element:Element, backgroundColor:Int):Void {
 		
 		untyped __js__ ("
 			var lastTime = 0;
@@ -61,6 +61,7 @@ import js.Browser;
 		");
 		
 		var stage = new Stage (width, height);
+		stage.color = backgroundColor;
 		
 		if (element != null) {
 			

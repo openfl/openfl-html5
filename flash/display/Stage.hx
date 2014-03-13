@@ -19,7 +19,7 @@ class Stage extends Sprite {
 	
 	
 	public var align:StageAlign;
-	public var backgroundColor (get, set):Int;
+	public var color (get, set):Int;
 	public var displayState:StageDisplayState;
 	public var focus:InteractiveObject;
 	public var frameRate:Float;
@@ -27,10 +27,10 @@ class Stage extends Sprite {
 	public var stageHeight (default, null):Int;
 	public var stageWidth (default, null):Int;
 	
-	private var __backgroundColor:Int;
-	private var __backgroundColorString:String;
 	private var __canvas:CanvasElement;
 	private var __clearBeforeRender:Bool;
+	private var __color:Int;
+	private var __colorString:String;
 	private var __context:CanvasRenderingContext2D;
 	private var __eventQueue:Array<js.html.Event>;
 	//private var __dirty:Bool;
@@ -47,7 +47,7 @@ class Stage extends Sprite {
 		
 		super ();
 		
-		backgroundColor = 0xFFFFFF;
+		color = 0xFFFFFF;
 		
 		__canvas = cast Browser.document.createElement ("canvas");
 		
@@ -184,7 +184,7 @@ class Stage extends Sprite {
 		
 		if (!__transparent && __clearBeforeRender) {
 			
-			__context.fillStyle = __backgroundColorString;
+			__context.fillStyle = __colorString;
 			__context.fillRect (0, 0, stageWidth, stageHeight);
 			
 		} else if (__transparent && __clearBeforeRender) {
@@ -453,21 +453,21 @@ class Stage extends Sprite {
 	
 	
 	
-	private function get_backgroundColor ():Int {
+	private function get_color ():Int {
 		
-		return __backgroundColor;
+		return __color;
 		
 	}
 	
 	
-	private function set_backgroundColor (value:Int):Int {
+	private function set_color (value:Int):Int {
 		
 		//this.backgroundColorSplit = PIXI.hex2rgb(this.backgroundColor);
 		//var hex = this.backgroundColor.toString (16);
 		//hex = '000000'.substr(0, 6 - hex.length) + hex;
-		__backgroundColorString = "#" + StringTools.hex (value, 6);
+		__colorString = "#" + StringTools.hex (value, 6);
 		
-		return __backgroundColor = value;
+		return __color = value;
 		
 	}
 	
