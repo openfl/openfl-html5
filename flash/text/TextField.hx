@@ -238,7 +238,6 @@ class TextField extends InteractiveObject {
 					if (__text != null && text != "") {
 						
 						__width = __context.measureText (__text).width + 4;
-						trace (__width);
 						
 					} else {
 						
@@ -335,12 +334,6 @@ class TextField extends InteractiveObject {
 	
 	
 	private function set_autoSize (value:TextFieldAutoSize):TextFieldAutoSize {
-		
-		trace ("---");
-		trace (value);
-		trace (autoSize);
-		autoSize = value;
-		trace (autoSize);
 		
 		if (value != autoSize) __dirty = true;
 		return autoSize = value;
