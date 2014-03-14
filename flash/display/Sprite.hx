@@ -22,8 +22,6 @@ class Sprite extends DisplayObjectContainer {
 		
 		super ();
 		
-		//__interactive = true;
-		
 	}
 	
 	

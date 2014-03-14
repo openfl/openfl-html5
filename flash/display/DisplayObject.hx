@@ -69,21 +69,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	public function getBounds (targetCoordinateSpace:DisplayObject):Rectangle {
 		
-		/*if (_matrixInvalid || _matrixChainInvalid) __validateMatrix ();
-		if (_boundsInvalid) validateBounds ();
-		
-		var m = __getFullMatrix ();
-		
-		// perhaps inverse should be stored and updated lazily?
-		if (targetCoordinateSpace != null) {
-			
-			// will be null when target space is stage and this is not on stage
-			m.concat(targetCoordinateSpace.__getFullMatrix ().invert ());
-			
-		}
-		
-		var rect = __boundsRect.transform (m);	// transform does cloning
-		return rect;*/
 		return null;
 		
 	}
@@ -106,53 +91,12 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	public function hitTestObject (obj:DisplayObject):Bool {
 		
-		/*if (obj != null && obj.parent != null && parent != null) {
-			
-			var currentBounds = getBounds (this);
-			var targetBounds = obj.getBounds (this);
-			
-			return currentBounds.intersects (targetBounds);
-			
-		}*/
-		
 		return false;
 		
 	}
 	
 	
 	public function hitTestPoint (x:Float, y:Float, shapeFlag:Bool = false):Bool {
-		
-		/*var boundingBox = (shapeFlag == null ? true : !shapeFlag);
-		
-		if (!boundingBox) {
-			
-			return __getObjectUnderPoint (new Point (x, y)) != null;
-			
-		} else {
-			
-			var gfx = __getGraphics ();
-			
-			if (gfx != null) {
-				
-				var extX = gfx.__extent.x;
-				var extY = gfx.__extent.y;
-				var local = globalToLocal (new Point (x, y));
-				
-				if (local.x - extX < 0 || local.y - extY < 0 || (local.x - extX) * scaleX > width || (local.y - extY) * scaleY > height) {
-					
-					return false;
-					
-				} else {
-					
-					return true;
-					
-				}
-				
-			}
-			
-			return false;
-			
-		}*/
 		
 		return false;
 		
@@ -162,8 +106,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public function localToGlobal (point:Point):Point {
 		
 		return __worldTransform.transformPoint (point);
-		//if (_matrixInvalid || _matrixChainInvalid) __validateMatrix ();
-		//return __getFullMatrix ().transformPoint (point);
 		
 	}
 	
@@ -249,28 +191,20 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		if (parent != null) {
 			
 			var parentTransform = parent.__worldTransform;
-			var worldTransform = __worldTransform;
-			
-			//var px = 0;
-			//var py = 0;
 			
 			var a00 = __rotationCosine * scaleX,
 			a01 = __rotationSine * scaleX,
 			a10 = -__rotationSine * scaleY,
 			a11 = __rotationCosine * scaleY,
-			//a02 = x - a00 * px - py * a01,
-			//a12 = y - a11 * py - px * a10,
-			a02 = x,
-			a12 = y,
 			b00 = parentTransform.a, b01 = parentTransform.b,
 			b10 = parentTransform.c, b11 = parentTransform.d;
 			
-			worldTransform.a = a00 * b00 + a01 * b10;
-			worldTransform.b = a00 * b01 + a01 * b11;
-			worldTransform.c = a10 * b00 + a11 * b10;
-			worldTransform.d = a10 * b01 + a11 * b11;
-			worldTransform.tx = a02 * b00 + a12 * b10 + parentTransform.tx;
-			worldTransform.ty = a02 * b01 + a12 * b11 + parentTransform.ty;
+			__worldTransform.a = a00 * b00 + a01 * b10;
+			__worldTransform.b = a00 * b01 + a01 * b11;
+			__worldTransform.c = a10 * b00 + a11 * b10;
+			__worldTransform.d = a10 * b01 + a11 * b11;
+			__worldTransform.tx = x * b00 + y * b10 + parentTransform.tx;
+			__worldTransform.ty = x * b01 + y * b11 + parentTransform.ty;
 			
 			__worldAlpha = alpha * parent.__worldAlpha;
 			

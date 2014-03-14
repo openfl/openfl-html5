@@ -455,7 +455,6 @@ class Graphics {
 							__closePath (false);
 							__beginPath ();
 							__context.arc (x - offsetX, y - offsetY, radius, 0, Math.PI * 2, true);
-							//__context.fillStyle = "#FF0000";
 							__closePath (false);
 						
 						case DrawEllipse (x, y, width, height):
@@ -542,7 +541,6 @@ class Graphics {
 									
 								}
 								
-								//__context.fillRect (x - offsetX, y - offsetY, width, height);
 								__context.rect (x - offsetX, y - offsetY, width, height);
 								__closePath (false);
 								
@@ -683,16 +681,6 @@ class Graphics {
 								__hasStroke = true;
 								
 							}
-							
-							/*if (lj.grad != null) {
-								
-								ctx.strokeStyle = createCanvasGradient (ctx, lj.grad);
-								
-							} else {
-								
-								ctx.strokeStyle = createCanvasColor (lj.colour, lj.alpha);
-								
-							}*/
 						
 						case LineTo (x, y):
 							

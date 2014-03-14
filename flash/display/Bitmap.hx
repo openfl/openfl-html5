@@ -72,19 +72,6 @@ class Bitmap extends DisplayObjectContainer {
 		
 		var context = renderSession.context;
 		
-		/*if (this.blendMode !== renderSession.currentBlendMode) {
-			
-			renderSession.currentBlendMode = this.blendMode;
-			context.globalCompositeOperation = PIXI.blendModesCanvas[renderSession.currentBlendMode];
-			
-		}
-
-		if (this._mask) {
-			
-			renderSession.maskManager.pushMask(this._mask, renderSession.context);
-			
-		}*/
-		
 		if (bitmapData != null && bitmapData.__valid) {
 			
 			bitmapData.__syncImageData ();
@@ -102,69 +89,17 @@ class Bitmap extends DisplayObjectContainer {
 				
 			}
 			
-			/*if (renderSession.smoothProperty && renderSession.scaleMode !== this.texture.baseTexture.scaleMode) {
+			if (bitmapData.__sourceImage != null) {
 				
-				renderSession.scaleMode = this.texture.baseTexture.scaleMode;
-				context[renderSession.smoothProperty] = (renderSession.scaleMode === PIXI.scaleModes.LINEAR);
+				context.drawImage (bitmapData.__sourceImage, 0, 0);
 				
-			}*/
-			
-			/*if (this.tint !== 0xFFFFFF) {
-
-				if (this.cachedTint !== this.tint) {
-					
-					// no point tinting an image that has not loaded yet!
-					if (!texture.baseTexture.hasLoaded) return;
-					
-					this.cachedTint = this.tint;
-					
-					//TODO clean up caching - how to clean up the caches?
-					this.tintedTexture = PIXI.CanvasTinter.getTintedTexture(this, this.tint);
-					
-				}
+			} else {
 				
-				context.drawImage (this.tintedTexture, 0, 0, frame.width, frame.height,(this.anchor.x) * -frame.width, (this.anchor.y) * -frame.height, frame.width, frame.height);
+				context.drawImage (bitmapData.__sourceCanvas, 0, 0);
 				
-			} else {*/
-				
-				/*if (texture.trim) {
-					
-					var trim = texture.trim;
-					
-					context.drawImage (this.texture.baseTexture.source, frame.x, frame.y, frame.width, frame.height, trim.x - this.anchor.x * trim.width, trim.y - this.anchor.y * trim.height, frame.width, frame.height);
-					
-				} else {*/
-					
-					if (bitmapData.__sourceImage != null) {
-						
-						context.drawImage (bitmapData.__sourceImage, 0, 0);
-						
-					} else {
-						
-						context.drawImage (bitmapData.__sourceCanvas, 0, 0);
-						
-					}
-					
-					
-					//context.drawImage (bitmapData.__source, 0, 0, bitmapData.width, bitmapData.height, -bitmapData.width, -bitmapData.height, bitmapData.width, bitmapData.height);
-					
-				//}
-				
-			//}
+			}
 			
 		}
-
-		/*// OVERWRITE
-		for(var i=0,j=this.children.length; i<j; i++)
-		{
-		var child = this.children[i];
-		child._renderCanvas(renderSession);
-		}
-
-		if(this._mask)
-		{
-		renderSession.maskManager.popMask(renderSession.context);
-		}*/
 		
 	}
 	

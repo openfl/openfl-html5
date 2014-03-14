@@ -20,8 +20,6 @@ class Shape extends DisplayObject {
 		
 		super ();
 		
-		//__interactive = true;
-		
 	}
 	
 	
