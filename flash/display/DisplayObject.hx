@@ -214,6 +214,13 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
+	public function __renderWebGL (renderSession:RenderSession):Void {
+		
+		
+		
+	}
+	
+	
 	private function __setStageReference (stage:Stage):Void {
 		
 		if (this.stage != stage) {

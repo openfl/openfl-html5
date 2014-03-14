@@ -399,6 +399,60 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
+	public override function __renderWebGL (renderSession:RenderSession):Void {
+		
+		if (!visible || alpha == 0) return;
+		
+		for (child in __children) {
+			
+			child.__renderWebGL (renderSession);
+			
+		}
+		
+		/*if(!this.visible || this.alpha <= 0)return;
+
+		var i,j;
+
+		if(this._mask || this._filters)
+		{
+		if(this._mask)
+		{
+		renderSession.spriteBatch.stop();
+		renderSession.maskManager.pushMask(this.mask, renderSession);
+		renderSession.spriteBatch.start();
+		}
+
+		if(this._filters)
+		{
+		renderSession.spriteBatch.flush();
+		renderSession.filterManager.pushFilter(this._filterBlock);
+		}
+
+		// simple render children!
+		for(i=0,j=this.children.length; i<j; i++)
+		{
+		this.children[i]._renderWebGL(renderSession);
+		}
+
+		renderSession.spriteBatch.stop();
+
+		if(this._filters)renderSession.filterManager.popFilter();
+		if(this._mask)renderSession.maskManager.popMask(renderSession);
+
+		renderSession.spriteBatch.start();
+		}
+		else
+		{
+		// simple render children!
+		for(i=0,j=this.children.length; i<j; i++)
+		{
+		this.children[i]._renderWebGL(renderSession);
+		}
+		}*/
+		
+	}
+	
+	
 	private override function __setStageReference (stage:Stage):Void {
 		
 		if (this.stage != stage) {
