@@ -442,8 +442,6 @@ class TextField extends InteractiveObject {
 		
 		// TODO: Handle HTML text
 		
-		trace ("strip it");
-		
 		value = new EReg ("</p>", "g").replace (value, "\n");
 		value = new EReg ("<br>", "g").replace (value, "\n");
 		value = new EReg ("<.*?>", "g").replace (value, "");
