@@ -240,6 +240,8 @@ class Stage extends Sprite {
 		var event = new Event (Event.ENTER_FRAME);
 		__broadcast (event);
 		
+		super.__update ();
+		
 		if (stageWidth != __canvas.width || stageHeight != __canvas.height) {
 			
 			__canvas.width = stageWidth;
