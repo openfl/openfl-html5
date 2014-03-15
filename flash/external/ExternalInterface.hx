@@ -1,26 +1,30 @@
 package flash.external;
 
 
+import flash.Lib;
+
+
+@:access(flash.display.Stage)
 class ExternalInterface {
 	
 	
-	public static var available = false;
+	public static var available = true;
 	public static var marshallExceptions = false;
 	
 	
 	public static function addCallback (functionName:String, closure:Dynamic):Void {
-				
-		// FYI: new functionality
-		// add the named function as a method on the containing HTMLElement in order that
-		// it can be called from the containing page, as in Flash.
-		//flash.Lib.addCallback (functionName, closure);
+		
+		if (Lib.current.stage.__element != null) {
+			
+			untyped Lib.current.stage.__element[functionName] = closure;
+			
+		}
 		
 	}
 	
 	
 	public static function call (functionName:String, ?p1:Dynamic, ?p2:Dynamic, ?p3:Dynamic, ?p4:Dynamic, ?p5:Dynamic):Dynamic {
-		// FYI: new functionality
-		// call the named function on the containing page, as in Flash
+		
 		var callResponse:Dynamic = null;
 		
 		if (p1 == null) {
@@ -50,11 +54,7 @@ class ExternalInterface {
 		}
 		
 		return callResponse;
-
-		// FYI: old functionality
-		// simply call from the Map of functions instead of calling on the containing page as in Flash
-		//if (mCallbacks == null || !mCallbacks.exists(functionName)) return null;
-		//return Reflect.callMethod(null, mCallbacks.get(functionName), [ p1, p2, p3, p4, p5 ]);
+		
 	}
 	
 	
