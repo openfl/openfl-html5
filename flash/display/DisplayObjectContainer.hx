@@ -49,6 +49,10 @@ class DisplayObjectContainer extends InteractiveObject {
 				
 			}
 			
+			// TODO: Should this be necessary?
+			
+			child.__update ();
+			
 		}
 		
 		return child;
