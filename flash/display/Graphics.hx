@@ -482,13 +482,16 @@ class Graphics {
 								
 							}
 							
+							x -= offsetX;
+							y -= offsetY;
+							
 							var kappa = .5522848,
 								ox = (width / 2) * kappa, // control point offset horizontal
 								oy = (height / 2) * kappa, // control point offset vertical
-								xe = x + width - offsetX,           // x-end
-								ye = y + height - offsetY,           // y-end
-								xm = x + width / 2 - offsetX,       // x-middle
-								ym = y + height / 2 - offsetY;       // y-middle
+								xe = x + width,           // x-end
+								ye = y + height,           // y-end
+								xm = x + width / 2,       // x-middle
+								ym = y + height / 2;       // y-middle
 							
 							__closePath (false);
 							__beginPath ();
