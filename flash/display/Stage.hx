@@ -715,6 +715,7 @@ class MaskManager {
 		
 		//var cacheAlpha = mask.__worldAlpha;
 		var transform = mask.__worldTransform;
+		if (transform == null) transform = new Matrix ();
 		
 		context.setTransform (transform.a, transform.c, transform.b, transform.d, transform.tx, transform.ty);
 		
