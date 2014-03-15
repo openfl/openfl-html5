@@ -70,6 +70,17 @@ class TextField extends InteractiveObject {
 		
 		__width = 100;
 		__height = 100;
+		__text = "";
+		
+		type = TextFieldType.DYNAMIC;
+		autoSize = TextFieldAutoSize.NONE;
+		selectable = true;
+		borderColor = 0x000000;
+		border = false;
+		backgroundColor = 0xffffff;
+		background = false;
+		gridFitType = GridFitType.PIXEL;
+		sharpness = 0;
 		
 		if (__defaultTextFormat == null) {
 			
