@@ -1,6 +1,7 @@
 package flash.display;
 
 
+import flash.display.Stage;
 import flash.geom.Matrix;
 import flash.geom.Rectangle;
 import js.html.CanvasElement;
@@ -721,6 +722,81 @@ class Graphics {
 				if (__hasStroke) {
 					
 					__context.stroke ();
+					
+				}
+				
+			}
+			
+		}
+		
+	}
+	
+	
+	private function __renderMask (renderSession:RenderSession) {
+		
+		if (__commands.length != 0) {
+			
+			var __context = renderSession.context;
+			
+			var __positionX = 0.0;
+			var __positionY = 0.0;
+			
+			var offsetX = 0;
+			var offsetY = 0;
+			
+			for (command in __commands) {
+				
+				switch (command) {
+					
+					case CurveTo (cx, cy, x, y):
+						
+						__context.quadraticCurveTo (cx, cy, x, y);
+						__positionX = x;
+						__positionY = y;
+					
+					case DrawCircle (x, y, radius):
+						
+						__context.arc (x - offsetX, y - offsetY, radius, 0, Math.PI * 2, true);
+					
+					case DrawEllipse (x, y, width, height):
+						
+						x -= offsetX;
+						y -= offsetY;
+						
+						var kappa = .5522848,
+							ox = (width / 2) * kappa, // control point offset horizontal
+							oy = (height / 2) * kappa, // control point offset vertical
+							xe = x + width,           // x-end
+							ye = y + height,           // y-end
+							xm = x + width / 2,       // x-middle
+							ym = y + height / 2;       // y-middle
+						
+						//__closePath (false);
+						//__beginPath ();
+						__context.moveTo(x, ym);
+						__context.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+						__context.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+						__context.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+						__context.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+						//__closePath (false);
+					
+					case DrawRect (x, y, width, height):
+						
+						__context.rect (x - offsetX, y - offsetY, width, height);
+					
+					case LineTo (x, y):
+						
+						__context.lineTo (x, y);
+						__positionX = x;
+						__positionY = y;
+						
+					case MoveTo (x, y):
+						
+						__context.moveTo (x, y);
+						__positionX = x;
+						__positionY = y;
+					
+					default:
 					
 				}
 				

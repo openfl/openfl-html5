@@ -74,6 +74,12 @@ class Bitmap extends DisplayObjectContainer {
 		
 		if (bitmapData != null && bitmapData.__valid) {
 			
+			if (__mask != null) {
+				
+				renderSession.maskManager.pushMask (__mask);
+				
+			}
+			
 			bitmapData.__syncImageData ();
 			
 			context.globalAlpha = __worldAlpha;
@@ -99,7 +105,20 @@ class Bitmap extends DisplayObjectContainer {
 				
 			}
 			
+			if (__mask != null) {
+				
+				renderSession.maskManager.popMask ();
+				
+			}
+			
 		}
+		
+	}
+	
+	
+	public override function __renderMask (renderSession:RenderSession):Void {
+		
+		renderSession.context.rect (0, 0, width, height);
 		
 	}
 	

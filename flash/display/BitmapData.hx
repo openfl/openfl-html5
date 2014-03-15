@@ -1047,6 +1047,13 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
+	public function __renderMask (renderSession:RenderSession):Void {
+		
+		
+		
+	}
+	
+	
 	private function __syncImageData ():Void {
 		
 		if (__sourceImageDataChanged) {

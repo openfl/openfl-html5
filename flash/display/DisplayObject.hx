@@ -21,7 +21,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public var filters (get, set):Array<BitmapFilter>;
 	public var height (get, set):Float;
 	public var loaderInfo:LoaderInfo;
-	public var mask:DisplayObject;
+	public var mask (get, set):DisplayObject;
 	public var mouseX (get, null):Float;
 	public var mouseY (get, null):Float;
 	public var name:String;
@@ -42,6 +42,8 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private var __filters:Array<BitmapFilter>;
 	private var __interactive:Bool;
+	private var __isMask:Bool;
+	private var __mask:DisplayObject;
 	private var __renderable:Bool;
 	private var __rotationCache:Float;
 	private var __rotationCosine:Float;
@@ -156,6 +158,13 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
+	public function __renderMask (renderSession:RenderSession):Void {
+		
+		
+		
+	}
+	
+	
 	private function __setStageReference (stage:Stage):Void {
 		
 		if (this.stage != stage) {
@@ -176,8 +185,8 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	public function __update ():Void {
 		
-		__renderable = (visible && alpha > 0 && scaleX != 0 && scaleY != 0);
-		if (!__renderable) return;
+		__renderable = (visible && alpha > 0 && scaleX != 0 && scaleY != 0 && !__isMask);
+		if (!__renderable && !__isMask) return;
 		
 		if (rotation != __rotationCache) {
 			
@@ -272,6 +281,22 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private function set_height (value:Float):Float {
 		
 		return 0;
+		
+	}
+	
+	
+	private function get_mask ():DisplayObject {
+		
+		return __mask;
+		
+	}
+	
+	
+	private function set_mask (value:DisplayObject):DisplayObject {
+		
+		if (__mask != null) __mask.__isMask = false;
+		if (value != null) value.__isMask = true;
+		return __mask = value;
 		
 	}
 	

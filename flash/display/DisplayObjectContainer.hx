@@ -382,23 +382,33 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		if (!__renderable) return;
 		
-		/*if (this._mask) {
+		if (__mask != null) {
 			
-			renderSession.maskManager.pushMask (this._mask, renderSession.context);
+			renderSession.maskManager.pushMask (__mask);
 			
-		}*/
+		}
 		
 		for (child in __children) {
 			
 			child.__renderCanvas (renderSession);
 			
 		}
-
-		/*if (this._mask) {
+		
+		if (__mask != null) {
 			
-			renderSession.maskManager.popMask (renderSession.context);
+			renderSession.maskManager.popMask ();
 			
-		}*/
+		}
+		
+	}
+	
+	
+	public override function __renderMask (renderSession:RenderSession):Void {
+		
+		var bounds = new Rectangle ();
+		__getLocalBounds (bounds);
+		
+		renderSession.context.rect (0, 0, bounds.width, bounds.height);	
 		
 	}
 	
@@ -444,8 +454,8 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	public override function __updateChildren ():Void {
 		
-		__renderable = (visible && alpha > 0 && scaleX != 0 && scaleY != 0);
-		if (!__renderable) return;
+		__renderable = (visible && alpha > 0 && scaleX != 0 && scaleY != 0 && !__isMask);
+		if (!__renderable && !__isMask) return;
 		
 		for (child in __children) {
 			

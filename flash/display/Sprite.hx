@@ -80,6 +80,12 @@ class Sprite extends DisplayObjectContainer {
 			__graphics.__render ();
 			
 			if (__graphics.__canvas != null) {
+					
+				if (__mask != null) {
+					
+					renderSession.maskManager.pushMask (__mask);
+					
+				}
 				
 				var context = renderSession.context;
 				
@@ -98,11 +104,32 @@ class Sprite extends DisplayObjectContainer {
 				
 				context.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
 				
+				if (__mask != null) {
+					
+					renderSession.maskManager.popMask ();
+					
+				}
+				
 			}
 			
 		}
 		
 		super.__renderCanvas (renderSession);
+		
+	}
+	
+	
+	public override function __renderMask (renderSession:RenderSession):Void {
+		
+		if (__graphics != null) {
+			
+			__graphics.__renderMask (renderSession);
+				
+		} else {
+			
+			super.__renderMask (renderSession);
+			
+		}
 		
 	}
 	
