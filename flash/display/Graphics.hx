@@ -364,7 +364,6 @@ class Graphics {
 					
 					__canvas = cast Browser.document.createElement ("canvas");
 					__context = __canvas.getContext ("2d");
-					__context.lineWidth = 0;
 					
 				}
 				

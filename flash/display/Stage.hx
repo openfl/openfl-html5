@@ -67,6 +67,8 @@ class Stage extends Sprite {
 		
 		__canvas.style.transform = "translatez(0)";
 		__canvas.style.position = "absolute";
+		__canvas.style.top = "0px";
+		__canvas.style.left = "0px";
 		
 		__originalWidth = width;
 		__originalHeight = height;
