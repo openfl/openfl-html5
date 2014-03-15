@@ -255,11 +255,11 @@ class BitmapData implements IBitmapDrawable {
 		
 		if (sourceBitmapData.__sourceImage != null) {
 			
-			__sourceContext.drawImage (sourceBitmapData.__sourceImage, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height, destPoint.x, destPoint.y, sourceRect.width, sourceRect.height);
+			__sourceContext.drawImage (sourceBitmapData.__sourceImage, Std.int (sourceRect.x), Std.int (sourceRect.y), Std.int (sourceRect.width), Std.int (sourceRect.height), Std.int (destPoint.x), Std.int (destPoint.y), Std.int (sourceRect.width), Std.int (sourceRect.height));
 			
 		} else if (sourceBitmapData.__sourceCanvas != null) {
 			
-			__sourceContext.drawImage (sourceBitmapData.__sourceCanvas, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height, destPoint.x, destPoint.y, sourceRect.width, sourceRect.height);
+			__sourceContext.drawImage (sourceBitmapData.__sourceCanvas, Std.int (sourceRect.x), Std.int (sourceRect.y), Std.int (sourceRect.width), Std.int (sourceRect.height), Std.int (destPoint.x), Std.int (destPoint.y), Std.int (sourceRect.width), Std.int (sourceRect.height));
 			
 		}
 		
@@ -855,6 +855,9 @@ class BitmapData implements IBitmapDrawable {
 		__sourceCanvas.width = width;
 		__sourceCanvas.height = height;
 		__sourceContext = __sourceCanvas.getContext ("2d");
+		untyped (__sourceContext).mozImageSmoothingEnabled = false;
+		untyped (__sourceContext).webkitImageSmoothingEnabled = false;
+		__sourceContext.imageSmoothingEnabled = false;
 		__valid = true;
 		
 	}

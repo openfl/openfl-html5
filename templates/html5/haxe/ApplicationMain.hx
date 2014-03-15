@@ -142,7 +142,7 @@ import flash.Lib;
 			}
 			
 		}
-			
+		
 		if (hasMain) {
 			
 			Reflect.callMethod (::APP_MAIN::, Reflect.field (::APP_MAIN::, "main"), []);
@@ -154,6 +154,11 @@ import flash.Lib;
 			if (Std.is (instance, flash.display.DisplayObject)) {
 				
 				flash.Lib.current.addChild (cast instance);
+				
+			} else {
+				
+				trace ("Error: No entry point found");
+				trace ("If you are using DCE with a static main, you may need to @:keep the function");
 				
 			}
 			
