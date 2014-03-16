@@ -421,7 +421,7 @@ class TextField extends InteractiveObject {
 		
 		switch (format.align) {
 			
-			/*case TextFormatAlign.CENTER:
+			case TextFormatAlign.CENTER:
 				
 				__context.textAlign = "center";
 				__context.fillText (text, __width / 2, 2, __width - 4);
@@ -430,7 +430,7 @@ class TextField extends InteractiveObject {
 				
 				__context.textAlign = "end";
 				__context.fillText (text, __width - 2, 2, __width - 4);
-			*/
+			
 			default:
 				
 				__context.textAlign = "start";
