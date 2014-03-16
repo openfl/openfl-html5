@@ -9,8 +9,11 @@ import openfl.Assets;
 
 import flash.display.Loader;
 import flash.events.Event;
+import flash.events.IOErrorEvent;
+import flash.media.Sound;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
+import haxe.io.Path;
 import js.html.HtmlElement;
 import js.html.Image;
 import flash.Lib;
@@ -43,6 +46,7 @@ import flash.Lib;
 		Lib.current.addChild (preloader);
 		preloader.onInit ();
 		
+		var sounds = [];
 		var id;
 		::foreach assets::::if (embed)::
 		::if (type == "image")::
@@ -64,6 +68,12 @@ import flash.Lib;
 		urlLoader.dataFormat = BINARY;
 		urlLoaders.set("::resourceName::", urlLoader);
 		total ++;
+		::elseif (type == "sound")::
+		var sound = Path.withoutExtension ("::resourceName::");
+		if (!sounds.remove (sound)) {
+			total++;
+		}
+		sounds.push (sound);
 		::end::
 		::end::::end::
 		
@@ -80,6 +90,17 @@ import flash.Lib;
 				urlLoader.load (new URLRequest (path));
 				
 			}
+			
+			for (soundName in sounds) {
+				
+				var sound = new Sound ();
+				sound.addEventListener (Event.COMPLETE, sound_onComplete);
+				sound.addEventListener (IOErrorEvent.IO_ERROR, sound_onIOError);
+				sound.load (new URLRequest (soundName + ".ogg"));
+				
+			}
+			
+			
 			
 		}
 		
@@ -161,6 +182,38 @@ import flash.Lib;
 				trace ("If you are using DCE with a static main, you may need to @:keep the function");
 				
 			}
+			
+		}
+		
+	}
+	
+	
+	private static function sound_onComplete (event:Event):Void {
+		
+		assetsLoaded++;
+		
+		preloader.onUpdate (assetsLoaded, total);
+		
+		if (assetsLoaded == total) {
+			
+			start ();
+			
+		}
+		
+	}
+	
+	
+	private static function sound_onIOError (event:IOErrorEvent):Void {
+		
+		// if it is actually valid, it will load later when requested
+		
+		assetsLoaded++;
+		
+		preloader.onUpdate (assetsLoaded, total);
+		
+		if (assetsLoaded == total) {
+			
+			start ();
 			
 		}
 		

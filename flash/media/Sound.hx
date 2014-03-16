@@ -5,6 +5,188 @@ import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.events.IOErrorEvent;
 import flash.net.URLRequest;
+import haxe.io.Path;
+
+
+@:autoBuild(openfl.Assets.embedSound())
+class Sound extends EventDispatcher {
+	
+	
+	public var bytesLoaded (default, null):Int;
+	public var bytesTotal (default, null):Int;
+	public var id3 (default, null):ID3Info;
+	public var isBuffering (default, null):Bool;
+	public var length (default, null):Float;
+	public var url (default, null):String;
+	
+	private var __buffer:Bool;
+	private var __howl:Howl;
+	
+	
+	public function new (stream:URLRequest = null, context:SoundLoaderContext = null) {
+		
+		super (this);
+		
+		bytesLoaded = 0;
+		bytesTotal = 0;
+		id3 = null;
+		isBuffering = false;
+		length = 0;
+		url = null;
+		
+		if (stream != null) {
+			
+			load (stream, context);
+			
+		}
+		
+	}
+	
+	
+	public function close ():Void {
+		
+		if (__howl != null) {
+			
+			__howl.unload ();
+			
+		}
+		
+	}
+	
+	
+	public function load (stream:URLRequest, context:SoundLoaderContext = null):Void {
+		
+		if (__howl != null) {
+			
+			if (stream.url == url) {
+				
+				return;
+				
+			} else {
+				
+				__howl.unload ();
+				
+			}
+			
+		}
+		
+		url = stream.url;
+		var file = Path.withoutExtension (stream.url);
+		
+		__howl = new Howl ({
+			onload: howl_onLoad,
+			onloaderror: howl_onLoadError,
+			urls: [ file + ".ogg", file + ".mp3", file + ".wav" ],
+			buffer: __buffer,
+			loop: __buffer // For now, we'll assume music tracks are looping :/
+		});
+		
+	}
+	
+	
+	public function play (startTime:Float = 0.0, loops:Int = 0, sndTransform:SoundTransform = null):SoundChannel {
+		
+		if (sndTransform == null) {
+			
+			sndTransform = new SoundTransform (1, 0);
+			
+		}
+		
+		// For now, assume looping on music tracks
+		
+		if (__buffer) loops++;
+		
+		return new SoundChannel (__howl, startTime, loops, sndTransform);
+		
+	}
+	
+	
+	
+	
+	// Event Handlers
+	
+	
+	
+	
+	private function howl_onLoad (_):Void {
+		
+		dispatchEvent (new Event (Event.COMPLETE));
+		
+	}
+	
+	
+	private function howl_onLoadError (_):Void {
+		
+		#if debug
+		trace ("Error loading sound '" + url + "'");
+		#end
+		
+		dispatchEvent (new IOErrorEvent (IOErrorEvent.IO_ERROR));
+		
+	}
+	
+	
+}
+
+
+@:native("Howler") extern class Howler {
+	
+	
+	public static function mute ():Howler;
+	public static function unmute ():Howler;
+	public static function volume (vol:Float):Howler;
+	
+}
+
+
+@:native("Howl") extern class Howl {
+	
+	
+	public var autoplay:Bool;
+	public var buffer:Bool;
+	public var format:String;
+    //public var loop:Bool;
+    //public var sprite:Dynamic;
+    //public var volume:Float;
+    //public var urls:Array<String>;
+    public var onend:Dynamic;
+	public var onload:Dynamic;
+	public var onloaderror:Dynamic;
+	public var onpause:Dynamic;
+	public var onplay:Dynamic;
+	
+	public function new (options:Dynamic);
+	
+	public function load ():Howl;
+	@:overload(function (url:String):Howl{}) public function urls (urls:Array<String>):Howl;
+	public function play (?sprite:String, ?callback:Dynamic):Howl;
+	public function pause (?id:String, ?timerID:String):Howl;
+	public function stop (?id:String, ?timerID:String):Howl;
+	public function mute (?id:String):Howl;
+	public function unmute (?id:String):Howl;
+	public function volume (vol:Float, ?id:String):Howl;
+	public function loop (loop:Bool):Howl;
+	public function sprite (sprite:Dynamic):Howl;
+	public function pos (pos:Float, ?id:String):Howl;
+	public function pos3d (x:Float, y:Float, z:Float, ?id:String):Howl;
+	public function fade (from:Float, to:Float, len:Float, ?callback:Dynamic, ?id:String):Howl;
+	//public function fadeIn (to:Float, len:Float, ?callback:Dynamic):Howl;
+	//public function fadeOut (to:Float, len:Float, ?callback:Dynamic, ?id:String):Howl;
+	public function on (event:String, ?callback:Dynamic):Howl;
+	public function off (event:String, ?callback:Dynamic):Howl;
+	public function unload ():Void;
+	
+	
+}
+
+
+/*package flash.media;
+
+
+import flash.events.Event;
+import flash.events.EventDispatcher;
+import flash.events.IOErrorEvent;
+import flash.net.URLRequest;
 import flash.net.URLLoader;
 import flash.Lib;
 import js.html.MediaElement;
@@ -221,4 +403,4 @@ class Sound extends EventDispatcher {
 	}
 	
 	
-}
+}*/
