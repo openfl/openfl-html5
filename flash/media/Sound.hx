@@ -145,11 +145,11 @@ class Sound extends EventDispatcher {
 	public var autoplay:Bool;
 	public var buffer:Bool;
 	public var format:String;
-    //public var loop:Bool;
-    //public var sprite:Dynamic;
-    //public var volume:Float;
-    //public var urls:Array<String>;
-    public var onend:Dynamic;
+	//public var loop:Bool;
+	//public var sprite:Dynamic;
+	//public var volume:Float;
+	//public var urls:Array<String>;
+	public var onend:Dynamic;
 	public var onload:Dynamic;
 	public var onloaderror:Dynamic;
 	public var onpause:Dynamic;
