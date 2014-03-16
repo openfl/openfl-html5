@@ -570,6 +570,8 @@ class TextField extends InteractiveObject {
 			
 			for (segment in segments) {
 				
+				if (segment == "") continue;
+				
 				var closeFontIndex = segment.indexOf ("</font>");
 				
 				if (closeFontIndex > -1) {
@@ -600,11 +602,19 @@ class TextField extends InteractiveObject {
 						
 					}
 					
-					segment = segment.substring (start, end);
-					segment = new EReg ("<.*?>", "g").replace (segment, "");
+					var sub = segment.substring (start, end);
+					sub = new EReg ("<.*?>", "g").replace (sub, "");
 					
-					__ranges.push (new TextFormatRange (format, value.length, value.length + segment.length));
-					value += segment;
+					__ranges.push (new TextFormatRange (format, value.length, value.length + sub.length));
+					value += sub;
+					
+					if (closeFontIndex + 7 < segment.length) {
+						
+						sub = segment.substr (closeFontIndex + 7);
+						__ranges.push (new TextFormatRange (__textFormat, value.length, value.length + sub.length));
+						value += sub;
+						
+					}
 					
 				} else {
 					
