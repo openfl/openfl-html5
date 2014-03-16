@@ -70,7 +70,7 @@ class Shape extends DisplayObject {
 				
 				if (renderSession.roundPixels) {
 					
-					context.setTransform (transform.a, transform.b, transform.c, transform.d, untyped (transform.tx || 0), untyped (transform.ty || 0));
+					context.setTransform (transform.a, transform.b, transform.c, transform.d, Std.int (transform.tx), Std.int (transform.ty));
 					
 				} else {
 					

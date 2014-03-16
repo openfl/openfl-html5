@@ -9,12 +9,14 @@ import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
 import flash.text.TextFormatAlign;
+import haxe.xml.Fast;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
 import js.Browser;
 
 
 @:access(flash.display.Graphics)
+@:access(flash.text.TextFormat)
 class TextField extends InteractiveObject {
 	
 	
@@ -57,8 +59,10 @@ class TextField extends InteractiveObject {
 	private var __canvas:CanvasElement;
 	private var __context:CanvasRenderingContext2D;
 	private var __dirty:Bool;
+	//private var __graphics:Graphics;
 	private var __height:Float;
 	private var __isHTML:Bool;
+	private var __ranges:Array<TextFormatRange>;
 	private var __text:String;
 	private var __textFormat:TextFormat;
 	private var __width:Float;
@@ -93,6 +97,7 @@ class TextField extends InteractiveObject {
 		}
 		
 		__textFormat = __defaultTextFormat.clone ();
+		//__graphics = new Graphics ();
 		
 	}
 	
@@ -163,7 +168,7 @@ class TextField extends InteractiveObject {
 		
 		__dirty = true;
 		
-		return __textFormat.clone ();
+		return format;
 		
 	}
 	
@@ -174,6 +179,28 @@ class TextField extends InteractiveObject {
 		bounds.transform (__worldTransform);
 		
 		rect.__expand (bounds.x, bounds.y, bounds.width, bounds.height);
+		
+	}
+	
+	
+	private function __getFont (format:TextFormat):String {
+		
+		var font = format.italic ? "italic " : "normal ";
+		font += "normal ";
+		font += format.bold ? "bold " : "normal ";
+		font += format.size + "px";
+		font += "/" + (format.size + format.leading + 4) + "px ";
+		
+		font += switch (format.font) {
+			
+			case "_sans": "sans-serif";
+			case "_serif": "serif";
+			case "_typewriter": "monospace";
+			default: format.font;
+			
+		}
+		
+		return font;
 		
 	}
 	
@@ -201,6 +228,31 @@ class TextField extends InteractiveObject {
 	}
 	
 	
+	private function __measureText ():Array<Float> {
+		
+		if (__ranges == null) {
+			
+			__context.font = __getFont (__textFormat);
+			return [ __context.measureText (__text).width ];
+			
+		} else {
+			
+			var measurements = [];
+			
+			for (range in __ranges) {
+				
+				__context.font = __getFont (range.format);
+				measurements.push (__context.measureText (text.substring (range.start, range.end)).width);
+				
+			}
+			
+			return measurements;
+			
+		}
+		
+	}
+	
+	
 	public override function __renderCanvas (renderSession:RenderSession):Void {
 		
 		if (!__renderable) return;
@@ -211,8 +263,19 @@ class TextField extends InteractiveObject {
 				
 				__canvas = null;
 				__context = null;
+				//__graphics.clear ();
 				
 			} else {
+				
+				//var font = new Font ();
+				//trace (font.hasGlyph ("a"));
+				//__graphics.beginFill (0xFF0000);
+				//font.__setScale (20);
+				//font.__render (__graphics, "a".charCodeAt (0), 0, 0, false);
+				//__graphics.endFill ();
+				
+				//__graphics.beginFill (0xFF0000);
+				//__graphics.drawRect (0, 0, 100, 100);
 				
 				if (__canvas == null) {
 					
@@ -224,99 +287,108 @@ class TextField extends InteractiveObject {
 					
 				}
 				
-				var font = "";
-				
 				if (__text != null && __text != "") {
 					
-					font += __textFormat.italic ? "italic " : "normal ";
-					font += "normal ";
-					font += __textFormat.bold ? "bold " : "normal ";
-					font += __textFormat.size + "px";
-					font += "/" + (__textFormat.size + __textFormat.leading + 4) + "px ";
+					var measurements = __measureText ();
+					var textWidth = 0.0;
 					
-					font += switch (__textFormat.font) {
+					for (measurement in measurements) {
 						
-						case "_sans": "sans-serif";
-						case "_serif": "serif";
-						case "_typewriter": "monospace";
-						default: __textFormat.font;
+						textWidth += measurement;
 						
 					}
 					
-					__context.font = font;
-					
-				}
-				
-				if (autoSize == TextFieldAutoSize.LEFT) {
-					
-					if (__text != null && text != "") {
+					if (autoSize == TextFieldAutoSize.LEFT) {
 						
-						__width = __context.measureText (__text).width + 4;
+						__width = textWidth + 4;
+						
+					}
+					
+					__canvas.width = Math.ceil (__width);
+					__canvas.height = Math.ceil (__height);
+					
+					if (border || background) {
+						
+						if (border) {
+							
+							__context.lineWidth = 1;
+							__context.strokeStyle = "#" + StringTools.hex (borderColor, 6);
+							
+						}
+						
+						if (background) {
+							
+							__context.fillStyle = "#" + StringTools.hex (backgroundColor, 6);
+							
+						}
+						
+						__context.rect (0, 0, __width, __height);
+						
+					}
+					
+					if (__ranges == null) {
+						
+						__renderText (text, __textFormat, 0);
 						
 					} else {
+						
+						var currentIndex = 0;
+						var range;
+						var offsetX = 0.0;
+						
+						for (i in 0...__ranges.length) {
+							
+							range = __ranges[i];
+							
+							__renderText (text.substring (range.start, range.end), range.format, offsetX);
+							offsetX += measurements[i];
+							
+						}
+						
+					}
+					
+				} else {
+					
+					if (autoSize == TextFieldAutoSize.LEFT) {
 						
 						__width = 4;
 						
 					}
 					
+					__canvas.width = Math.ceil (__width);
+					__canvas.height = Math.ceil (__height);
+					
+					if (border || background) {
+						
+						if (border) {
+							
+							__context.lineWidth = 1;
+							__context.strokeStyle = "#" + StringTools.hex (borderColor, 6);
+							
+						}
+						
+						if (background) {
+							
+							__context.fillStyle = "#" + StringTools.hex (backgroundColor, 6);
+							
+						}
+						
+						__context.rect (0, 0, __width, __height);
+						
+					}
+					
 				}
-				
-				__canvas.width = Math.ceil (__width);
-				__canvas.height = Math.ceil (__height);
-				
-				if (border || background) {
-					
-					if (border) {
-						
-						__context.lineWidth = 1;
-						__context.strokeStyle = "#" + StringTools.hex (borderColor, 6);
-						
-					}
-					
-					if (background) {
-						
-						__context.fillStyle = "#" + StringTools.hex (backgroundColor, 6);
-						
-					}
-					
-					__context.rect (0, 0, __width, __height);
-					
-				}
-				
-				if (__text != null && __text != "") {
-					
-					__context.font = font;
-					__context.textBaseline = "top";
-					__context.fillStyle = "#" + StringTools.hex (__textFormat.color, 6);
-					
-					switch (__textFormat.align) {
-						
-						case TextFormatAlign.CENTER:
-							
-							__context.textAlign = "center";
-							__context.fillText (__text, __width / 2, 2, __width - 4);
-						
-						case TextFormatAlign.RIGHT:
-							
-							__context.textAlign = "end";
-							__context.fillText (__text, __width - 2, 2, __width - 4);
-						
-						default:
-							
-							__context.textAlign = "start";
-							__context.fillText (__text, 2, 2, __width - 4);
-						
-					}
-					
-				}				
 				
 			}
+			
+			//__graphics.__render ();
 			
 			__dirty = false;
 			
 		}
 		
 		if (__canvas != null) {
+		//if (__graphics.__canvas != null) {
 			
 			var context = renderSession.context;
 			
@@ -325,7 +397,7 @@ class TextField extends InteractiveObject {
 			
 			if (renderSession.roundPixels) {
 				
-				context.setTransform (transform.a, transform.b, transform.c, transform.d, untyped (transform.tx || 0), untyped (transform.ty || 0));
+				context.setTransform (transform.a, transform.b, transform.c, transform.d, Std.int (transform.tx), Std.int (transform.ty));
 				
 			} else {
 				
@@ -333,7 +405,36 @@ class TextField extends InteractiveObject {
 				
 			}
 			
+			//context.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
 			context.drawImage (__canvas, 0, 0);
+			
+		}
+		
+	}
+	
+	
+	private function __renderText (text:String, format:TextFormat, offsetX:Float):Void {
+		
+		__context.font = __getFont (format);
+		__context.textBaseline = "top";
+		__context.fillStyle = "#" + StringTools.hex (format.color, 6);
+		
+		switch (format.align) {
+			
+			/*case TextFormatAlign.CENTER:
+				
+				__context.textAlign = "center";
+				__context.fillText (text, __width / 2, 2, __width - 4);
+			
+			case TextFormatAlign.RIGHT:
+				
+				__context.textAlign = "end";
+				__context.fillText (text, __width - 2, 2, __width - 4);
+			*/
+			default:
+				
+				__context.textAlign = "start";
+				__context.fillText (text, 2 + offsetX, 2, __width - 4);
 			
 		}
 		
@@ -411,7 +512,7 @@ class TextField extends InteractiveObject {
 	private function set_defaultTextFormat (value:TextFormat):TextFormat {
 		
 		__textFormat = __defaultTextFormat.clone ();
-		setTextFormat (value);
+		__textFormat.__merge (value);
 		return value;
 		
 	}
@@ -445,14 +546,120 @@ class TextField extends InteractiveObject {
 	private function set_htmlText (value:String):String {
 		
 		if (!__isHTML || __text != value) __dirty = true;
+		__ranges = null;
 		__isHTML = true;
 		
-		// TODO: Handle HTML text
+		value = new EReg ("<br>", "g").replace (value, "\n");
+		value = new EReg ("<br/>", "g").replace (value, "\n");
 		
-		value = new EReg ("</p>", "g").replace (value, "\n");
+		// crude solution
+		
+		var segments = value.split ("<font");
+		
+		if (segments.length == 1) {
+			
+			value = new EReg ("<.*?>", "g").replace (value, "");
+			return __text = value;
+			
+		} else {
+			
+			value = "";
+			__ranges = [];
+			
+			// crude search for font
+			
+			for (segment in segments) {
+				
+				var closeFontIndex = segment.indexOf ("</font>");
+				
+				if (closeFontIndex > -1) {
+					
+					var start = segment.indexOf (">") + 1;
+					var end = closeFontIndex;
+					var format = __textFormat.clone ();
+					
+					var faceIndex = segment.indexOf ("face=");
+					var colorIndex = segment.indexOf ("color=");
+					var sizeIndex = segment.indexOf ("size=");
+					
+					if (faceIndex > -1 && faceIndex < start) {
+						
+						format.font = segment.substr (faceIndex + 6, segment.indexOf ("\"", faceIndex));
+						
+					}
+					
+					if (colorIndex > -1 && colorIndex < start) {
+						
+						format.color = Std.parseInt ("0x" + segment.substr (colorIndex + 8, 6));
+						
+					}
+					
+					if (sizeIndex > -1 && sizeIndex < start) {
+						
+						format.size = Std.parseInt (segment.substr (sizeIndex + 6, segment.indexOf ("\"", sizeIndex)));
+						
+					}
+					
+					segment = segment.substring (start, end);
+					segment = new EReg ("<.*?>", "g").replace (segment, "");
+					
+					__ranges.push (new TextFormatRange (format, value.length, value.length + segment.length));
+					value += segment;
+					
+				} else {
+					
+					__ranges.push (new TextFormatRange (__textFormat, value.length, value.length + segment.length));
+					value += segment;
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		// crude
+		
+		/*var segments = value.split ("<");
+		var format = __textFormat;
+		var rangeFormat = null;
+		
+		for (segment in segments) {
+			
+			if (segment != "") {
+				
+				var caretIndex = segment.indexOf (">");
+				
+				if (caretIndex > -1) {
+					
+					if (StringTools.startsWith (segment, "font ")) {
+						
+						// parse font
+						rangeFormat = format.clone ();
+						rangeFormat.color = 0xFF0000;
+						
+					}
+					
+				}
+				
+				if (segment.indexOf (">") > )
+				
+			}
+			
+		}*/
+		
+		
+		
+		/*value = new EReg ("</p>", "g").replace (value, "\n");
 		value = new EReg ("<br>", "g").replace (value, "\n");
 		value = new EReg ("<.*?>", "g").replace (value, "");
 		
+		var first = Math.floor (value.length / 2);
+		var format = __textFormat.clone ();
+		format.color = 0xFF00FF;
+		
+		__ranges = [ new TextFormatRange (__textFormat, 0, first), new TextFormatRange (format, first, value.length) ];
+		*/
 		return __text = value;
 		
 	}
@@ -479,6 +686,7 @@ class TextField extends InteractiveObject {
 	public function set_text (value:String):String {
 		
 		if (__isHTML || __text != value) __dirty = true;
+		__ranges = null;
 		__isHTML = false;
 		return __text = value;
 		
@@ -495,6 +703,17 @@ class TextField extends InteractiveObject {
 	public function set_textColor (value:Int):Int {
 		
 		if (value != __textFormat.color) __dirty = true;
+		
+		if (__ranges != null) {
+			
+			for (range in __ranges) {
+				
+				range.format.color = null;
+				
+			}
+			
+		}
+		
 		return __textFormat.color = value;
 		
 	}
@@ -532,6 +751,26 @@ class TextField extends InteractiveObject {
 		
 		//if (value != wordWrap) __dirty = true;
 		return wordWrap = value;
+		
+	}
+	
+	
+}
+
+
+class TextFormatRange {
+	
+	
+	public var end:Int;
+	public var format:TextFormat;
+	public var start:Int;
+	
+	
+	public function new (format:TextFormat, start:Int, end:Int) {
+		
+		this.format = format;
+		this.start = start;
+		this.end = end;
 		
 	}
 	

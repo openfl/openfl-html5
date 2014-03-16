@@ -64,4 +64,28 @@ class TextFormat {
 	}
 	
 	
+	private function __merge (format:TextFormat):Void {
+		
+		if (format.font != null) font = format.font;
+		if (format.size != null) size = format.size;
+		if (format.color != null) color = format.color;
+		if (format.bold != null) bold = format.bold;
+		if (format.italic != null) italic = format.italic;
+		if (format.underline != null) underline = format.underline;
+		if (format.url != null) url = format.url;
+		if (format.target != null) target = format.target;
+		if (format.align != null) align = format.align;
+		if (format.leftMargin != null) leftMargin = format.leftMargin;
+		if (format.rightMargin != null) rightMargin = format.rightMargin;
+		if (format.indent != null) indent = format.indent;
+		if (format.leading != null) leading = format.leading;
+		if (format.blockIndent != null) blockIndent = format.blockIndent;
+		if (format.bullet != null) bullet = format.bullet;
+		if (format.kerning != null) kerning = format.kerning;
+		if (format.letterSpacing != null) letterSpacing = format.letterSpacing;
+		if (format.tabStops != null) tabStops = format.tabStops;
+		
+	}
+	
+	
 }
