@@ -234,13 +234,29 @@ class Stage extends Sprite {
 		__stats.begin ();
 		#end
 		
-		__renderable = true;
-		__update ();
+		//__renderable = true;
+		//__update ();
+		
+		for (event in __eventQueue) {
+			
+			switch (event.type) {
+				
+				case "keydown", "keyup": window_onKey (cast event);
+				case "touchstart", "touchend", "touchmove": canvas_onTouch (cast event);
+				case "mousedown", "mouseup", "mousemove", "click", "dblclick": canvas_onMouse (cast event);
+				default:
+				
+			}
+			
+		}
+		
+		untyped __eventQueue.length = 0;
 		
 		var event = new Event (Event.ENTER_FRAME);
 		__broadcast (event);
 		
-		super.__update ();
+		__renderable = true;
+		__update ();
 		
 		if (stageWidth != __canvas.width || stageHeight != __canvas.height) {
 			
@@ -336,7 +352,7 @@ class Stage extends Sprite {
 	}
 	
 	
-	public override function __update ():Void {
+	/*public override function __update ():Void {
 		
 		super.__update ();
 		
@@ -355,7 +371,7 @@ class Stage extends Sprite {
 		
 		untyped __eventQueue.length = 0;
 		
-	}
+	}*/
 	
 	
 	
