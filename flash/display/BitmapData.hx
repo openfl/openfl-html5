@@ -851,13 +851,24 @@ class BitmapData implements IBitmapDrawable {
 	
 	private function __createCanvas (width:Int, height:Int):Void {
 		
-		__sourceCanvas = cast Browser.document.createElement ("canvas");
+		__sourceCanvas = cast Browser.document.createElement ("canvas");		
 		__sourceCanvas.width = width;
 		__sourceCanvas.height = height;
-		__sourceContext = __sourceCanvas.getContext ("2d");
-		untyped (__sourceContext).mozImageSmoothingEnabled = false;
-		untyped (__sourceContext).webkitImageSmoothingEnabled = false;
-		__sourceContext.imageSmoothingEnabled = false;
+		
+		if (!transparent) {
+			
+			if (!transparent) __sourceCanvas.setAttribute ("moz-opaque", "true");
+			__sourceContext = untyped __js__ ('this.__sourceCanvas.getContext ("2d", { alpha: false })');
+			
+		} else {
+			
+			__sourceContext = __sourceCanvas.getContext ("2d");
+			
+		}
+		
+		//untyped (__sourceContext).mozImageSmoothingEnabled = false;
+		//untyped (__sourceContext).webkitImageSmoothingEnabled = false;
+		//__sourceContext.imageSmoothingEnabled = false;
 		__valid = true;
 		
 	}

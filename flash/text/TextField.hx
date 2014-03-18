@@ -281,9 +281,9 @@ class TextField extends InteractiveObject {
 					
 					__canvas = cast Browser.document.createElement ("canvas");
 					__context = __canvas.getContext ("2d");
-					untyped (__context).mozImageSmoothingEnabled = false;
-					untyped (__context).webkitImageSmoothingEnabled = false;
-					__context.imageSmoothingEnabled = false;
+					//untyped (__context).mozImageSmoothingEnabled = false;
+					//untyped (__context).webkitImageSmoothingEnabled = false;
+					//__context.imageSmoothingEnabled = false;
 					
 				}
 				

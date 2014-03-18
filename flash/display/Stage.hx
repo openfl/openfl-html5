@@ -59,11 +59,12 @@ class Stage extends Sprite {
 		__mouseY = 0;
 		
 		__canvas = cast Browser.document.createElement ("canvas");
+		__canvas.setAttribute ("moz-opaque", "true");
 		
 		__context = untyped __js__ ('this.__canvas.getContext ("2d", { alpha: false })');
-		untyped (__context).mozImageSmoothingEnabled = false;
-		untyped (__context).webkitImageSmoothingEnabled = false;
-		__context.imageSmoothingEnabled = false;
+		//untyped (__context).mozImageSmoothingEnabled = false;
+		//untyped (__context).webkitImageSmoothingEnabled = false;
+		//__context.imageSmoothingEnabled = false;
 		
 		__canvas.style.transform = "translatez(0)";
 		__canvas.style.position = "absolute";
@@ -252,8 +253,7 @@ class Stage extends Sprite {
 		
 		untyped __eventQueue.length = 0;
 		
-		var event = new Event (Event.ENTER_FRAME);
-		__broadcast (event);
+		__broadcast (new Event (Event.ENTER_FRAME));
 		
 		__renderable = true;
 		__update ();
