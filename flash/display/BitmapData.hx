@@ -334,22 +334,24 @@ class BitmapData implements IBitmapDrawable {
 		var data = __sourceImageData.data;
 		
 		var offset = ((y * (width * 4)) + (x * 4));
-        var hitColor = data[offset + 0] << 24;
-        hitColor |= data[offset + 1] << 16;
-        hitColor |= data[offset + 2] << 8;
-        if (transparent) hitColor |= data[offset + 3];
-        
+		var hitColorR = data[offset + 0] << 24;
+		var hitColorG = data[offset + 1] << 16;
+		var hitColorB = data[offset + 2] << 8;
+		var hitColorA = transparent ? data[offset + 3] : 0xFF;
+
+		var r = (color & 0xFF0000) >>> 16;
+		var g = (color & 0x00FF00) >>> 8;
+		var b = (color & 0x0000FF);
+		var a = transparent ? (color & 0xFF000000) >>> 24 : 0xFF;
+
+		if( hitColorR == r && hitColorG == g && hitColorB == b && hitColorA == a ) return;
+		
 		var dx = [ 0, -1, 1, 0 ];
 		var dy = [ -1, 0, 0, 1 ];
 		
 		var queue = new Array<Int> ();
 		queue.push (x);
 		queue.push (y);
-		
-		var r = (color & 0xFF0000) >>> 16;
-		var g = (color & 0x00FF00) >>> 8;
-		var b = (color & 0x0000FF);
-		var a = transparent ? (color & 0xFF000000) >>> 24 : 0xFF;
 		
 		while (queue.length > 0) {
 			
@@ -369,7 +371,7 @@ class BitmapData implements IBitmapDrawable {
 				
 				var nextPointOffset = (nextPointY * width + nextPointX) * 4;
 				
-				if (data[nextPointOffset + 0] == ((hitColor >> 24) & 0xFF) && data[nextPointOffset + 1] == ((hitColor >> 16) & 0xFF) && data[nextPointOffset + 2] == ((hitColor >> 8) & 0xFF) && data[nextPointOffset + 3] == ((hitColor) & 0xFF)) {
+				if (data[nextPointOffset + 0] == hitColorR && data[nextPointOffset + 1] == hitColorG && data[nextPointOffset + 2] == hitColorB && data[nextPointOffset + 3] == hitColorA) {
 					
 					data[nextPointOffset + 0] = r;
 					data[nextPointOffset + 1] = g;
