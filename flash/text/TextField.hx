@@ -175,7 +175,7 @@ class TextField extends InteractiveObject {
 	
 	private override function __getBounds (rect:Rectangle, matrix:Matrix):Void {
 		
-		var bounds = new Rectangle (0, 0, width, height);
+		var bounds = new Rectangle (0, 0, __width, __height);
 		bounds.transform (__worldTransform);
 		
 		rect.__expand (bounds.x, bounds.y, bounds.width, bounds.height);
