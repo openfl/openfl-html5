@@ -290,6 +290,8 @@ class Graphics {
 	
 	private function __getBounds (rect:Rectangle, matrix:Matrix):Void {
 		
+		if (__bounds == null) return;
+		
 		var bounds = __bounds.clone ().transform (matrix);
 		rect.__expand (bounds.x, bounds.y, bounds.width, bounds.height);
 		
