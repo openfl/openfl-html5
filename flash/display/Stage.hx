@@ -102,6 +102,8 @@ class Stage extends Sprite {
 		
 		__resize ();
 		Browser.window.addEventListener ("resize", window_onResize);
+		Browser.window.addEventListener ("focus", window_onFocus);
+		Browser.window.addEventListener ("blur", window_onBlur);
 		
 		if (element != null) {
 			
@@ -655,6 +657,20 @@ class Stage extends Sprite {
 		__resize ();
 		
 		var event = new Event (Event.RESIZE);
+		__broadcast (event);
+		
+	}
+	
+	private function window_onFocus (event:js.html.Event):Void {
+		
+		var event = new Event (Event.ACTIVATE);
+		__broadcast (event);
+		
+	}
+	
+	private function window_onBlur (event:js.html.Event):Void {
+		
+		var event = new Event (Event.DEACTIVATE);
 		__broadcast (event);
 		
 	}
