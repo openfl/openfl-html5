@@ -79,7 +79,7 @@ class MouseEvent extends Event {
 		}
 		
 		// source: http://unixpapa.com/js/mouse.html
-		if (type == MouseEvent.MOUSE_DOWN) {
+		if (type == MouseEvent.MOUSE_DOWN || type == MouseEvent.MOUSE_MOVE) {
 			
 			__mouseDown = if (event.which != null) 
 				event.which == 1

@@ -25,6 +25,7 @@ class Stage extends Sprite {
 	public var displayState:StageDisplayState;
 	public var focus:InteractiveObject;
 	public var frameRate:Float;
+	public var quality:StageQuality;
 	public var scaleMode:StageScaleMode;
 	public var stageHeight (default, null):Int;
 	public var stageWidth (default, null):Int;
@@ -114,6 +115,7 @@ class Stage extends Sprite {
 		this.stage = this;
 		this.parent = this;
 		
+		quality = StageQuality.HIGH;
 		__clearBeforeRender = true;
 		__eventQueue = [];
 		__stack = [];
