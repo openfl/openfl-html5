@@ -167,7 +167,7 @@ class Sound extends EventDispatcher {
 	public function volume (vol:Float, ?id:String):Howl;
 	public function loop (loop:Bool):Howl;
 	public function sprite (sprite:Dynamic):Howl;
-	public function pos (pos:Float, ?id:String):Howl;
+	public function pos (pos:Float, ?id:String):Dynamic;
 	public function pos3d (x:Float, y:Float, z:Float, ?id:String):Howl;
 	public function fade (from:Float, to:Float, len:Float, ?callback:Dynamic, ?id:String):Howl;
 	//public function fadeIn (to:Float, len:Float, ?callback:Dynamic):Howl;
