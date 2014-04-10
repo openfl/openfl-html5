@@ -15,7 +15,7 @@ import flash.geom.Transform;
 class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	
-	public var alpha:Float;
+	@:isVar public var alpha (get, set):Float;
 	public var blendMode:BlendMode;
 	public var cacheAsBitmap:Bool;
 	public var filters (get, set):Array<BitmapFilter>;
@@ -26,17 +26,17 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public var mouseY (get, null):Float;
 	public var name:String;
 	public var parent (default, null):DisplayObjectContainer;
-	public var rotation:Float;
+	@:isVar public var rotation (get, set):Float;
 	public var scale9Grid:Rectangle;
-	public var scaleX:Float;
-	public var scaleY:Float;
+	@:isVar public var scaleX (get, set):Float;
+	@:isVar public var scaleY (get, set):Float;
 	public var scrollRect:Rectangle;
 	public var stage (default, null):Stage;
 	public var transform (get, set):Transform;
-	public var visible:Bool;
+	@:isVar public var visible (get, set):Bool;
 	public var width (get, set):Float;
-	public var x:Float;
-	public var y:Float;
+	@:isVar public var x (get, set):Float;
+	@:isVar public var y (get, set):Float;
 	
 	public var __worldTransform:Matrix;
 	
@@ -262,6 +262,20 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	
 	
+	private function get_alpha ():Float {
+		
+		return alpha;
+		
+	}
+	
+	
+	private function set_alpha (value:Float):Float {
+		
+		return alpha = value;
+		
+	}
+	
+	
 	private function get_filters ():Array<BitmapFilter> {
 		
 		if (__filters == null) {
@@ -330,6 +344,48 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
+	private function get_rotation ():Float {
+		
+		return rotation;
+		
+	}
+	
+	
+	private function set_rotation (value:Float):Float {
+		
+		return rotation = value;
+		
+	}
+	
+	
+	private function get_scaleX ():Float {
+		
+		return scaleX;
+		
+	}
+	
+	
+	private function set_scaleX (value:Float):Float {
+		
+		return scaleX = value;
+		
+	}
+	
+	
+	private function get_scaleY ():Float {
+		
+		return scaleY;
+		
+	}
+	
+	
+	private function set_scaleY (value:Float):Float {
+		
+		return scaleY = value;
+		
+	}
+	
+	
 	private function get_transform ():Transform {
 		
 		return new Transform (this);
@@ -344,6 +400,20 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
+	private function get_visible ():Bool {
+		
+		return visible;
+		
+	}
+	
+	
+	private function set_visible (value:Bool):Bool {
+		
+		return visible = value;
+		
+	}
+	
+	
 	private function get_width ():Float {
 		
 		return 0;
@@ -354,6 +424,34 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private function set_width (value:Float):Float {
 		
 		return 0;
+		
+	}
+	
+	
+	private function get_x ():Float {
+		
+		return x;
+		
+	}
+	
+	
+	private function set_x (value:Float):Float {
+		
+		return x = value;
+		
+	}
+	
+	
+	private function get_y ():Float {
+		
+		return y;
+		
+	}
+	
+	
+	private function set_y (value:Float):Float {
+		
+		return y = value;
 		
 	}
 	
