@@ -356,7 +356,7 @@ class Graphics {
 			__positionX = 0;
 			__positionY = 0;
 			
-			if (__commands.length == 0) {
+			if (__commands.length == 0 || __bounds.width == 0 || __bounds.height == 0) {
 				
 				__canvas = null;
 				__context = null;
