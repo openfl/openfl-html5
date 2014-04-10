@@ -55,14 +55,14 @@ class Matrix {
 	}
 	
 	
-	public function copy (m:Matrix):Void {
+	public function copyFrom (sourceMatrix:Matrix):Void {
 		
-		a = m.a;
-		b = m.b;
-		c = m.c;
-		d = m.d;
-		tx = m.tx;
-		ty = m.ty;
+		a = sourceMatrix.a;
+		b = sourceMatrix.b;
+		c = sourceMatrix.c;
+		d = sourceMatrix.d;
+		tx = sourceMatrix.tx;
+		ty = sourceMatrix.ty;
 		
 	}
 	
@@ -227,6 +227,18 @@ class Matrix {
 		d = a;
 		
 		//__cleanValues ();
+		
+	}
+	
+	
+	public function setTo (a:Float, b:Float, c:Float, d:Float, tx:Float, ty:Float):Void {
+		
+		this.a = a;
+		this.b = b;
+		this.c = c;
+		this.d = d;
+		this.tx = tx;
+		this.ty = ty;
 		
 	}
 	

@@ -63,6 +63,16 @@ class Rectangle {
 	}
 	
 	
+	public function copyFrom (sourceRect:Rectangle):Void {
+		
+		x = sourceRect.x;
+		y = sourceRect.y;
+		width = sourceRect.width;
+		height = sourceRect.height;
+		
+	}
+	
+	
 	public function equals (toCompare:Rectangle):Bool {
 		
 		return x == toCompare.x && y == toCompare.y && width == toCompare.width && height == toCompare.height;
@@ -218,6 +228,16 @@ class Rectangle {
 	
 	
 	public function __expand (x:Float, y:Float, width:Float, height:Float):Void {
+		
+		if (this.width == 0 && this.height == 0) {
+			
+			this.x = x;
+			this.y = y;
+			this.width = width;
+			this.height = height;
+			return;
+			
+		}
 		
 		var cacheRight = right;
 		var cacheBottom = bottom;
