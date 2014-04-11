@@ -2,6 +2,7 @@ package flash.display;
 
 
 import flash.display.Stage;
+import flash.errors.TypeError;
 import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.filters.BitmapFilter;
@@ -405,28 +406,20 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		
 		if (value == null) {
 			
-			scaleX = 1;
-			scaleY = 1;
-			x = 0;
-			y = 0;
-			rotation = 0;
-			
-			return __transform = null;
-			
-		} else {
-			
-			if (__transform == null) {
-				
-				__transform = new Transform (this);
-				
-			}
-			
-			__transform.matrix = value.matrix.clone ();
-			__transform.colorTransform = new ColorTransform (value.colorTransform.redMultiplier, value.colorTransform.greenMultiplier, value.colorTransform.blueMultiplier, value.colorTransform.alphaMultiplier, value.colorTransform.redOffset, value.colorTransform.greenOffset, value.colorTransform.blueOffset, value.colorTransform.alphaOffset);
-			
-			return __transform;
+			throw new TypeError ("Parameter transform must be non-null.");
 			
 		}
+		
+		if (__transform == null) {
+			
+			__transform = new Transform (this);
+			
+		}
+		
+		__transform.matrix = value.matrix.clone ();
+		__transform.colorTransform = new ColorTransform (value.colorTransform.redMultiplier, value.colorTransform.greenMultiplier, value.colorTransform.blueMultiplier, value.colorTransform.alphaMultiplier, value.colorTransform.redOffset, value.colorTransform.greenOffset, value.colorTransform.blueOffset, value.colorTransform.alphaOffset);
+		
+		return __transform;
 		
 	}
 	

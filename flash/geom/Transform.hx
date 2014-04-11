@@ -14,6 +14,7 @@ class Transform {
 	public var pixelBounds:Rectangle;
 	
 	private var __displayObject:DisplayObject;
+	private var __matrix:Matrix;
 	
 	
 	public function new (displayObject:DisplayObject) {
@@ -24,6 +25,7 @@ class Transform {
 		pixelBounds = new Rectangle ();
 		
 		__displayObject = displayObject;
+		__matrix = new Matrix ();
 		
 	}
 	
@@ -37,13 +39,18 @@ class Transform {
 	
 	private function get_matrix ():Matrix {
 		
-		var matrix = new Matrix ();
+		if (__matrix != null) {
+			
+			__matrix.identity ();
+			__matrix.scale (__displayObject.scaleX, __displayObject.scaleY);
+			__matrix.rotate (__displayObject.rotation * (Math.PI / 180));
+			__matrix.translate (__displayObject.x, __displayObject.y);
+			
+			return __matrix.clone ();
+			
+		}
 		
-		matrix.scale (__displayObject.scaleX, __displayObject.scaleY);
-		matrix.rotate (__displayObject.rotation * (Math.PI / 180));
-		matrix.translate (__displayObject.x, __displayObject.y);
-		
-		return matrix;
+		return null;
 		
 	}
 	
@@ -52,7 +59,7 @@ class Transform {
 		
 		if (value == null) {
 			
-			value = new Matrix ();
+			return __matrix = null;
 			
 		}
 		
