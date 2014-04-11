@@ -170,8 +170,8 @@ class Matrix {
 		   [  tx ty  1 ][  mtx mty 1 ]
 			
 		   ma = md = cos
-		   mb = -sin
-		   mc = sin
+		   mb = sin
+		   mc = -sin
 		   mtx = my = 0
 			
 		 */

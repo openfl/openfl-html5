@@ -5,6 +5,7 @@ import flash.display.Stage;
 import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.filters.BitmapFilter;
+import flash.geom.ColorTransform;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
@@ -48,6 +49,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private var __rotationCache:Float;
 	private var __rotationCosine:Float;
 	private var __rotationSine:Float;
+	private var __transform:Transform;
 	private var __worldAlpha:Float;
 	
 	
@@ -388,14 +390,43 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function get_transform ():Transform {
 		
-		return new Transform (this);
+		if (__transform == null) {
+			
+			__transform = new Transform (this);
+			
+		}
+		
+		return __transform;
 		
 	}
 	
 	
 	private function set_transform (value:Transform):Transform {
 		
-		return value;
+		if (value == null) {
+			
+			scaleX = 1;
+			scaleY = 1;
+			x = 0;
+			y = 0;
+			rotation = 0;
+			
+			return __transform = null;
+			
+		} else {
+			
+			if (__transform == null) {
+				
+				__transform = new Transform (this);
+				
+			}
+			
+			__transform.matrix = value.matrix.clone ();
+			__transform.colorTransform = new ColorTransform (value.colorTransform.redMultiplier, value.colorTransform.greenMultiplier, value.colorTransform.blueMultiplier, value.colorTransform.alphaMultiplier, value.colorTransform.redOffset, value.colorTransform.greenOffset, value.colorTransform.blueOffset, value.colorTransform.alphaOffset);
+			
+			return __transform;
+			
+		}
 		
 	}
 	
