@@ -5,6 +5,8 @@ import flash.display.Stage;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
+import js.html.ImageElement;
+import js.Browser;
 
 
 @:access(flash.display.BitmapData)
@@ -14,6 +16,8 @@ class Bitmap extends DisplayObjectContainer {
 	public var bitmapData:BitmapData;
 	public var pixelSnapping:PixelSnapping;
 	public var smoothing:Bool;
+	
+	private var __imageElement:ImageElement;
 	
 	
 	public function new (bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) {
@@ -108,6 +112,46 @@ class Bitmap extends DisplayObjectContainer {
 			if (__mask != null) {
 				
 				renderSession.maskManager.popMask ();
+				
+			}
+			
+		}
+		
+	}
+	
+	
+	public override function __renderDOM (renderSession:RenderSession):Void {
+		
+		if (!__renderable) return;
+		
+		if (bitmapData != null && bitmapData.__valid) {
+			
+			if (__imageElement == null) {
+				
+				__imageElement = cast Browser.document.createElement ("img");
+				__imageElement.src = bitmapData.__sourceImage.src;
+				__imageElement.style.position = "absolute";
+				
+				Lib.current.stage.__domElement.appendChild (__imageElement);
+				
+			}
+			
+			if (renderSession.vendorPrefix == null) {
+				
+				__imageElement.style.transform = __worldTransform.to3DString (renderSession.z++);
+				
+			} else {
+				
+				__imageElement.style.setProperty ("-" + renderSession.vendorPrefix + "-transform", __worldTransform.to3DString (renderSession.z++), "");
+				
+			}
+			
+		} else {
+			
+			if (__imageElement != null) {
+				
+				Lib.current.stage.__domElement.removeChild (__imageElement);
+				__imageElement = null;
 				
 			}
 			

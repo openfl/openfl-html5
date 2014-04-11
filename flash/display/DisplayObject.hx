@@ -177,6 +177,13 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
+	public function __renderDOM (renderSession:RenderSession):Void {
+		
+		
+		
+	}
+	
+	
 	public function __renderMask (renderSession:RenderSession):Void {
 		
 		

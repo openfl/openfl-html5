@@ -403,6 +403,31 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
+	public override function __renderDOM (renderSession:RenderSession):Void {
+		
+		if (!__renderable) return;
+		
+		//if (__mask != null) {
+			
+			//renderSession.maskManager.pushMask (__mask);
+			
+		//}
+		
+		for (child in __children) {
+			
+			child.__renderDOM (renderSession);
+			
+		}
+		
+		//if (__mask != null) {
+			
+			//renderSession.maskManager.popMask ();
+			
+		//}
+		
+	}
+	
+	
 	public override function __renderMask (renderSession:RenderSession):Void {
 		
 		var bounds = new Rectangle ();

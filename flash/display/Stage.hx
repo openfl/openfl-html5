@@ -12,6 +12,7 @@ import flash.ui.Keyboard;
 import flash.ui.KeyLocation;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
+import js.html.DivElement;
 import js.html.HtmlElement;
 import js.Browser;
 
@@ -36,6 +37,7 @@ class Stage extends Sprite {
 	private var __colorString:String;
 	private var __context:CanvasRenderingContext2D;
 	private var __cursor:String;
+	public var __domElement:DivElement;
 	private var __element:HtmlElement;
 	private var __eventQueue:Array<js.html.Event>;
 	private var __fullscreen:Bool;
@@ -56,8 +58,13 @@ class Stage extends Sprite {
 		
 		super ();
 		
+		this.__element = element;
+		this.color = color;
+		
 		__mouseX = 0;
 		__mouseY = 0;
+		
+		#if !dom
 		
 		__canvas = cast Browser.document.createElement ("canvas");
 		__canvas.setAttribute ("moz-opaque", "true");
@@ -71,6 +78,18 @@ class Stage extends Sprite {
 		__canvas.style.position = "absolute";
 		__canvas.style.top = "0px";
 		__canvas.style.left = "0px";
+		
+		#else
+		
+		__domElement = cast Browser.document.createElement ("div");
+		__domElement.style.backgroundColor = __colorString;
+		
+		__domElement.style.transform = "translatez(0)";
+		__domElement.style.position = "absolute";
+		__domElement.style.top = "0px";
+		__domElement.style.left = "0px";
+		
+		#end
 		
 		__originalWidth = width;
 		__originalHeight = height;
@@ -95,22 +114,41 @@ class Stage extends Sprite {
 		
 		stageWidth = width;
 		stageHeight = height;
+		
+		#if !dom
+		
 		__canvas.width = width;
 		__canvas.height = height;
 		
-		this.__element = element;
-		this.color = color;
+		#else
+		
+		__domElement.style.width = width + "px";
+		__domElement.style.height = height + "px";
+		
+		#end
 		
 		__resize ();
 		Browser.window.addEventListener ("resize", window_onResize);
 		Browser.window.addEventListener ("focus", window_onFocus);
 		Browser.window.addEventListener ("blur", window_onBlur);
 		
+		#if !dom
+		
 		if (element != null) {
 			
 			element.appendChild (__canvas);
 			
 		}
+		
+		#else
+		
+		if (element != null) {
+			
+			element.appendChild (__domElement);
+			
+		}
+		
+		#end
 		
 		this.stage = this;
 		this.parent = this;
@@ -123,6 +161,26 @@ class Stage extends Sprite {
 		__renderSession = new RenderSession ();
 		__renderSession.context = __context;
 		__renderSession.roundPixels = true;
+		
+		#if dom
+		__renderSession.z = 1;
+		var prefix = untyped __js__ ("(function () {
+		  var styles = window.getComputedStyle(document.documentElement, ''),
+		    pre = (Array.prototype.slice
+		      .call(styles)
+		      .join('') 
+		      .match(/-(moz|webkit|ms)-/) || (styles.OLink === '' && ['', 'o'])
+		    )[1],
+		    dom = ('WebKit|Moz|MS|O').match(new RegExp('(' + pre + ')', 'i'))[1];
+		  return {
+		    dom: dom,
+		    lowercase: pre,
+		    css: '-' + pre + '-',
+		    js: pre[0].toUpperCase() + pre.substr(1)
+		  };
+		})")();
+		__renderSession.vendorPrefix = (prefix.lowercase == "webkit") ? "webkit" : null;
+		#end
 		
 		#if stats
 		__stats = untyped __js__("new Stats ()");
@@ -140,11 +198,15 @@ class Stage extends Sprite {
 			
 		}
 		
+		#if !dom
+		
 		for (event in canvasEvents) {
 			
 			__canvas.addEventListener (event, __queueEvent, true);
 			
 		}
+		
+		#end
 		
 		Browser.window.requestAnimationFrame (cast __render);
 		
@@ -247,8 +309,14 @@ class Stage extends Sprite {
 			switch (event.type) {
 				
 				case "keydown", "keyup": window_onKey (cast event);
+				
+				#if !dom
+				
 				case "touchstart", "touchend", "touchmove": canvas_onTouch (cast event);
 				case "mousedown", "mouseup", "mousemove", "click", "dblclick": canvas_onMouse (cast event);
+				
+				#end
+				
 				default:
 				
 			}
@@ -261,6 +329,8 @@ class Stage extends Sprite {
 		
 		__renderable = true;
 		__update ();
+		
+		#if !dom
 		
 		if (stageWidth != __canvas.width || stageHeight != __canvas.height) {
 			
@@ -284,6 +354,12 @@ class Stage extends Sprite {
 		}
 		
 		__renderCanvas (__renderSession);
+		
+		#else
+		
+		__renderDOM (__renderSession);
+		
+		#end
 		
 		/*// run interaction!
 		if(stage.interactive) {
@@ -322,8 +398,18 @@ class Stage extends Sprite {
 				
 				stageWidth = __element.clientWidth;
 				stageHeight = __element.clientHeight;
+				
+				#if !dom
+				
 				__canvas.width = stageWidth;
 				__canvas.height = stageHeight;
+				
+				#else
+				
+				__domElement.style.width = stageWidth + "px";
+				__domElement.style.height = stageHeight + "px";
+				
+				#end
 				
 			} else {
 				
@@ -333,10 +419,21 @@ class Stage extends Sprite {
 				var currentRatio = scaleX / scaleY;
 				var targetRatio = Math.min (scaleX, scaleY);
 				
+				#if !dom
+				
 				__canvas.style.width = __originalWidth * targetRatio + "px";
 				__canvas.style.height = __originalHeight * targetRatio + "px";
 				__canvas.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
 				__canvas.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
+				
+				#else
+				
+				__domElement.style.width = __originalWidth * targetRatio + "px";
+				__domElement.style.height = __originalHeight * targetRatio + "px";
+				__domElement.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
+				__domElement.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
+				
+				#end
 				
 			}
 			
@@ -349,7 +446,13 @@ class Stage extends Sprite {
 		
 		if (__cursor != cursor) {
 			
-			__canvas.style.cursor = __cursor = cursor;
+			__cursor = cursor;
+			
+			#if !dom
+			
+			__canvas.style.cursor = cursor;
+			
+			#end
 			
 		}
 		
@@ -405,6 +508,8 @@ class Stage extends Sprite {
 	
 	
 	
+	
+	#if !dom
 	
 	private function canvas_onTouch (event:js.html.TouchEvent):Void {
 		
@@ -643,6 +748,8 @@ class Stage extends Sprite {
 		
 	}
 	
+	#end
+	
 	
 	private function window_onKey (event:js.html.KeyboardEvent):Void {
 		
@@ -715,6 +822,8 @@ class RenderSession {
 	public var maskManager:MaskManager;
 	//public var scaleMode:ScaleMode;
 	public var roundPixels:Bool;
+	public var vendorPrefix:String;
+	public var z:Int;
 	//public var smoothProperty:Null<Bool> = null;
 	
 	

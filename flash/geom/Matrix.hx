@@ -243,7 +243,7 @@ class Matrix {
 	}
 	
 	
-	public inline function to3DString ():String {
+	public inline function to3DString (tz:Float = 1):String {
 		
 		// identityMatrix
 		//  [a,b,tx,0],
@@ -253,7 +253,7 @@ class Matrix {
 		//
 		// matrix3d(a,       b, 0, 0, c, d,       0, 0, 0, 0, 1, 0, tx,     ty, 0, 1)
 		
-		return "matrix3d(" + a + ", " + b + ", " + "0, 0, " + c + ", " + d + ", " + "0, 0, 0, 0, 1, 0, " + tx + ", " + ty + ", " + "0, 1" + ")";
+		return "matrix3d(" + a + ", " + b + ", " + "0, 0, " + c + ", " + d + ", " + "0, 0, 0, 0, 1, 0, " + tx + ", " + ty + ", " + tz + ", 1)";
 		
 	}
 	
