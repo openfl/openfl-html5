@@ -41,6 +41,7 @@ class Stage extends Sprite {
 	private var __element:HtmlElement;
 	private var __eventQueue:Array<js.html.Event>;
 	private var __fullscreen:Bool;
+	private var __invalidated:Bool;
 	private var __mouseX:Float = 0;
 	private var __mouseY:Float = 0;
 	private var __originalWidth:Int;
@@ -220,6 +221,13 @@ class Stage extends Sprite {
 	}
 	
 	
+	public function invalidate ():Void {
+		
+		__invalidated = true;
+		
+	}
+	
+	
 	public override function localToGlobal (pos:Point):Point {
 		
 		return pos;
@@ -326,6 +334,13 @@ class Stage extends Sprite {
 		untyped __eventQueue.length = 0;
 		
 		__broadcast (new Event (Event.ENTER_FRAME));
+		
+		if (__invalidated) {
+			
+			__invalidated = false;
+			__broadcast (new Event (Event.RENDER));
+			
+		}
 		
 		__renderable = true;
 		__update ();

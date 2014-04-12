@@ -72,126 +72,44 @@ class Loader extends Sprite {
 			
 		}
 		
-		var onload = function (bitmapData:BitmapData):Void {
-			
-			contentLoaderInfo.content = new Bitmap (bitmapData);
-			addChild (contentLoaderInfo.content);
-			
-			var event = new Event (Event.COMPLETE);
-			event.target = contentLoaderInfo;
-			event.currentTarget = contentLoaderInfo;
-			contentLoaderInfo.dispatchEvent (event);
-			
-		}
-		
-		var bitmapData = BitmapData.fromFile (request.url, onload);
-		
-		/*try {
-			
-			contentLoaderInfo.addEventListener (Event.COMPLETE, handleLoad, false, 2147483647);
-			
-			// TODO: Handle content load
-			
-			//mImage.__loadFromFile (request.url, contentLoaderInfo);
-			//content = new Bitmap (mImage);
-			//Reflect.setField (contentLoaderInfo, "content", this.content);
-			//addChild (content);
-			
-		} catch (e:Dynamic) {
-			
-			trace ("Error " + e);
-			var evt = new IOErrorEvent (IOErrorEvent.IO_ERROR);
-			evt.currentTarget = this;
-			contentLoaderInfo.dispatchEvent (evt);
-			return;
-			
-		}
-		
-		if (mShape == null) {
-			
-			mShape = new Shape ();
-			addChild (mShape);
-			
-		}*/
+		BitmapData.fromFile (request.url, BitmapData_onLoad);
 		
 	}
 	
 	
 	public function loadBytes (buffer:ByteArray):Void {
 		
-		try {
-			
-			contentLoaderInfo.addEventListener (Event.COMPLETE, handleLoad, false, 2147483647);
-			
-			// TODO: Load from Bytes
-			
-			/*BitmapData.loadFromBytes (buffer, null, function(bmd:BitmapData):Void {
-				
-				content = new Bitmap (bmd);
-				Reflect.setField (contentLoaderInfo, "content", this.content);
-				addChild (content);
-				var evt = new Event (Event.COMPLETE);
-				evt.currentTarget = this;
-				contentLoaderInfo.dispatchEvent (evt);
-				
-			});*/
-			
-		} catch (e:Dynamic) {
-			
-			trace ("Error " + e);
-			var evt = new IOErrorEvent (IOErrorEvent.IO_ERROR);
-			evt.currentTarget = this;
-			contentLoaderInfo.dispatchEvent (evt);
-			
-		}
+		BitmapData.fromBytes (buffer, BitmapData_onLoad);
 		
 	}
 	
 	
-	/*override public function toString ():String {
+	public function unload ():Void {
 		
-		// TODO: Loader.toString
-		
-		return "Loader";
-		
-		//return "[Loader name=" + this.name + " id=" + ___id + "]";
-		
-	}*/
-	
-	
-	/*override function validateBounds ():Void {
-		
-		if (_boundsInvalid) {
+		if (numChildren > 0) {
 			
-			super.validateBounds ();
-			
-			if (mImage != null) {
+			while (numChildren > 0) {
 				
-				var r = new Rectangle (0, 0, mImage.width, mImage.height);
-				
-				if (r.width != 0 || r.height != 0) {
-					
-					if (__boundsRect.width == 0 && __boundsRect.height == 0) {
-						
-						__boundsRect = r.clone ();
-						
-					} else {
-						
-						__boundsRect.extendBounds (r);
-						
-					}
-					
-				}
+				removeChildAt (0);
 				
 			}
 			
-			__setDimensions ();
+			content = null;
+			contentLoaderInfo.url = null;
+			contentLoaderInfo.contentType = null;
+			contentLoaderInfo.content = null;
+			contentLoaderInfo.bytesLoaded = 0;
+			contentLoaderInfo.bytesTotal = 0;
+			contentLoaderInfo.width = 0;
+			contentLoaderInfo.height = 0;
+			
+			var event = new Event (Event.UNLOAD);
+			event.currentTarget = this;
+			dispatchEvent (event);
 			
 		}
 		
-		// TODO: validateBounds?
-		
-	}*/
+	}
 	
 	
 	
@@ -201,15 +119,15 @@ class Loader extends Sprite {
 	
 	
 	
-	private function handleLoad (e:Event):Void {
+	private function BitmapData_onLoad (bitmapData:BitmapData):Void {
 		
-		e.currentTarget = this;
+		contentLoaderInfo.content = new Bitmap (bitmapData);
+		addChild (contentLoaderInfo.content);
 		
-		// TODO: Handle load
-		
-		//content.__invalidateBounds ();
-		//content.__render (null, null);
-		contentLoaderInfo.removeEventListener (Event.COMPLETE, handleLoad);
+		var event = new Event (Event.COMPLETE);
+		event.target = contentLoaderInfo;
+		event.currentTarget = contentLoaderInfo;
+		contentLoaderInfo.dispatchEvent (event);
 		
 	}
 	

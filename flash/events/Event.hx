@@ -1,6 +1,9 @@
 package flash.events;
 
 
+import flash.display.InteractiveObject;
+
+
 class Event {
 	
 	
@@ -72,6 +75,12 @@ class Event {
 		
 	}
 	
+	
+	public function toString ():String {
+		
+		return "[Event type=" + type + " bubbles=" + bubbles + " cancelable=" + cancelable + "]";
+		
+	}
 	
 	
 }
