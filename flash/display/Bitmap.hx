@@ -99,6 +99,14 @@ class Bitmap extends DisplayObjectContainer {
 				
 			}
 			
+			if (!smoothing) {
+				
+				untyped (context).mozImageSmoothingEnabled = false;
+				untyped (context).webkitImageSmoothingEnabled = false;
+				context.imageSmoothingEnabled = false;
+				
+			}
+			
 			if (bitmapData.__sourceImage != null) {
 				
 				context.drawImage (bitmapData.__sourceImage, 0, 0);
@@ -106,6 +114,14 @@ class Bitmap extends DisplayObjectContainer {
 			} else {
 				
 				context.drawImage (bitmapData.__sourceCanvas, 0, 0);
+				
+			}
+			
+			if (!smoothing) {
+				
+				untyped (context).mozImageSmoothingEnabled = true;
+				untyped (context).webkitImageSmoothingEnabled = true;
+				context.imageSmoothingEnabled = true;
 				
 			}
 			

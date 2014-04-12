@@ -868,9 +868,9 @@ class BitmapData implements IBitmapDrawable {
 			
 		}
 		
-		//untyped (__sourceContext).mozImageSmoothingEnabled = false;
-		//untyped (__sourceContext).webkitImageSmoothingEnabled = false;
-		//__sourceContext.imageSmoothingEnabled = false;
+		untyped (__sourceContext).mozImageSmoothingEnabled = false;
+		untyped (__sourceContext).webkitImageSmoothingEnabled = false;
+		__sourceContext.imageSmoothingEnabled = false;
 		__valid = true;
 		
 	}
