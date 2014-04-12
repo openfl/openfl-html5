@@ -756,7 +756,19 @@ class Stage extends Sprite {
 		var keyCode = (event.keyCode != null ? event.keyCode : event.which);
 		keyCode = Keyboard.__convertMozillaCode (keyCode);
 		
-		dispatchEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, event.keyLocation != null ? cast (event.keyLocation, KeyLocation) : KeyLocation.STANDARD, event.ctrlKey, event.altKey, event.shiftKey));
+		var keyLocation = KeyLocation.STANDARD;
+		
+		if (untyped (event).location != null) {
+			
+			keyLocation = cast (untyped (event).location, KeyLocation);
+			
+		} else if (event.keyLocation != null) {
+			
+			keyLocation = cast (event.keyLocation, KeyLocation);
+			
+		}
+		
+		dispatchEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, keyLocation, event.ctrlKey, event.altKey, event.shiftKey));
 		
 	}
 	
