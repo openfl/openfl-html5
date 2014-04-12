@@ -334,17 +334,17 @@ class BitmapData implements IBitmapDrawable {
 		var data = __sourceImageData.data;
 		
 		var offset = ((y * (width * 4)) + (x * 4));
-		var hitColorR = data[offset + 0] << 24;
-		var hitColorG = data[offset + 1] << 16;
-		var hitColorB = data[offset + 2] << 8;
+		var hitColorR = data[offset + 0];
+		var hitColorG = data[offset + 1];
+		var hitColorB = data[offset + 2];
 		var hitColorA = transparent ? data[offset + 3] : 0xFF;
-
+		
 		var r = (color & 0xFF0000) >>> 16;
 		var g = (color & 0x00FF00) >>> 8;
 		var b = (color & 0x0000FF);
 		var a = transparent ? (color & 0xFF000000) >>> 24 : 0xFF;
 
-		if( hitColorR == r && hitColorG == g && hitColorB == b && hitColorA == a ) return;
+		if (hitColorR == r && hitColorG == g && hitColorB == b && hitColorA == a) return;
 		
 		var dx = [ 0, -1, 1, 0 ];
 		var dy = [ -1, 0, 0, 1 ];
