@@ -13,6 +13,7 @@ import flash.ui.KeyLocation;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
 import js.html.DivElement;
+import js.html.Element;
 import js.html.HtmlElement;
 import js.Browser;
 
@@ -38,7 +39,7 @@ class Stage extends Sprite {
 	private var __colorString:String;
 	private var __context:CanvasRenderingContext2D;
 	private var __cursor:String;
-	public var __domElement:DivElement;
+	private var __div:DivElement;
 	private var __element:HtmlElement;
 	private var __eventQueue:Array<js.html.Event>;
 	private var __fullscreen:Bool;
@@ -76,20 +77,20 @@ class Stage extends Sprite {
 		//untyped (__context).webkitImageSmoothingEnabled = false;
 		//__context.imageSmoothingEnabled = false;
 		
-		__canvas.style.transform = "translatez(0)";
-		__canvas.style.position = "absolute";
-		__canvas.style.top = "0px";
-		__canvas.style.left = "0px";
+		var style = __canvas.style;
+		style.setProperty ("position", "absolute", null);
+		style.setProperty ("-webkit-transform", "translate(0,0,0)", null);
+		style.setProperty ("transform", "translate(0,0,0)", null);
 		
 		#else
 		
-		__domElement = cast Browser.document.createElement ("div");
-		__domElement.style.backgroundColor = __colorString;
+		__div = cast Browser.document.createElement ("div");
 		
-		__domElement.style.transform = "translatez(0)";
-		__domElement.style.position = "absolute";
-		__domElement.style.top = "0px";
-		__domElement.style.left = "0px";
+		var style = __div.style;
+		style.setProperty ("background-color", __colorString, null);
+		style.setProperty ("-webkit-transform", "translate(0,0,0)", null);
+		style.setProperty ("transform", "translate(0,0,0)", null);
+		style.setProperty ("overflow", "hidden", null);
 		
 		#end
 		
@@ -117,40 +118,36 @@ class Stage extends Sprite {
 		stageWidth = width;
 		stageHeight = height;
 		
-		#if !dom
-		
-		__canvas.width = width;
-		__canvas.height = height;
-		
-		#else
-		
-		__domElement.style.width = width + "px";
-		__domElement.style.height = height + "px";
-		
-		#end
+		if (__canvas != null) {
+			
+			__canvas.width = width;
+			__canvas.height = height;
+			
+		} else {
+			
+			__div.style.setProperty ("width", width + "px", null);
+			__div.style.setProperty ("height", height + "px", null);
+			
+		}
 		
 		__resize ();
 		Browser.window.addEventListener ("resize", window_onResize);
 		Browser.window.addEventListener ("focus", window_onFocus);
 		Browser.window.addEventListener ("blur", window_onBlur);
 		
-		#if !dom
-		
 		if (element != null) {
 			
-			element.appendChild (__canvas);
+			if (__canvas != null) {
+				
+				element.appendChild (__canvas);
+				
+			} else {
+				
+				element.appendChild (__div);
+				
+			}
 			
 		}
-		
-		#else
-		
-		if (element != null) {
-			
-			element.appendChild (__domElement);
-			
-		}
-		
-		#end
 		
 		this.stage = this;
 		this.parent = this;
@@ -164,25 +161,29 @@ class Stage extends Sprite {
 		__renderSession.context = __context;
 		__renderSession.roundPixels = true;
 		
-		#if dom
-		__renderSession.z = 1;
-		var prefix = untyped __js__ ("(function () {
-		  var styles = window.getComputedStyle(document.documentElement, ''),
-		    pre = (Array.prototype.slice
-		      .call(styles)
-		      .join('') 
-		      .match(/-(moz|webkit|ms)-/) || (styles.OLink === '' && ['', 'o'])
-		    )[1],
-		    dom = ('WebKit|Moz|MS|O').match(new RegExp('(' + pre + ')', 'i'))[1];
-		  return {
-		    dom: dom,
-		    lowercase: pre,
-		    css: '-' + pre + '-',
-		    js: pre[0].toUpperCase() + pre.substr(1)
-		  };
-		})")();
-		__renderSession.vendorPrefix = (prefix.lowercase == "webkit") ? "webkit" : null;
-		#end
+		if (__div != null) {
+			
+			__renderSession.element = __div;
+			var prefix = untyped __js__ ("(function () {
+			  var styles = window.getComputedStyle(document.documentElement, ''),
+			    pre = (Array.prototype.slice
+			      .call(styles)
+			      .join('') 
+			      .match(/-(moz|webkit|ms)-/) || (styles.OLink === '' && ['', 'o'])
+			    )[1],
+			    dom = ('WebKit|Moz|MS|O').match(new RegExp('(' + pre + ')', 'i'))[1];
+			  return {
+			    dom: dom,
+			    lowercase: pre,
+			    css: '-' + pre + '-',
+			    js: pre[0].toUpperCase() + pre.substr(1)
+			  };
+			})")();
+			__renderSession.vendorPrefix = prefix.lowercase;
+			__renderSession.transformProperty = (prefix.lowercase == "webkit") ? "-webkit-transform" : "transform";
+			__renderSession.transformOriginProperty = (prefix.lowercase == "webkit") ? "-webkit-transform-origin" : "transform-origin";
+			
+		}
 		
 		#if stats
 		__stats = untyped __js__("new Stats ()");
@@ -200,15 +201,15 @@ class Stage extends Sprite {
 			
 		}
 		
-		#if !dom
-		
-		for (event in canvasEvents) {
+		if (__canvas != null) {
 			
-			__canvas.addEventListener (event, __queueEvent, true);
+			for (event in canvasEvents) {
+				
+				__canvas.addEventListener (event, __queueEvent, true);
+				
+			}
 			
 		}
-		
-		#end
 		
 		Browser.window.requestAnimationFrame (cast __render);
 		
@@ -346,36 +347,37 @@ class Stage extends Sprite {
 		__renderable = true;
 		__update ();
 		
-		#if !dom
-		
-		if (stageWidth != __canvas.width || stageHeight != __canvas.height) {
+		if (__canvas != null) {
 			
-			__canvas.width = stageWidth;
-			__canvas.height = stageHeight;
+			if (stageWidth != __canvas.width || stageHeight != __canvas.height) {
+				
+				__canvas.width = stageWidth;
+				__canvas.height = stageHeight;
+				
+			}
+			
+			__context.setTransform (1, 0, 0, 1, 0, 0);
+			__context.globalAlpha = 1;
+			
+			if (!__transparent && __clearBeforeRender) {
+				
+				__context.fillStyle = __colorString;
+				__context.fillRect (0, 0, stageWidth, stageHeight);
+				
+			} else if (__transparent && __clearBeforeRender) {
+				
+				__context.clearRect (0, 0, stageWidth, stageHeight);
+				
+			}
+			
+			__renderCanvas (__renderSession);
+			
+		} else {
+			
+			__renderSession.z = 1;
+			__renderDOM (__renderSession);
 			
 		}
-		
-		__context.setTransform (1, 0, 0, 1, 0, 0);
-		__context.globalAlpha = 1;
-		
-		if (!__transparent && __clearBeforeRender) {
-			
-			__context.fillStyle = __colorString;
-			__context.fillRect (0, 0, stageWidth, stageHeight);
-			
-		} else if (__transparent && __clearBeforeRender) {
-			
-			__context.clearRect (0, 0, stageWidth, stageHeight);
-			
-		}
-		
-		__renderCanvas (__renderSession);
-		
-		#else
-		
-		__renderDOM (__renderSession);
-		
-		#end
 		
 		/*// run interaction!
 		if(stage.interactive) {
@@ -415,17 +417,17 @@ class Stage extends Sprite {
 				stageWidth = __element.clientWidth;
 				stageHeight = __element.clientHeight;
 				
-				#if !dom
-				
-				__canvas.width = stageWidth;
-				__canvas.height = stageHeight;
-				
-				#else
-				
-				__domElement.style.width = stageWidth + "px";
-				__domElement.style.height = stageHeight + "px";
-				
-				#end
+				if (__canvas != null) {
+					
+					__canvas.width = stageWidth;
+					__canvas.height = stageHeight;
+					
+				} else {
+					
+					__div.style.width = stageWidth + "px";
+					__div.style.height = stageHeight + "px";
+					
+				}
 				
 			} else {
 				
@@ -435,21 +437,21 @@ class Stage extends Sprite {
 				var currentRatio = scaleX / scaleY;
 				var targetRatio = Math.min (scaleX, scaleY);
 				
-				#if !dom
-				
-				__canvas.style.width = __originalWidth * targetRatio + "px";
-				__canvas.style.height = __originalHeight * targetRatio + "px";
-				__canvas.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
-				__canvas.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
-				
-				#else
-				
-				__domElement.style.width = __originalWidth * targetRatio + "px";
-				__domElement.style.height = __originalHeight * targetRatio + "px";
-				__domElement.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
-				__domElement.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
-				
-				#end
+				if (__canvas != null) {
+					
+					__canvas.style.width = __originalWidth * targetRatio + "px";
+					__canvas.style.height = __originalHeight * targetRatio + "px";
+					__canvas.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
+					__canvas.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
+					
+				} else {
+					
+					__div.style.width = __originalWidth * targetRatio + "px";
+					__div.style.height = __originalHeight * targetRatio + "px";
+					__div.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
+					__div.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
+					
+				}
 				
 			}
 			
@@ -846,10 +848,13 @@ class RenderSession {
 	
 	
 	public var context:CanvasRenderingContext2D;
+	public var element:Element;
 	//public var mask:Bool;
 	public var maskManager:MaskManager;
 	//public var scaleMode:ScaleMode;
 	public var roundPixels:Bool;
+	public var transformProperty:String;
+	public var transformOriginProperty:String;
 	public var vendorPrefix:String;
 	public var z:Int;
 	//public var smoothProperty:Null<Bool> = null;

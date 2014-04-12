@@ -107,6 +107,13 @@ class Matrix {
 	}
 	
 	
+	public function equals (matrix):Bool {
+		
+		return (matrix != null && tx == matrix.tx && ty == matrix.ty && a == matrix.a && b == matrix.b && c == matrix.c && d == matrix.d);
+		
+	}
+	
+	
 	public function identity ():Void {
 		
 		a = 1;
