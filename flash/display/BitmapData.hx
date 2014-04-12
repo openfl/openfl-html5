@@ -343,7 +343,7 @@ class BitmapData implements IBitmapDrawable {
 		var g = (color & 0x00FF00) >>> 8;
 		var b = (color & 0x0000FF);
 		var a = transparent ? (color & 0xFF000000) >>> 24 : 0xFF;
-
+		
 		if (hitColorR == r && hitColorG == g && hitColorB == b && hitColorA == a) return;
 		
 		var dx = [ 0, -1, 1, 0 ];
