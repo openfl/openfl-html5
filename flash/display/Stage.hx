@@ -27,6 +27,7 @@ class Stage extends Sprite {
 	public var focus:InteractiveObject;
 	public var frameRate:Float;
 	public var quality:StageQuality;
+	public var stageFocusRect:Bool;
 	public var scaleMode:StageScaleMode;
 	public var stageHeight (default, null):Int;
 	public var stageWidth (default, null):Int;

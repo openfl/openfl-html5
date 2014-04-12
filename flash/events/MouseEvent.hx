@@ -118,21 +118,6 @@ class MouseEvent extends Event {
 	}
 	
 	
-	public function __createSimilar (type:String, related:InteractiveObject = null, targ:InteractiveObject = null):Event {
-		
-		var result = new MouseEvent (type, bubbles, cancelable, localX, localY, related == null ? relatedObject : related, ctrlKey, altKey, shiftKey, buttonDown, delta, commandKey, clickCount);
-		
-		if (targ != null) {
-			
-			result.target = targ;
-			
-		}
-		
-		return cast result;
-		
-	}
-	
-	
 	public function updateAfterEvent ():Void {
 		
 		

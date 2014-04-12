@@ -54,7 +54,7 @@ class TextField extends InteractiveObject {
 	public var textHeight (get, null):Float;
 	public var textWidth (get, null):Float;
 	@:isVar public var type (default, set):TextFieldType;
-	@:isVar public var wordWrap (default, set):Bool;
+	@:isVar public var wordWrap (get, set):Bool;
 	
 	private var __canvas:CanvasElement;
 	private var __context:CanvasRenderingContext2D;
@@ -145,7 +145,7 @@ class TextField extends InteractiveObject {
 	}
 	
 	
-	public function setTextFormat (format:TextFormat, beginIndex:Int = 0, endIndex:Int = 0) {
+	public function setTextFormat (format:TextFormat, beginIndex:Int = 0, endIndex:Int = 0):Void {
 		
 		if (format.font != null) __textFormat.font = format.font;
 		if (format.size != null) __textFormat.size = format.size;
@@ -167,8 +167,6 @@ class TextField extends InteractiveObject {
 		if (format.tabStops != null) __textFormat.tabStops = format.tabStops;
 		
 		__dirty = true;
-		
-		return format;
 		
 	}
 	
@@ -753,6 +751,13 @@ class TextField extends InteractiveObject {
 		if (scaleX != 1 || __width != value) __dirty = true;
 		scaleX = 1;
 		return __width = value;
+		
+	}
+	
+	
+	public function get_wordWrap ():Bool {
+		
+		return wordWrap;
 		
 	}
 	

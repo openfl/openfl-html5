@@ -24,7 +24,7 @@ class EventDispatcher implements IEventDispatcher {
 	}
 	
 	
-	public function addEventListener <T:Event>(type:String, listener:T->Void, useCapture:Bool = false, priority:Int = 0, useWeakReference:Bool = false):Void {
+	public function addEventListener (type:String, listener:Dynamic->Void, useCapture:Bool = false, priority:Int = 0, useWeakReference:Bool = false):Void {
 		
 		if (__eventMap == null) {
 			
@@ -114,7 +114,7 @@ class EventDispatcher implements IEventDispatcher {
 	}
 	
 	
-	public function removeEventListener <T:Event>(type:String, listener:T->Void, capture:Bool = false):Void {
+	public function removeEventListener (type:String, listener:Dynamic->Void, capture:Bool = false):Void {
 		
 		if (__eventMap == null) return;
 		
@@ -180,7 +180,7 @@ private class Listener {
 	public var useCapture:Bool;
 	
 	
-	public function new <T:Event>(callback:T->Void, useCapture:Bool, priority:Int) {
+	public function new (callback:Dynamic->Void, useCapture:Bool, priority:Int) {
 		
 		this.callback = callback;
 		this.useCapture = useCapture;
@@ -189,7 +189,7 @@ private class Listener {
 	}
 	
 	
-	public function match <T:Event>(callback:T->Void, useCapture:Bool) {
+	public function match (callback:Dynamic->Void, useCapture:Bool) {
 		
 		return (this.callback == callback && this.useCapture == useCapture);
 		
