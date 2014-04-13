@@ -12,6 +12,7 @@ import flash.text.TextFormatAlign;
 import haxe.xml.Fast;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
+import js.html.DivElement;
 import js.Browser;
 
 
@@ -59,6 +60,7 @@ class TextField extends InteractiveObject {
 	private var __canvas:CanvasElement;
 	private var __context:CanvasRenderingContext2D;
 	private var __dirty:Bool;
+	private var __div:DivElement;
 	//private var __graphics:Graphics;
 	private var __height:Float;
 	private var __isHTML:Bool;
@@ -405,6 +407,45 @@ class TextField extends InteractiveObject {
 			
 			//context.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
 			context.drawImage (__canvas, 0, 0);
+			
+		}
+		
+	}
+	
+	
+	public override function __renderDOM (renderSession:RenderSession):Void {
+		
+		if (!__renderable) return;
+		
+		if (__dirty) {
+			
+			if (__text != "") {
+				
+				if (__div == null) {
+					
+					__div = cast Browser.document.createElement ("div");
+					__div.style.position = "absolute";
+					__div.style.top = "0px";
+					__div.style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+					renderSession.element.appendChild (__div);
+					
+				}
+				
+				__div.innerHTML = __text;
+				
+				__div.style.setProperty ("opacity", Std.string (__worldAlpha), null);
+				__div.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+				
+			} else {
+				
+				if (__div != null) {
+					
+					renderSession.element.removeChild (__div);
+					__div = null;
+					
+				}
+				
+			}
 			
 		}
 		

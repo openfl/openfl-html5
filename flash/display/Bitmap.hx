@@ -19,9 +19,9 @@ class Bitmap extends DisplayObjectContainer {
 	public var pixelSnapping:PixelSnapping;
 	public var smoothing:Bool;
 	
+	private var __canvas:CanvasElement;
 	private var __canvasContext:CanvasRenderingContext2D;
-	private var __canvasElement:CanvasElement;
-	private var __imageElement:ImageElement;
+	private var __image:ImageElement;
 	
 	
 	public function new (bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) {
@@ -148,102 +148,115 @@ class Bitmap extends DisplayObjectContainer {
 			
 			if (bitmapData.__sourceImage != null) {
 				
-				if (__imageElement == null) {
-					
-					__imageElement = cast Browser.document.createElement ("img");
-					__imageElement.src = bitmapData.__sourceImage.src;
-					__imageElement.style.position = "absolute";
-					__imageElement.style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
-					renderSession.element.appendChild (__imageElement);
-					
-				}
-				
-				if (__worldAlpha != __cacheWorldAlpha) {
-					
-					__imageElement.style.setProperty ("opacity", Std.string (__worldAlpha), null);
-					__cacheWorldAlpha = __worldAlpha;
-					
-				}
-				
-				if (!__worldTransform.equals (__cacheWorldTransform)) {
-					
-					__imageElement.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
-					__cacheWorldTransform = __worldTransform.clone ();
-					
-				}
+				__renderDOMImage (renderSession);
 				
 			} else {
 				
-				if (__imageElement != null) {
-					
-					renderSession.element.removeChild (__imageElement);
-					__imageElement = null;
-					
-				}
-				
-				if (__canvasElement == null) {
-					
-					__canvasElement = cast Browser.document.createElement ("canvas");	
-					__canvasContext = __canvasElement.getContext ("2d");
-					
-					if (!smoothing) {
-						
-						untyped (__canvasContext).mozImageSmoothingEnabled = false;
-						untyped (__canvasContext).webkitImageSmoothingEnabled = false;
-						__canvasContext.imageSmoothingEnabled = false;
-						
-					}
-					
-					__canvasElement.style.position = "absolute";
-					renderSession.element.appendChild (__canvasElement);
-					
-				}
-				
-				bitmapData.__syncImageData ();
-				
-				__canvasElement.width = bitmapData.width;
-				__canvasElement.height = bitmapData.height;
-				
-				__canvasContext.globalAlpha = __worldAlpha;
-				var transform = __worldTransform;
-				
-				if (renderSession.roundPixels) {
-					
-					__canvasContext.setTransform (transform.a, transform.b, transform.c, transform.d, Std.int (transform.tx), Std.int (transform.ty));
-					
-				} else {
-					
-					__canvasContext.setTransform (transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty);
-					
-				}
-				
-				if (bitmapData.__sourceImage != null) {
-					
-					__canvasContext.drawImage (bitmapData.__sourceImage, 0, 0);
-					
-				} else {
-					
-					__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
-					
-				}
+				__renderDOMCanvas (renderSession);
 				
 			}
 			
 		} else {
 			
-			if (__imageElement != null) {
+			if (__image != null) {
 				
-				renderSession.element.removeChild (__imageElement);
-				__imageElement = null;
+				renderSession.element.removeChild (__image);
+				__image = null;
 				
 			}
 			
-			if (__canvasElement != null) {
+			if (__canvas != null) {
 				
-				renderSession.element.removeChild (__canvasElement);
-				__canvasElement = null;
+				renderSession.element.removeChild (__canvas);
+				__canvas = null;
 				
 			}
+			
+		}
+		
+	}
+	
+	
+	private function __renderDOMCanvas (renderSession:RenderSession):Void {
+		
+		if (__image != null) {
+			
+			renderSession.element.removeChild (__image);
+			__image = null;
+			
+		}
+		
+		if (__canvas == null) {
+			
+			__canvas = cast Browser.document.createElement ("canvas");	
+			__canvasContext = __canvas.getContext ("2d");
+			
+			if (!smoothing) {
+				
+				untyped (__canvasContext).mozImageSmoothingEnabled = false;
+				untyped (__canvasContext).webkitImageSmoothingEnabled = false;
+				__canvasContext.imageSmoothingEnabled = false;
+				
+			}
+			
+			__canvas.style.position = "absolute";
+			renderSession.element.appendChild (__canvas);
+			
+		}
+		
+		bitmapData.__syncImageData ();
+		
+		__canvas.width = bitmapData.width;
+		__canvas.height = bitmapData.height;
+		
+		__canvasContext.globalAlpha = __worldAlpha;
+		var transform = __worldTransform;
+		
+		if (renderSession.roundPixels) {
+			
+			__canvasContext.setTransform (transform.a, transform.b, transform.c, transform.d, Std.int (transform.tx), Std.int (transform.ty));
+			
+		} else {
+			
+			__canvasContext.setTransform (transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty);
+			
+		}
+		
+		if (bitmapData.__sourceImage != null) {
+			
+			__canvasContext.drawImage (bitmapData.__sourceImage, 0, 0);
+			
+		} else {
+			
+			__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
+			
+		}
+		
+	}
+	
+	
+	private function __renderDOMImage (renderSession:RenderSession):Void {
+		
+		if (__image == null) {
+			
+			__image = cast Browser.document.createElement ("img");
+			__image.src = bitmapData.__sourceImage.src;
+			__image.style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+			renderSession.element.appendChild (__image);
+			
+		}
+		
+		if (__worldAlpha != __cacheWorldAlpha) {
+			
+			__image.style.setProperty ("opacity", Std.string (__worldAlpha), null);
+			__cacheWorldAlpha = __worldAlpha;
+			
+		}
+		
+		if (!__worldTransform.equals (__cacheWorldTransform)) {
+			
+			__image.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+			__cacheWorldTransform = __worldTransform.clone ();
 			
 		}
 		

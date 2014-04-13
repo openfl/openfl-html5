@@ -33,7 +33,7 @@ class Stage extends Sprite {
 	public var stageHeight (default, null):Int;
 	public var stageWidth (default, null):Int;
 	
-	private var __canvas:CanvasElement;
+	//private var __canvas:CanvasElement;
 	private var __clearBeforeRender:Bool;
 	private var __color:Int;
 	private var __colorString:String;
@@ -78,9 +78,8 @@ class Stage extends Sprite {
 		//__context.imageSmoothingEnabled = false;
 		
 		var style = __canvas.style;
-		style.setProperty ("position", "absolute", null);
-		style.setProperty ("-webkit-transform", "translate(0,0,0)", null);
-		style.setProperty ("transform", "translate(0,0,0)", null);
+		style.setProperty ("-webkit-transform", "translateZ(0)", null);
+		style.setProperty ("transform", "translateZ(0)", null);
 		
 		#else
 		
@@ -88,8 +87,8 @@ class Stage extends Sprite {
 		
 		var style = __div.style;
 		style.setProperty ("background-color", __colorString, null);
-		style.setProperty ("-webkit-transform", "translate(0,0,0)", null);
-		style.setProperty ("transform", "translate(0,0,0)", null);
+		style.setProperty ("-webkit-transform", "translateZ(0)", null);
+		style.setProperty ("transform", "translateZ(0)", null);
 		style.setProperty ("overflow", "hidden", null);
 		
 		#end
