@@ -127,7 +127,7 @@ class Sprite extends DisplayObjectContainer {
 		
 		if (!__renderable) return;
 		
-		if (__graphics != null) {
+		if (__graphics != null && __graphics.__dirty) {
 			
 			__graphics.__render ();
 			

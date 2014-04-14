@@ -229,8 +229,11 @@ class Bitmap extends DisplayObjectContainer {
 			
 			__image = cast Browser.document.createElement ("img");
 			__image.src = bitmapData.__sourceImage.src;
-			__image.style.setProperty ("position", "absolute", null);
-			__image.style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+			
+			var style = __image.style;
+			style.setProperty ("position", "absolute", null);
+			style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+			
 			renderSession.element.appendChild (__image);
 			
 		}

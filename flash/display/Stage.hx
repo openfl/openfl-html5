@@ -92,6 +92,11 @@ class Stage extends Sprite {
 		//style.setProperty ("-webkit-transform-style", "preserve-3d", null);
 		//style.setProperty ("transform-style", "preserve-3d", null);
 		style.position = "relative";
+		style.overflow = "hidden";
+		style.setProperty ("-webkit-user-select", "none", null);
+		style.setProperty ("-moz-user-select", "none", null);
+		style.setProperty ("-ms-user-select", "none", null);
+		style.setProperty ("-o-user-select", "none", null);
 		
 		#end
 		
@@ -469,11 +474,15 @@ class Stage extends Sprite {
 			
 			__cursor = cursor;
 			
-			#if !dom
-			
-			__canvas.style.cursor = cursor;
-			
-			#end
+			if (__canvas != null) {
+				
+				__canvas.style.cursor = cursor;
+				
+			} else {
+				
+				__div.style.cursor = cursor;
+				
+			}
 			
 		}
 		
