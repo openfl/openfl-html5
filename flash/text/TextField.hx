@@ -425,7 +425,6 @@ class TextField extends InteractiveObject {
 					
 					__div = cast Browser.document.createElement ("div");
 					__div.style.position = "absolute";
-					__div.style.top = "0px";
 					__div.style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 					renderSession.element.appendChild (__div);
 					

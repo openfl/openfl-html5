@@ -87,9 +87,11 @@ class Stage extends Sprite {
 		
 		var style = __div.style;
 		style.backgroundColor = __colorString;
-		style.setProperty ("-webkit-transform", "translateZ(0)", null);
-		style.setProperty ("transform", "translateZ(0)", null);
-		style.overflow = "hidden";
+		style.setProperty ("-webkit-transform", "translate3D(0,0,0)", null);
+		style.setProperty ("transform", "translate3D(0,0,0)", null);
+		//style.setProperty ("-webkit-transform-style", "preserve-3d", null);
+		//style.setProperty ("transform-style", "preserve-3d", null);
+		style.position = "relative";
 		
 		#end
 		
@@ -192,7 +194,7 @@ class Stage extends Sprite {
 		#end
 		
 		var windowEvents = [ "keydown", "keyup" ];
-		var canvasEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup", "click", "dblclick" ];
+		var elementEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup", "click", "dblclick" ];
 		
 		for (event in windowEvents) {
 			
@@ -202,9 +204,17 @@ class Stage extends Sprite {
 		
 		if (__canvas != null) {
 			
-			for (event in canvasEvents) {
+			for (event in elementEvents) {
 				
 				__canvas.addEventListener (event, __queueEvent, true);
+				
+			}
+			
+		} else {
+			
+			for (event in elementEvents) {
+				
+				__div.addEventListener (event, __queueEvent, true);
 				
 			}
 			
@@ -318,14 +328,8 @@ class Stage extends Sprite {
 			switch (event.type) {
 				
 				case "keydown", "keyup": window_onKey (cast event);
-				
-				#if !dom
-				
-				case "touchstart", "touchend", "touchmove": canvas_onTouch (cast event);
-				case "mousedown", "mouseup", "mousemove", "click", "dblclick": canvas_onMouse (cast event);
-				
-				#end
-				
+				case "touchstart", "touchend", "touchmove": element_onTouch (cast event);
+				case "mousedown", "mouseup", "mousemove", "click", "dblclick": element_onMouse (cast event);
 				default:
 				
 			}
@@ -409,7 +413,7 @@ class Stage extends Sprite {
 	
 	private function __resize ():Void {
 		
-		if (__element != null) {
+		if (__element != null && __div == null) {
 			
 			if (__fullscreen) {
 				
@@ -526,13 +530,22 @@ class Stage extends Sprite {
 	
 	
 	
-	#if !dom
-	
-	private function canvas_onTouch (event:js.html.TouchEvent):Void {
+	private function element_onTouch (event:js.html.TouchEvent):Void {
 		
 		event.preventDefault ();
 		
-		var rect = __canvas.getBoundingClientRect ();
+		var rect;
+		
+		if (__canvas != null) {
+			
+			rect = __canvas.getBoundingClientRect ();
+			
+		} else {
+			
+			rect = __div.getBoundingClientRect ();
+			
+		}
+		
 		var touch = event.changedTouches[0];
 		var point = new Point (touch.pageX - rect.left, touch.pageY - rect.top);
 		
@@ -669,12 +682,25 @@ class Stage extends Sprite {
 	}
 	
 	
-	private function canvas_onMouse (event:js.html.MouseEvent):Void {
+	private function element_onMouse (event:js.html.MouseEvent):Void {
 		
-		var rect = __canvas.getBoundingClientRect ();
+		var rect;
 		
-		__mouseX = (event.clientX - rect.left) * (__canvas.width / rect.width);
-		__mouseY = (event.clientY - rect.top) * (__canvas.height / rect.height);
+		if (__canvas != null) {
+			
+			rect = __canvas.getBoundingClientRect ();
+			__mouseX = (event.clientX - rect.left) * (__canvas.width / rect.width);
+			__mouseY = (event.clientY - rect.top) * (__canvas.height / rect.height);
+			
+		} else {
+			
+			rect = __div.getBoundingClientRect ();
+			//__mouseX = (event.clientX - rect.left) * (__div.style.width / rect.width);
+			__mouseX = (event.clientX - rect.left) * (rect.width);
+			//__mouseY = (event.clientY - rect.top) * (__div.style.height / rect.height);
+			__mouseY = (event.clientY - rect.top) * (rect.height);
+			
+		}
 		
 		__stack = [];
 		
@@ -764,8 +790,6 @@ class Stage extends Sprite {
 		}*/
 		
 	}
-	
-	#end
 	
 	
 	private function window_onKey (event:js.html.KeyboardEvent):Void {
