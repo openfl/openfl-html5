@@ -86,10 +86,10 @@ class Stage extends Sprite {
 		__div = cast Browser.document.createElement ("div");
 		
 		var style = __div.style;
-		style.setProperty ("background-color", __colorString, null);
+		style.backgroundColor = __colorString;
 		style.setProperty ("-webkit-transform", "translateZ(0)", null);
 		style.setProperty ("transform", "translateZ(0)", null);
-		style.setProperty ("overflow", "hidden", null);
+		style.overflow = "hidden";
 		
 		#end
 		
@@ -124,8 +124,8 @@ class Stage extends Sprite {
 			
 		} else {
 			
-			__div.style.setProperty ("width", width + "px", null);
-			__div.style.setProperty ("height", height + "px", null);
+			__div.style.width = width + "px";
+			__div.style.height = height + "px";
 			
 		}
 		

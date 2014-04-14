@@ -431,10 +431,36 @@ class TextField extends InteractiveObject {
 					
 				}
 				
+				// TODO: Handle ranges using span
+				
+				var style = __div.style;
+				style.setProperty ("font", __getFont (__textFormat), null);
+				style.setProperty ("color", "#" + StringTools.hex (__textFormat.color, 6), null);
+				style.setProperty ("width", __width + "px", null);
+				style.setProperty ("height", __height + "px", null);
+				
+				switch (__textFormat.align) {
+					
+					case TextFormatAlign.CENTER:
+						
+						style.setProperty ("text-align", "center", null);
+					
+					case TextFormatAlign.RIGHT:
+						
+						style.setProperty ("text-align", "right", null);
+					
+					default:
+						
+						style.setProperty ("text-align", "left", null);
+					
+				}
+				
+				// TODO: Vertical align
+				
 				__div.innerHTML = __text;
 				
-				__div.style.setProperty ("opacity", Std.string (__worldAlpha), null);
-				__div.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+				style.setProperty ("opacity", Std.string (__worldAlpha), null);
+				style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
 				
 			} else {
 				

@@ -182,6 +182,7 @@ class Bitmap extends DisplayObjectContainer {
 		if (__image != null) {
 			
 			renderSession.element.removeChild (__image);
+			__cacheWorldTransform = null;
 			__image = null;
 			
 		}
@@ -209,28 +210,15 @@ class Bitmap extends DisplayObjectContainer {
 		__canvas.width = bitmapData.width;
 		__canvas.height = bitmapData.height;
 		
+		if (!__worldTransform.equals (__cacheWorldTransform)) {
+			
+			__canvas.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+			__cacheWorldTransform = __worldTransform.clone ();
+			
+		}
+		
 		__canvasContext.globalAlpha = __worldAlpha;
-		var transform = __worldTransform;
-		
-		if (renderSession.roundPixels) {
-			
-			__canvasContext.setTransform (transform.a, transform.b, transform.c, transform.d, Std.int (transform.tx), Std.int (transform.ty));
-			
-		} else {
-			
-			__canvasContext.setTransform (transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty);
-			
-		}
-		
-		if (bitmapData.__sourceImage != null) {
-			
-			__canvasContext.drawImage (bitmapData.__sourceImage, 0, 0);
-			
-		} else {
-			
-			__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
-			
-		}
+		__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
 		
 	}
 	

@@ -113,20 +113,19 @@ class Shape extends DisplayObject {
 				__canvas.width = __graphics.__canvas.width;
 				__canvas.height = __graphics.__canvas.height;
 				
-				__canvasContext.globalAlpha = __worldAlpha;
-				var transform = __worldTransform;
-				
-				if (renderSession.roundPixels) {
+				if (!__worldTransform.equals (__cacheWorldTransform)) {
 					
-					__canvasContext.setTransform (transform.a, transform.b, transform.c, transform.d, Std.int (transform.tx), Std.int (transform.ty));
+					var transform = new Matrix ();
+					transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
+					transform = transform.mult (__worldTransform);
 					
-				} else {
-					
-					__canvasContext.setTransform (transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty);
+					__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.z++), null);
+					__cacheWorldTransform = __worldTransform.clone ();
 					
 				}
 				
-				__canvasContext.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
+				__canvasContext.globalAlpha = __worldAlpha;
+				__canvasContext.drawImage (__graphics.__canvas, 0, 0);
 				
 			} else {
 				
