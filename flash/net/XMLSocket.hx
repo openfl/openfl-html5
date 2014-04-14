@@ -3,6 +3,7 @@ package flash.net;
 
 import flash.events.DataEvent;
 import flash.events.Event;
+import flash.events.IOErrorEvent;
 import flash.events.EventDispatcher;
 
 
@@ -37,9 +38,26 @@ class XMLSocket extends EventDispatcher {
 	
 	public function connect (host: String, port:Int):Void {
 		
-		_socket = untyped __js__("new WebSocket(\"ws://\" + host + \":\" + port)");
+		connectWithProto(host, port, null);
+		
+	}
+	
+	
+	public function connectWithProto (host: String, port:Int, protocol:String):Void {
+		
+		if (protocol == null) {
+            _socket = untyped __js__("new WebSocket(\"ws://\" + host + \":\" + port)");
+        }
+        else {
+            _socket = untyped __js__("new WebSocket(\"ws://\" + host + \":\" + port, protocol)");
+        }
+		
+		connected = false;
+		
 		_socket.onopen = onOpenHandler;
 		_socket.onmessage = onMessageHandler;
+		_socket.onclose = onCloseHandler;
+		_socket.onerror = onErrorHandler;
 		
 	}
 	
@@ -66,8 +84,22 @@ class XMLSocket extends EventDispatcher {
 	
 	
 	private function onOpenHandler (_):Void {
-		
+		connected = true;
 		dispatchEvent (new Event (Event.CONNECT));
+		
+	}
+	
+	
+	private function onCloseHandler (_):Void {
+		
+		dispatchEvent (new Event (Event.CLOSE));
+		
+	}
+	
+	
+	private function onErrorHandler (_):Void {
+		
+		dispatchEvent (new Event (IOErrorEvent.IO_ERROR));
 		
 	}
 	

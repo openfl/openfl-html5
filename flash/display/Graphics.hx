@@ -613,7 +613,7 @@ class Graphics {
 									
 								}
 								
-								if (rect != null && center != null) {
+								if (rect != null && rect.width > 0 && rect.height > 0 && center != null) {
 									
 									__context.save ();
 									__context.translate (tileData[index], tileData[index + 1]);

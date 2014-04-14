@@ -1,15 +1,10 @@
 package flash.net;
 
 
-//import haxe.remoting.Connection;
-import flash.utils.UInt;
-import flash.display.Graphics;
 import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.events.NetStatusEvent;
-import flash.media.VideoElement;
 import flash.Lib;
-import haxe.Timer;
 import js.html.MediaElement;
 import js.Browser;
 
@@ -48,11 +43,6 @@ class NetStream extends EventDispatcher {
 	public var play:Dynamic;
 	
 	public var __videoElement(default, null):MediaElement;
-	
-	private static inline var fps:Int = 30;
-	
-	private var timer:Timer;
-	
 	private var __connection:NetConnection;
 	
 	
