@@ -273,6 +273,7 @@ class BitmapData implements IBitmapDrawable {
 		__sourceContext = null;
 		width = 0;
 		height = 0;
+		rect = null;
 		__valid = false;
 		
 	}
@@ -418,6 +419,7 @@ class BitmapData implements IBitmapDrawable {
 			
 			bitmapData.width = bitmapData.__sourceImage.width;
 			bitmapData.height = bitmapData.__sourceImage.height;
+			bitmapData.rect = new Rectangle (0, 0, bitmapData.__sourceImage.width, bitmapData.__sourceImage.height);
 			bitmapData.__valid = true;
 			
 			if (onload != null) {
@@ -444,6 +446,7 @@ class BitmapData implements IBitmapDrawable {
 		bitmapData.__sourceImage = image;
 		bitmapData.width = image.width;
 		bitmapData.height = image.height;
+		bitmapData.rect = new Rectangle (0, 0, image.width, image.height);
 		bitmapData.__valid = true;
 		
 		return bitmapData;
@@ -454,6 +457,9 @@ class BitmapData implements IBitmapDrawable {
 	public static function fromCanvas (canvas:CanvasElement, transparent:Bool = true):BitmapData {
 		
 		var bitmapData = new BitmapData (0, 0, transparent);
+		bitmapData.width = canvas.width;
+		bitmapData.height = canvas.height;
+		bitmapData.rect = new Rectangle (0, 0, canvas.width, canvas.height);
 		bitmapData.__createCanvas (canvas.width, canvas.height);
 		bitmapData.__sourceContext.drawImage (canvas, 0, 0);
 		
@@ -952,6 +958,7 @@ class BitmapData implements IBitmapDrawable {
 			
 			width = __sourceImage.width;
 			height = __sourceImage.height;
+			rect = new Rectangle (0, 0, width, height);
 			
 			__valid = true;
 			
