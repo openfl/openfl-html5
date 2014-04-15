@@ -13,6 +13,7 @@ import flash.ui.KeyLocation;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
 import js.html.DivElement;
+import js.html.Element;
 import js.html.HtmlElement;
 import js.Browser;
 
@@ -27,20 +28,22 @@ class Stage extends Sprite {
 	public var focus:InteractiveObject;
 	public var frameRate:Float;
 	public var quality:StageQuality;
+	public var stageFocusRect:Bool;
 	public var scaleMode:StageScaleMode;
 	public var stageHeight (default, null):Int;
 	public var stageWidth (default, null):Int;
 	
-	private var __canvas:CanvasElement;
+	//private var __canvas:CanvasElement;
 	private var __clearBeforeRender:Bool;
 	private var __color:Int;
 	private var __colorString:String;
 	private var __context:CanvasRenderingContext2D;
 	private var __cursor:String;
-	public var __domElement:DivElement;
+	private var __div:DivElement;
 	private var __element:HtmlElement;
 	private var __eventQueue:Array<js.html.Event>;
 	private var __fullscreen:Bool;
+	private var __invalidated:Bool;
 	private var __mouseX:Float = 0;
 	private var __mouseY:Float = 0;
 	private var __originalWidth:Int;
@@ -74,20 +77,26 @@ class Stage extends Sprite {
 		//untyped (__context).webkitImageSmoothingEnabled = false;
 		//__context.imageSmoothingEnabled = false;
 		
-		__canvas.style.transform = "translatez(0)";
-		__canvas.style.position = "absolute";
-		__canvas.style.top = "0px";
-		__canvas.style.left = "0px";
+		var style = __canvas.style;
+		style.setProperty ("-webkit-transform", "translateZ(0)", null);
+		style.setProperty ("transform", "translateZ(0)", null);
 		
 		#else
 		
-		__domElement = cast Browser.document.createElement ("div");
-		__domElement.style.backgroundColor = __colorString;
+		__div = cast Browser.document.createElement ("div");
 		
-		__domElement.style.transform = "translatez(0)";
-		__domElement.style.position = "absolute";
-		__domElement.style.top = "0px";
-		__domElement.style.left = "0px";
+		var style = __div.style;
+		style.backgroundColor = __colorString;
+		style.setProperty ("-webkit-transform", "translate3D(0,0,0)", null);
+		style.setProperty ("transform", "translate3D(0,0,0)", null);
+		//style.setProperty ("-webkit-transform-style", "preserve-3d", null);
+		//style.setProperty ("transform-style", "preserve-3d", null);
+		style.position = "relative";
+		style.overflow = "hidden";
+		style.setProperty ("-webkit-user-select", "none", null);
+		style.setProperty ("-moz-user-select", "none", null);
+		style.setProperty ("-ms-user-select", "none", null);
+		style.setProperty ("-o-user-select", "none", null);
 		
 		#end
 		
@@ -115,40 +124,36 @@ class Stage extends Sprite {
 		stageWidth = width;
 		stageHeight = height;
 		
-		#if !dom
-		
-		__canvas.width = width;
-		__canvas.height = height;
-		
-		#else
-		
-		__domElement.style.width = width + "px";
-		__domElement.style.height = height + "px";
-		
-		#end
+		if (__canvas != null) {
+			
+			__canvas.width = width;
+			__canvas.height = height;
+			
+		} else {
+			
+			__div.style.width = width + "px";
+			__div.style.height = height + "px";
+			
+		}
 		
 		__resize ();
 		Browser.window.addEventListener ("resize", window_onResize);
 		Browser.window.addEventListener ("focus", window_onFocus);
 		Browser.window.addEventListener ("blur", window_onBlur);
 		
-		#if !dom
-		
 		if (element != null) {
 			
-			element.appendChild (__canvas);
+			if (__canvas != null) {
+				
+				element.appendChild (__canvas);
+				
+			} else {
+				
+				element.appendChild (__div);
+				
+			}
 			
 		}
-		
-		#else
-		
-		if (element != null) {
-			
-			element.appendChild (__domElement);
-			
-		}
-		
-		#end
 		
 		this.stage = this;
 		this.parent = this;
@@ -162,25 +167,29 @@ class Stage extends Sprite {
 		__renderSession.context = __context;
 		__renderSession.roundPixels = true;
 		
-		#if dom
-		__renderSession.z = 1;
-		var prefix = untyped __js__ ("(function () {
-		  var styles = window.getComputedStyle(document.documentElement, ''),
-		    pre = (Array.prototype.slice
-		      .call(styles)
-		      .join('') 
-		      .match(/-(moz|webkit|ms)-/) || (styles.OLink === '' && ['', 'o'])
-		    )[1],
-		    dom = ('WebKit|Moz|MS|O').match(new RegExp('(' + pre + ')', 'i'))[1];
-		  return {
-		    dom: dom,
-		    lowercase: pre,
-		    css: '-' + pre + '-',
-		    js: pre[0].toUpperCase() + pre.substr(1)
-		  };
-		})")();
-		__renderSession.vendorPrefix = (prefix.lowercase == "webkit") ? "webkit" : null;
-		#end
+		if (__div != null) {
+			
+			__renderSession.element = __div;
+			var prefix = untyped __js__ ("(function () {
+			  var styles = window.getComputedStyle(document.documentElement, ''),
+			    pre = (Array.prototype.slice
+			      .call(styles)
+			      .join('') 
+			      .match(/-(moz|webkit|ms)-/) || (styles.OLink === '' && ['', 'o'])
+			    )[1],
+			    dom = ('WebKit|Moz|MS|O').match(new RegExp('(' + pre + ')', 'i'))[1];
+			  return {
+			    dom: dom,
+			    lowercase: pre,
+			    css: '-' + pre + '-',
+			    js: pre[0].toUpperCase() + pre.substr(1)
+			  };
+			})")();
+			__renderSession.vendorPrefix = prefix.lowercase;
+			__renderSession.transformProperty = (prefix.lowercase == "webkit") ? "-webkit-transform" : "transform";
+			__renderSession.transformOriginProperty = (prefix.lowercase == "webkit") ? "-webkit-transform-origin" : "transform-origin";
+			
+		}
 		
 		#if stats
 		__stats = untyped __js__("new Stats ()");
@@ -190,7 +199,7 @@ class Stage extends Sprite {
 		#end
 		
 		var windowEvents = [ "keydown", "keyup" ];
-		var canvasEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup", "click", "dblclick" ];
+		var elementEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup", "click", "dblclick" ];
 		
 		for (event in windowEvents) {
 			
@@ -198,15 +207,23 @@ class Stage extends Sprite {
 			
 		}
 		
-		#if !dom
-		
-		for (event in canvasEvents) {
+		if (__canvas != null) {
 			
-			__canvas.addEventListener (event, __queueEvent, true);
+			for (event in elementEvents) {
+				
+				__canvas.addEventListener (event, __queueEvent, true);
+				
+			}
+			
+		} else {
+			
+			for (event in elementEvents) {
+				
+				__div.addEventListener (event, __queueEvent, true);
+				
+			}
 			
 		}
-		
-		#end
 		
 		Browser.window.requestAnimationFrame (cast __render);
 		
@@ -216,6 +233,13 @@ class Stage extends Sprite {
 	public override function globalToLocal (pos:Point):Point {
 		
 		return pos;
+		
+	}
+	
+	
+	public function invalidate ():Void {
+		
+		__invalidated = true;
 		
 	}
 	
@@ -309,14 +333,8 @@ class Stage extends Sprite {
 			switch (event.type) {
 				
 				case "keydown", "keyup": window_onKey (cast event);
-				
-				#if !dom
-				
-				case "touchstart", "touchend", "touchmove": canvas_onTouch (cast event);
-				case "mousedown", "mouseup", "mousemove", "click", "dblclick": canvas_onMouse (cast event);
-				
-				#end
-				
+				case "touchstart", "touchend", "touchmove": element_onTouch (cast event);
+				case "mousedown", "mouseup", "mousemove", "click", "dblclick": element_onMouse (cast event);
 				default:
 				
 			}
@@ -327,39 +345,47 @@ class Stage extends Sprite {
 		
 		__broadcast (new Event (Event.ENTER_FRAME));
 		
+		if (__invalidated) {
+			
+			__invalidated = false;
+			__broadcast (new Event (Event.RENDER));
+			
+		}
+		
 		__renderable = true;
 		__update ();
 		
-		#if !dom
-		
-		if (stageWidth != __canvas.width || stageHeight != __canvas.height) {
+		if (__canvas != null) {
 			
-			__canvas.width = stageWidth;
-			__canvas.height = stageHeight;
+			if (stageWidth != __canvas.width || stageHeight != __canvas.height) {
+				
+				__canvas.width = stageWidth;
+				__canvas.height = stageHeight;
+				
+			}
+			
+			__context.setTransform (1, 0, 0, 1, 0, 0);
+			__context.globalAlpha = 1;
+			
+			if (!__transparent && __clearBeforeRender) {
+				
+				__context.fillStyle = __colorString;
+				__context.fillRect (0, 0, stageWidth, stageHeight);
+				
+			} else if (__transparent && __clearBeforeRender) {
+				
+				__context.clearRect (0, 0, stageWidth, stageHeight);
+				
+			}
+			
+			__renderCanvas (__renderSession);
+			
+		} else {
+			
+			__renderSession.z = 1;
+			__renderDOM (__renderSession);
 			
 		}
-		
-		__context.setTransform (1, 0, 0, 1, 0, 0);
-		__context.globalAlpha = 1;
-		
-		if (!__transparent && __clearBeforeRender) {
-			
-			__context.fillStyle = __colorString;
-			__context.fillRect (0, 0, stageWidth, stageHeight);
-			
-		} else if (__transparent && __clearBeforeRender) {
-			
-			__context.clearRect (0, 0, stageWidth, stageHeight);
-			
-		}
-		
-		__renderCanvas (__renderSession);
-		
-		#else
-		
-		__renderDOM (__renderSession);
-		
-		#end
 		
 		/*// run interaction!
 		if(stage.interactive) {
@@ -392,24 +418,24 @@ class Stage extends Sprite {
 	
 	private function __resize ():Void {
 		
-		if (__element != null) {
+		if (__element != null && __div == null) {
 			
 			if (__fullscreen) {
 				
 				stageWidth = __element.clientWidth;
 				stageHeight = __element.clientHeight;
 				
-				#if !dom
-				
-				__canvas.width = stageWidth;
-				__canvas.height = stageHeight;
-				
-				#else
-				
-				__domElement.style.width = stageWidth + "px";
-				__domElement.style.height = stageHeight + "px";
-				
-				#end
+				if (__canvas != null) {
+					
+					__canvas.width = stageWidth;
+					__canvas.height = stageHeight;
+					
+				} else {
+					
+					__div.style.width = stageWidth + "px";
+					__div.style.height = stageHeight + "px";
+					
+				}
 				
 			} else {
 				
@@ -419,21 +445,21 @@ class Stage extends Sprite {
 				var currentRatio = scaleX / scaleY;
 				var targetRatio = Math.min (scaleX, scaleY);
 				
-				#if !dom
-				
-				__canvas.style.width = __originalWidth * targetRatio + "px";
-				__canvas.style.height = __originalHeight * targetRatio + "px";
-				__canvas.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
-				__canvas.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
-				
-				#else
-				
-				__domElement.style.width = __originalWidth * targetRatio + "px";
-				__domElement.style.height = __originalHeight * targetRatio + "px";
-				__domElement.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
-				__domElement.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
-				
-				#end
+				if (__canvas != null) {
+					
+					__canvas.style.width = __originalWidth * targetRatio + "px";
+					__canvas.style.height = __originalHeight * targetRatio + "px";
+					__canvas.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
+					__canvas.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
+					
+				} else {
+					
+					__div.style.width = __originalWidth * targetRatio + "px";
+					__div.style.height = __originalHeight * targetRatio + "px";
+					__div.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
+					__div.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
+					
+				}
 				
 			}
 			
@@ -448,11 +474,15 @@ class Stage extends Sprite {
 			
 			__cursor = cursor;
 			
-			#if !dom
-			
-			__canvas.style.cursor = cursor;
-			
-			#end
+			if (__canvas != null) {
+				
+				__canvas.style.cursor = cursor;
+				
+			} else {
+				
+				__div.style.cursor = cursor;
+				
+			}
 			
 		}
 		
@@ -509,13 +539,22 @@ class Stage extends Sprite {
 	
 	
 	
-	#if !dom
-	
-	private function canvas_onTouch (event:js.html.TouchEvent):Void {
+	private function element_onTouch (event:js.html.TouchEvent):Void {
 		
 		event.preventDefault ();
 		
-		var rect = __canvas.getBoundingClientRect ();
+		var rect;
+		
+		if (__canvas != null) {
+			
+			rect = __canvas.getBoundingClientRect ();
+			
+		} else {
+			
+			rect = __div.getBoundingClientRect ();
+			
+		}
+		
 		var touch = event.changedTouches[0];
 		var point = new Point (touch.pageX - rect.left, touch.pageY - rect.top);
 		
@@ -652,12 +691,25 @@ class Stage extends Sprite {
 	}
 	
 	
-	private function canvas_onMouse (event:js.html.MouseEvent):Void {
+	private function element_onMouse (event:js.html.MouseEvent):Void {
 		
-		var rect = __canvas.getBoundingClientRect ();
+		var rect;
 		
-		__mouseX = (event.clientX - rect.left) * (__canvas.width / rect.width);
-		__mouseY = (event.clientY - rect.top) * (__canvas.height / rect.height);
+		if (__canvas != null) {
+			
+			rect = __canvas.getBoundingClientRect ();
+			__mouseX = (event.clientX - rect.left) * (__canvas.width / rect.width);
+			__mouseY = (event.clientY - rect.top) * (__canvas.height / rect.height);
+			
+		} else {
+			
+			rect = __div.getBoundingClientRect ();
+			//__mouseX = (event.clientX - rect.left) * (__div.style.width / rect.width);
+			__mouseX = (event.clientX - rect.left) * (rect.width);
+			//__mouseY = (event.clientY - rect.top) * (__div.style.height / rect.height);
+			__mouseY = (event.clientY - rect.top) * (rect.height);
+			
+		}
 		
 		__stack = [];
 		
@@ -748,15 +800,25 @@ class Stage extends Sprite {
 		
 	}
 	
-	#end
-	
 	
 	private function window_onKey (event:js.html.KeyboardEvent):Void {
 		
 		var keyCode = (event.keyCode != null ? event.keyCode : event.which);
 		keyCode = Keyboard.__convertMozillaCode (keyCode);
 		
-		dispatchEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, event.keyLocation != null ? cast (event.keyLocation, KeyLocation) : KeyLocation.STANDARD, event.ctrlKey, event.altKey, event.shiftKey));
+		var keyLocation = KeyLocation.STANDARD;
+		
+		if (untyped (event).location != null) {
+			
+			keyLocation = cast (untyped (event).location, KeyLocation);
+			
+		} else if (event.keyLocation != null) {
+			
+			keyLocation = cast (event.keyLocation, KeyLocation);
+			
+		}
+		
+		dispatchEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, keyLocation, event.ctrlKey, event.altKey, event.shiftKey));
 		
 	}
 	
@@ -818,10 +880,13 @@ class RenderSession {
 	
 	
 	public var context:CanvasRenderingContext2D;
+	public var element:Element;
 	//public var mask:Bool;
 	public var maskManager:MaskManager;
 	//public var scaleMode:ScaleMode;
 	public var roundPixels:Bool;
+	public var transformProperty:String;
+	public var transformOriginProperty:String;
 	public var vendorPrefix:String;
 	public var z:Int;
 	//public var smoothProperty:Null<Bool> = null;

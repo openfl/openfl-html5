@@ -5,6 +5,8 @@ import flash.display.Stage;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
+import js.html.CanvasElement;
+import js.html.CanvasRenderingContext2D;
 import js.html.ImageElement;
 import js.Browser;
 
@@ -17,7 +19,9 @@ class Bitmap extends DisplayObjectContainer {
 	public var pixelSnapping:PixelSnapping;
 	public var smoothing:Bool;
 	
-	private var __imageElement:ImageElement;
+	private var __canvas:CanvasElement;
+	private var __canvasContext:CanvasRenderingContext2D;
+	private var __image:ImageElement;
 	
 	
 	public function new (bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) {
@@ -99,6 +103,14 @@ class Bitmap extends DisplayObjectContainer {
 				
 			}
 			
+			if (!smoothing) {
+				
+				untyped (context).mozImageSmoothingEnabled = false;
+				untyped (context).webkitImageSmoothingEnabled = false;
+				context.imageSmoothingEnabled = false;
+				
+			}
+			
 			if (bitmapData.__sourceImage != null) {
 				
 				context.drawImage (bitmapData.__sourceImage, 0, 0);
@@ -106,6 +118,14 @@ class Bitmap extends DisplayObjectContainer {
 			} else {
 				
 				context.drawImage (bitmapData.__sourceCanvas, 0, 0);
+				
+			}
+			
+			if (!smoothing) {
+				
+				untyped (context).mozImageSmoothingEnabled = true;
+				untyped (context).webkitImageSmoothingEnabled = true;
+				context.imageSmoothingEnabled = true;
 				
 			}
 			
@@ -126,34 +146,109 @@ class Bitmap extends DisplayObjectContainer {
 		
 		if (bitmapData != null && bitmapData.__valid) {
 			
-			if (__imageElement == null) {
+			if (bitmapData.__sourceImage != null) {
 				
-				__imageElement = cast Browser.document.createElement ("img");
-				__imageElement.src = bitmapData.__sourceImage.src;
-				__imageElement.style.position = "absolute";
-				
-				Lib.current.stage.__domElement.appendChild (__imageElement);
-				
-			}
-			
-			if (renderSession.vendorPrefix == null) {
-				
-				__imageElement.style.transform = __worldTransform.to3DString (renderSession.z++);
+				__renderDOMImage (renderSession);
 				
 			} else {
 				
-				__imageElement.style.setProperty ("-" + renderSession.vendorPrefix + "-transform", __worldTransform.to3DString (renderSession.z++), "");
+				__renderDOMCanvas (renderSession);
 				
 			}
 			
 		} else {
 			
-			if (__imageElement != null) {
+			if (__image != null) {
 				
-				Lib.current.stage.__domElement.removeChild (__imageElement);
-				__imageElement = null;
+				renderSession.element.removeChild (__image);
+				__image = null;
 				
 			}
+			
+			if (__canvas != null) {
+				
+				renderSession.element.removeChild (__canvas);
+				__canvas = null;
+				
+			}
+			
+		}
+		
+	}
+	
+	
+	private function __renderDOMCanvas (renderSession:RenderSession):Void {
+		
+		if (__image != null) {
+			
+			renderSession.element.removeChild (__image);
+			__cacheWorldTransform = null;
+			__image = null;
+			
+		}
+		
+		if (__canvas == null) {
+			
+			__canvas = cast Browser.document.createElement ("canvas");	
+			__canvasContext = __canvas.getContext ("2d");
+			
+			if (!smoothing) {
+				
+				untyped (__canvasContext).mozImageSmoothingEnabled = false;
+				untyped (__canvasContext).webkitImageSmoothingEnabled = false;
+				__canvasContext.imageSmoothingEnabled = false;
+				
+			}
+			
+			__canvas.style.position = "absolute";
+			renderSession.element.appendChild (__canvas);
+			
+		}
+		
+		bitmapData.__syncImageData ();
+		
+		__canvas.width = bitmapData.width;
+		__canvas.height = bitmapData.height;
+		
+		if (!__worldTransform.equals (__cacheWorldTransform)) {
+			
+			__canvas.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+			__cacheWorldTransform = __worldTransform.clone ();
+			
+		}
+		
+		__canvasContext.globalAlpha = __worldAlpha;
+		__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
+		
+	}
+	
+	
+	private function __renderDOMImage (renderSession:RenderSession):Void {
+		
+		if (__image == null) {
+			
+			__image = cast Browser.document.createElement ("img");
+			__image.src = bitmapData.__sourceImage.src;
+			
+			var style = __image.style;
+			style.setProperty ("position", "absolute", null);
+			style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+			
+			renderSession.element.appendChild (__image);
+			
+		}
+		
+		if (__worldAlpha != __cacheWorldAlpha) {
+			
+			__image.style.setProperty ("opacity", Std.string (__worldAlpha), null);
+			__cacheWorldAlpha = __worldAlpha;
+			
+		}
+		
+		if (!__worldTransform.equals (__cacheWorldTransform)) {
+			
+			__image.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+			__cacheWorldTransform = __worldTransform.clone ();
 			
 		}
 		

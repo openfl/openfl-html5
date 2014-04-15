@@ -12,6 +12,7 @@ import flash.text.TextFormatAlign;
 import haxe.xml.Fast;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
+import js.html.DivElement;
 import js.Browser;
 
 
@@ -54,11 +55,12 @@ class TextField extends InteractiveObject {
 	public var textHeight (get, null):Float;
 	public var textWidth (get, null):Float;
 	@:isVar public var type (default, set):TextFieldType;
-	@:isVar public var wordWrap (default, set):Bool;
+	@:isVar public var wordWrap (get, set):Bool;
 	
 	private var __canvas:CanvasElement;
 	private var __context:CanvasRenderingContext2D;
 	private var __dirty:Bool;
+	private var __div:DivElement;
 	//private var __graphics:Graphics;
 	private var __height:Float;
 	private var __isHTML:Bool;
@@ -145,7 +147,7 @@ class TextField extends InteractiveObject {
 	}
 	
 	
-	public function setTextFormat (format:TextFormat, beginIndex:Int = 0, endIndex:Int = 0) {
+	public function setTextFormat (format:TextFormat, beginIndex:Int = 0, endIndex:Int = 0):Void {
 		
 		if (format.font != null) __textFormat.font = format.font;
 		if (format.size != null) __textFormat.size = format.size;
@@ -167,8 +169,6 @@ class TextField extends InteractiveObject {
 		if (format.tabStops != null) __textFormat.tabStops = format.tabStops;
 		
 		__dirty = true;
-		
-		return format;
 		
 	}
 	
@@ -407,6 +407,74 @@ class TextField extends InteractiveObject {
 			
 			//context.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
 			context.drawImage (__canvas, 0, 0);
+			
+		}
+		
+	}
+	
+	
+	public override function __renderDOM (renderSession:RenderSession):Void {
+		
+		if (!__renderable) return;
+		
+		if (__dirty) {
+			
+			if (__text != "") {
+				
+				if (__div == null) {
+					
+					__div = cast Browser.document.createElement ("div");
+					
+					var style = __div.style;
+					style.position = "absolute";
+					style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+					style.setProperty ("cursor", "inherit", null);
+					
+					renderSession.element.appendChild (__div);
+					
+				}
+				
+				// TODO: Handle ranges using span
+				
+				var style = __div.style;
+				style.setProperty ("font", __getFont (__textFormat), null);
+				style.setProperty ("color", "#" + StringTools.hex (__textFormat.color, 6), null);
+				style.setProperty ("width", __width + "px", null);
+				style.setProperty ("height", __height + "px", null);
+				
+				switch (__textFormat.align) {
+					
+					case TextFormatAlign.CENTER:
+						
+						style.setProperty ("text-align", "center", null);
+					
+					case TextFormatAlign.RIGHT:
+						
+						style.setProperty ("text-align", "right", null);
+					
+					default:
+						
+						style.setProperty ("text-align", "left", null);
+					
+				}
+				
+				// TODO: Vertical align
+				
+				__div.innerHTML = __text;
+				
+				style.setProperty ("opacity", Std.string (__worldAlpha), null);
+				style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+				
+			} else {
+				
+				if (__div != null) {
+					
+					renderSession.element.removeChild (__div);
+					__div = null;
+					
+				}
+				
+			}
 			
 		}
 		
@@ -753,6 +821,13 @@ class TextField extends InteractiveObject {
 		if (scaleX != 1 || __width != value) __dirty = true;
 		scaleX = 1;
 		return __width = value;
+		
+	}
+	
+	
+	public function get_wordWrap ():Bool {
+		
+		return wordWrap;
 		
 	}
 	

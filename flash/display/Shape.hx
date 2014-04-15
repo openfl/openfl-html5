@@ -4,6 +4,8 @@ package flash.display;
 import flash.display.Stage;
 import flash.geom.Matrix;
 import flash.geom.Rectangle;
+import js.html.CanvasElement;
+import js.html.CanvasRenderingContext2D;
 import js.Browser;
 
 
@@ -13,6 +15,8 @@ class Shape extends DisplayObject {
 	
 	public var graphics (get, null):Graphics;
 	
+	private var __canvas:CanvasElement;
+	private var __canvasContext:CanvasRenderingContext2D;
 	private var __graphics:Graphics;
 	
 	
@@ -79,6 +83,58 @@ class Shape extends DisplayObject {
 				}
 				
 				context.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
+				
+			}
+			
+		}
+		
+	}
+	
+	
+	public override function __renderDOM (renderSession:RenderSession):Void {
+		
+		if (!__renderable) return;
+		
+		if (__graphics != null && __graphics.__dirty) {
+			
+			__graphics.__render ();
+			
+			if (__graphics.__canvas != null) {
+				
+				if (__canvas == null) {
+					
+					__canvas = cast Browser.document.createElement ("canvas");	
+					__canvasContext = __canvas.getContext ("2d");
+					__canvas.style.position = "absolute";
+					renderSession.element.appendChild (__canvas);
+					
+				}
+				
+				__canvas.width = __graphics.__canvas.width;
+				__canvas.height = __graphics.__canvas.height;
+				
+				if (!__worldTransform.equals (__cacheWorldTransform)) {
+					
+					var transform = new Matrix ();
+					transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
+					transform = transform.mult (__worldTransform);
+					
+					__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.z++), null);
+					__cacheWorldTransform = __worldTransform.clone ();
+					
+				}
+				
+				__canvasContext.globalAlpha = __worldAlpha;
+				__canvasContext.drawImage (__graphics.__canvas, 0, 0);
+				
+			} else {
+				
+				if (__canvas != null) {
+					
+					renderSession.element.removeChild (__canvas);
+					__canvas = null;
+					
+				}
 				
 			}
 			
