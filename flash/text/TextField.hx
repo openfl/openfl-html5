@@ -436,8 +436,22 @@ class TextField extends InteractiveObject {
 				
 				// TODO: Handle ranges using span
 				
+				var fontFamily = switch (__textFormat.font) {
+					
+					case "_sans": "sans-serif";
+					case "_serif": "serif";
+					case "_typewriter": "monospace";
+					default: __textFormat.font;
+					
+				}
+				
 				var style = __div.style;
-				style.setProperty ("font", __getFont (__textFormat), null);
+				style.setProperty ("font-family", "\"" + fontFamily + "\"", null);
+				style.setProperty ("font-weight", __textFormat.bold ? "bold" : "normal", null);
+				style.setProperty ("font-style", __textFormat.italic ? "italic" : "normal", null);
+				style.setProperty ("font-size", __textFormat.size + "px", null);
+				style.setProperty ("line-height", (__textFormat.size + __textFormat.leading + 4) + "px ", null);
+				//style.setProperty ("font", __getFont (__textFormat), null);
 				style.setProperty ("color", "#" + StringTools.hex (__textFormat.color, 6), null);
 				style.setProperty ("width", __width + "px", null);
 				style.setProperty ("height", __height + "px", null);
@@ -464,6 +478,8 @@ class TextField extends InteractiveObject {
 				
 				style.setProperty ("opacity", Std.string (__worldAlpha), null);
 				style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+				
+				__dirty = false;
 				
 			} else {
 				
