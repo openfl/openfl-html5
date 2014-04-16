@@ -48,7 +48,7 @@ import flash.Lib;
 		
 		var sounds = [];
 		var id;
-		::foreach assets::::if (embed)::
+		::foreach assets::::if (embed != false)::
 		::if (type == "image")::
 		var image = new Image ();
 		id = "::resourceName::";
