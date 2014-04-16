@@ -505,7 +505,7 @@ class DisplayObjectContainer extends InteractiveObject {
 		var bounds = new Rectangle ();
 		__getLocalBounds (bounds);
 		
-		return bounds.height;
+		return bounds.height * scaleY;
 		
 	}
 	
@@ -542,7 +542,7 @@ class DisplayObjectContainer extends InteractiveObject {
 		var bounds = new Rectangle ();
 		__getLocalBounds (bounds);
 		
-		return bounds.width;
+		return bounds.width * scaleX;
 		
 	}
 	
