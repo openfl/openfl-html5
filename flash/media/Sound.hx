@@ -12,6 +12,8 @@ import haxe.io.Path;
 class Sound extends EventDispatcher {
 	
 	
+	private static var __registeredSounds = new Map<String, Bool> ();
+	
 	public var bytesLoaded (default, null):Int;
 	public var bytesTotal (default, null):Int;
 	public var id3 (default, null):ID3Info;
@@ -20,7 +22,8 @@ class Sound extends EventDispatcher {
 	public var url (default, null):String;
 	
 	private var __buffer:Bool;
-	private var __howl:Howl;
+	private var __sound:SoundJSInstance;
+	private var __soundID:String;
 	
 	
 	public function new (stream:URLRequest = null, context:SoundLoaderContext = null) {
@@ -45,9 +48,9 @@ class Sound extends EventDispatcher {
 	
 	public function close ():Void {
 		
-		if (__howl != null) {
+		if (__registeredSounds.exists (__soundID)) {
 			
-			__howl.unload ();
+			SoundJS.removeSound (__soundID);
 			
 		}
 		
@@ -56,30 +59,20 @@ class Sound extends EventDispatcher {
 	
 	public function load (stream:URLRequest, context:SoundLoaderContext = null):Void {
 		
-		if (__howl != null) {
+		url = stream.url;
+		__soundID = Path.withoutExtension (stream.url);
+		
+		if (!__registeredSounds.exists (__soundID)) {
 			
-			if (stream.url == url) {
-				
-				return;
-				
-			} else {
-				
-				__howl.unload ();
-				
-			}
+			__registeredSounds.set (__soundID, true);
+			SoundJS.addEventListener ("fileload", SoundJS_onFileLoad);
+			SoundJS.registerSound (url, __soundID);
+			
+		} else {
+			
+			dispatchEvent (new Event (Event.COMPLETE));
 			
 		}
-		
-		url = stream.url;
-		var file = Path.withoutExtension (stream.url);
-		
-		__howl = new Howl ({
-			onload: howl_onLoad,
-			onloaderror: howl_onLoadError,
-			urls: [ file + ".ogg", file + ".mp3", file + ".wav" ],
-			buffer: __buffer,
-			loop: __buffer // For now, we'll assume music tracks are looping :/
-		});
 		
 	}
 	
@@ -92,11 +85,16 @@ class Sound extends EventDispatcher {
 			
 		}
 		
-		// For now, assume looping on music tracks
+		var instance = SoundJS.play (__soundID, SoundJS.INTERRUPT_ANY, 0, Std.int (startTime), loops, sndTransform.volume, sndTransform.pan);
 		
-		if (__buffer) loops++;
+		return new SoundChannel (instance);
 		
-		return new SoundChannel (__howl, startTime, loops, sndTransform);
+	}
+	
+	
+	private static function __init__ ():Void {
+		
+		SoundJS.alternateExtensions = [ "ogg", "mp3", "wav" ];
 		
 	}
 	
@@ -108,20 +106,14 @@ class Sound extends EventDispatcher {
 	
 	
 	
-	private function howl_onLoad (_):Void {
+	private function SoundJS_onFileLoad (event:Dynamic):Void {
 		
-		dispatchEvent (new Event (Event.COMPLETE));
-		
-	}
-	
-	
-	private function howl_onLoadError (_):Void {
-		
-		#if debug
-		trace ("Error loading sound '" + url + "'");
-		#end
-		
-		dispatchEvent (new IOErrorEvent (IOErrorEvent.IO_ERROR));
+		if (event.id == __soundID) {
+			
+			SoundJS.removeEventListener ("fileload", SoundJS_onFileLoad);
+			dispatchEvent (new Event (Event.COMPLETE));
+			
+		}
 		
 	}
 	
@@ -129,278 +121,105 @@ class Sound extends EventDispatcher {
 }
 
 
-@:native("Howler") extern class Howler {
+@:native("createjs.Sound") extern class SoundJS {
 	
+	public static function addEventListener(type:String, listener:Dynamic, ?useCapture:Bool):Dynamic;
+	public static function dispatchEvent(eventObj:Dynamic, ?target:Dynamic):Bool;
+	public static function hasEventListener(type:String):Bool;
+	public static function removeAllEventListeners(?type:String):Void;
+	public static function removeEventListener(type:String, listener:Dynamic, ?useCapture:Bool):Void;
 	
-	public static function mute ():Howler;
-	public static function unmute ():Howler;
-	public static function volume (vol:Float):Howler;
+	public static function createInstance(src:String):SoundJSInstance;
+	public static function getCapabilities():Dynamic;
+	public static function getCapability(key:String):Dynamic;
+	public static function getMute():Bool;
+	public static function getVolume():Float;
+	public static function initializeDefaultPlugins():Bool;
+	public static function isReady():Bool;
+	public static function loadComplete(src:String):Bool;
+	//public static function mute(value:Bool):Void;
+	public static function play(src:String, ?interrupt:String = INTERRUPT_NONE, ?delay:Int = 0, ?offset:Int = 0, ?loop:Int = 0, ?volume:Float = 1, ?pan:Float = 0):SoundJSInstance;
+	public static function registerManifest(manifest:Array<Dynamic>, basepath:String):Dynamic;
+	public static function registerPlugin(plugin:Dynamic):Bool;
+	public static function registerPlugins(plugins:Array<Dynamic>):Bool;
+	public static function registerSound(src:String, ?id:String, ?data:Float, ?preload:Bool = true):Dynamic;
+	
+	public static function removeAllSounds():Void;
+	public static function removeManifest(manifest:Array<Dynamic>):Dynamic;
+	public static function removeSound(src:String):Void;
+	
+	public static function setMute(value:Bool):Bool;
+	public static function setVolume(value:Float):Void;
+	public static function stop():Void;
+	
+	public static var activePlugin:Dynamic;
+	public static var alternateExtensions:Array<String>;
+	//public static var AUDIO_TIMEOUT:Float;
+	public static var defaultInterruptBehavior:String;
+	public static var DELIMITER:String;
+	//public static var EXTENSION_MAP:Dynamic;
+	public static inline var INTERRUPT_ANY:String = "any";
+	public static inline var INTERRUPT_EARLY:String = "early";
+	public static inline var INTERRUPT_LATE:String = "late";
+	public static inline var INTERRUPT_NONE:String = "none";
+	//public var onLoadComplete:Dynamic->Void;
+	public static var PLAY_FAILED:String;
+	public static var PLAY_FINISHED:String;
+	public static var PLAY_INITED:String;
+	public static var PLAY_INTERRUPTED:String;
+	public static var PLAY_SUCCEEDED:String;
+	public static var SUPPORTED_EXTENSIONS:Array<String>;
 	
 }
 
 
-@:native("Howl") extern class Howl {
+@:native("createjs.SoundInstance") extern class SoundJSInstance extends SoundJSEventDispatcher {
 	
-	
-	public var autoplay:Bool;
-	public var buffer:Bool;
-	public var format:String;
-	//public var loop:Bool;
-	//public var sprite:Dynamic;
-	//public var volume:Float;
-	//public var urls:Array<String>;
-	public var onend:Dynamic;
-	public var onload:Dynamic;
-	public var onloaderror:Dynamic;
-	public var onpause:Dynamic;
-	public var onplay:Dynamic;
-	
-	public function new (options:Dynamic);
-	
-	public function load ():Howl;
-	@:overload(function (url:String):Howl{}) public function urls (urls:Array<String>):Howl;
-	public function play (?sprite:String, ?callback:Dynamic):Howl;
-	public function pause (?id:String, ?timerID:String):Howl;
-	public function stop (?id:String, ?timerID:String):Howl;
-	public function mute (?id:String):Howl;
-	public function unmute (?id:String):Howl;
-	public function volume (vol:Float, ?id:String):Howl;
-	public function loop (loop:Bool):Howl;
-	public function sprite (sprite:Dynamic):Howl;
-	public function pos (pos:Float, ?id:String):Dynamic;
-	public function pos3d (x:Float, y:Float, z:Float, ?id:String):Howl;
-	public function fade (from:Float, to:Float, len:Float, ?callback:Dynamic, ?id:String):Howl;
-	//public function fadeIn (to:Float, len:Float, ?callback:Dynamic):Howl;
-	//public function fadeOut (to:Float, len:Float, ?callback:Dynamic, ?id:String):Howl;
-	public function on (event:String, ?callback:Dynamic):Howl;
-	public function off (event:String, ?callback:Dynamic):Howl;
-	public function unload ():Void;
-	
+	public function new(src:String, owner:Dynamic):Void;
+	public function getDuration():Int;
+	public function getMute():Bool;
+	public function getPan():Float;
+	public function getPosition():Int;
+	public function getVolume():Float;
+	//public function mute(value:Bool):Bool;
+	public function pause():Bool;
+	public function play(?interrupt:String = Sound.INTERRUPT_NONE, ?delay:Int = 0, ?offset:Int = 0, ?loop:Int = 0, ?volume:Float = 1, ?pan:Float = 0):Void;
+	public function resume():Bool;
+	public function setMute(value:Bool):Bool;
+	public function setPan(value:Float):Float;
+	public function setPosition(value:Int):Void;
+	public function setVolume(value:Float):Bool;
+	public function stop():Bool;
+
+	public var gainNode:Dynamic;
+	public var pan:Float;
+	public var panNode:Dynamic;
+	public var playState:String;
+	public var sourceNode:Dynamic;
+	//public var startTime:Float;
+	public var uniqueId:Dynamic;
+	public var volume:Float;
+
+	public var onComplete:SoundJSInstance->Void;
+	public var onLoop:SoundJSInstance->Void;
+	public var onPlayFailed:SoundJSInstance->Void;
+	public var onPlayInterrupted:SoundJSInstance->Void;
+	public var onPlaySucceeded:SoundJSInstance->Void;
+	public var onReady:SoundJSInstance->Void;
 	
 }
 
 
-/*package flash.media;
-
-
-import flash.events.Event;
-import flash.events.EventDispatcher;
-import flash.events.IOErrorEvent;
-import flash.net.URLRequest;
-import flash.net.URLLoader;
-import flash.Lib;
-import js.html.MediaElement;
-import js.Browser;
-
-
-@:autoBuild(openfl.Assets.embedSound())
-class Sound extends EventDispatcher {
+@:native("createjs.EventDispatcher") extern class SoundJSEventDispatcher {
 	
+	public function addEventListener(type:String, listener:Dynamic, ?useCapture:Bool):Dynamic;
+	public function dispatchEvent(eventObj:Dynamic, ?target:Dynamic):Bool;
+	public function hasEventListener(type:String):Bool;
+	public static function initialize(target:Dynamic):Void;
+	public function off(type:String, listener:Dynamic, ?useCapture:Bool):Bool;
+	public function on(type:String, listener:Dynamic, ?scope:Dynamic, ?once:Bool=false, ?data:Dynamic = null, ?useCapture:Bool=false):Dynamic;
+	public function removeAllEventListeners(?type:String):Void;
+	public function removeEventListener(type:String, listener:Dynamic, ?useCapture:Bool):Void;
+	public function toString():String;
 	
-	static inline var EXTENSION_MP3 = "mp3";
-	static inline var EXTENSION_OGG = "ogg";
-	static inline var EXTENSION_WAV = "wav";
-	static inline var EXTENSION_AAC = "aac";
-	static inline var MEDIA_TYPE_MP3 = "audio/mpeg";
-	static inline var MEDIA_TYPE_OGG = "audio/ogg; codecs=\"vorbis\"";
-	static inline var MEDIA_TYPE_WAV = "audio/wav; codecs=\"1\"";
-	static inline var MEDIA_TYPE_AAC = "audio/mp4; codecs=\"mp4a.40.2\"";
-	
-	public var bytesLoaded (default, null):Int;
-	public var bytesTotal (default, null):Int;
-	public var id3 (default, null):ID3Info;
-	public var isBuffering (default, null):Bool;
-	public var length (default, null):Float;
-	public var url (default, null):String;
-	
-	private var __soundCache:URLLoader;
-	private var __soundChannels:Map<Int, SoundChannel>;
-	private var __soundIdx:Int;
-	private var __streamUrl:String;
-
-	
-	public function new (stream:URLRequest = null, context:SoundLoaderContext = null):Void {
-		
-		super (this);
-		
-		bytesLoaded = 0;
-		bytesTotal = 0;
-		id3 = null;
-		isBuffering = false;
-		length = 0;
-		url = null;
-		
-		__soundChannels = new Map<Int, SoundChannel> ();
-		__soundIdx = 0;
-		
-		if (stream != null) {
-			
-			load (stream, context);
-		}
-		
-	}
-	
-	
-	public function close ():Void {
-		
-		
-		
-	}
-	
-	
-	public function load (stream:URLRequest, context:SoundLoaderContext = null):Void {
-		
-		__load (stream, context);
-		
-	}
-	
-	
-	public function play (startTime:Float = 0.0, loops:Int = 0, sndTransform:SoundTransform = null):SoundChannel {
-		
-		if (__streamUrl == null) return null;
-		
-		// -- GC the sound when the following closure is executed
-		var self = this;
-		var curIdx = __soundIdx;
-		var removeRef = function () {
-			
-			self.__soundChannels.remove (curIdx);
-			
-		}
-		// --
-		
-		var channel = SoundChannel.__create (__streamUrl, startTime, loops, sndTransform, removeRef);
-		__soundChannels.set (curIdx, channel);
-		__soundIdx++;
-		var audio = channel.__audio;
-		
-		return channel;
-		
-	}
-	
-	
-	private function __addEventListeners ():Void {
-		
-		__soundCache.addEventListener (Event.COMPLETE, __onSoundLoaded);
-		__soundCache.addEventListener (IOErrorEvent.IO_ERROR, __onSoundLoadError);
-		
-	}
-	
-	
-	public static function __canPlayMime (mime:String):Bool {
-		
-		var audio:MediaElement = cast Browser.document.createElement ("audio");
-		
-		var playable = function (ok:String) {
-			
-			if (ok != "" && ok != "no") return true; else return false;
-		}
-		
-		//return playable(audio.canPlayType(mime));
-		return playable (audio.canPlayType (mime, null));
-		
-	}
-	
-	
-	public static function __canPlayType (extension:String):Bool {
-		
-		var mime = __mimeForExtension (extension);
-		if (mime == null) return false;
-		return __canPlayMime (mime);
-		
-	}
-	
-	
-	public function __load (stream:URLRequest, context:SoundLoaderContext = null, mime:String = ""):Void {
-		
-		#if debug
-		if (mime == null) {
-			
-			var url = stream.url.split ("?");
-			var extension = url[0].substr (url[0].lastIndexOf (".") + 1);
-			mime = __mimeForExtension (extension);
-			
-		}
-		
-		if (mime == null || !__canPlayMime (mime))
-			trace ("Warning: '" + stream.url + "' with type '" + mime + "' may not play on this browser.");
-		#end
-		
-		__streamUrl = stream.url;
-		
-		// initiate a network request, so the resource is cached by the browser
-		try {
-			
-			__soundCache = new URLLoader ();
-			__addEventListeners ();
-			__soundCache.load (stream);
-			
-		} catch (e:Dynamic) {
-			
-			#if debug
-			trace ("Warning: Could not preload '" + stream.url + "'");
-			#end
-			
-		}
-		
-	}
-	
-	
-	private static inline function __mimeForExtension (extension:String):String {
-		
-		var mime:String = null;
-		
-		switch (extension) {
-			
-			case EXTENSION_MP3: mime = MEDIA_TYPE_MP3;
-			case EXTENSION_OGG: mime = MEDIA_TYPE_OGG;
-			case EXTENSION_WAV: mime = MEDIA_TYPE_WAV;
-			case EXTENSION_AAC: mime = MEDIA_TYPE_AAC;
-			default: mime = null;
-			
-		}
-		
-		return mime;
-		
-	}
-	
-	
-	private function __removeEventListeners ():Void {
-		
-		__soundCache.removeEventListener (Event.COMPLETE, __onSoundLoaded, false);
-		__soundCache.removeEventListener (IOErrorEvent.IO_ERROR, __onSoundLoadError, false);
-		
-	}
-	
-	
-	
-	
-	// Event Handlers
-	
-	
-	
-	
-	private function __onSoundLoadError (evt:IOErrorEvent):Void {
-		
-		__removeEventListeners ();
-		
-		#if debug
-		trace ("Error loading sound '" + __streamUrl + "'");
-		#end
-		
-		var evt = new IOErrorEvent (IOErrorEvent.IO_ERROR);
-		dispatchEvent (evt);
-		
-	}
-	
-	
-	private function __onSoundLoaded (evt:Event):Void {
-		
-		__removeEventListeners ();
-		var evt = new Event (Event.COMPLETE);
-		dispatchEvent (evt);
-		
-	}
-	
-	
-}*/
+}

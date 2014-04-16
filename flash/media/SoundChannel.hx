@@ -14,53 +14,30 @@ class SoundChannel extends EventDispatcher {
 	public var rightPeak (default, null):Float;
 	public var soundTransform (get, set):SoundTransform;
 	
-	private var __howl:Howl;
-	private var __loop:Bool;
-	private var __soundID:String;
-	private var __soundTransform:SoundTransform;
-	private var __startTime:Float;
-	private var __stopped:Bool;
+	private var __soundInstance:SoundJSInstance;
 	
 	
-	private function new (howl:Howl, startTime:Float, loops:Int, soundTransform:SoundTransform):Void {
+	private function new (soundInstance:SoundJSInstance):Void {
 		
 		super (this);
 		
-		__loop = (loops > 0);
-		__soundTransform = soundTransform;
-		__startTime = startTime;
-		
-		if (__loop) howl.loop (true);
-		
-		__howl = howl;
-		__howl.on ("end", howl_onEnd);
-		__howl.play (null, howl_onPlay);
+		__soundInstance = soundInstance;
+		__soundInstance.addEventListener ("complete", soundInstance_onComplete);
 		
 	}
 	
 	
 	public function stop ():Void {
 		
-		if (__soundID != null) {
-			
-			__dispose ();
-			
-		}
-		
-		__stopped = true;
+		__soundInstance.stop ();
 		
 	}
 	
 	
 	private function __dispose ():Void {
 		
-		if (__soundID != null && __howl != null) {
-			
-			__howl.off ("end", howl_onEnd);
-			__howl.stop (__soundID);
-			__howl = null;
-			
-		}
+		__soundInstance.stop ();
+		__soundInstance = null;
 		
 	}
 	
@@ -74,48 +51,30 @@ class SoundChannel extends EventDispatcher {
 	
 	private function get_position ():Float {
 		
-		if (__soundID != null) {
-			
-			return __howl.pos (-1, __soundID);
-			
-		}
-		
-		return 0;
+		return __soundInstance.getPosition ();
 		
 	}
 	
 	
 	private function set_position (value:Float):Float {
 		
-		if (__soundID != null) {
-			
-			__howl.pos (value, __soundID);
-			return __howl.pos (-1, __soundID);
-			
-		}
-		
-		return 0;
+		__soundInstance.setPosition (Std.int (value));
+		return __soundInstance.getPosition ();
 		
 	}
 	
 	
 	private function get_soundTransform ():SoundTransform {
 		
-		return new SoundTransform (__soundTransform.volume, __soundTransform.pan);
+		return new SoundTransform (__soundInstance.getVolume (), __soundInstance.getPan ());
 		
 	}
 	
 	
 	private function set_soundTransform (value:SoundTransform):SoundTransform {
 		
-		__soundTransform.volume = value.volume;
-		__soundTransform.pan = value.pan;
-		
-		if (__soundID != null) {
-			
-			__howl.volume (__soundTransform.volume, __soundID);
-			
-		}
+		__soundInstance.setVolume (value.volume);
+		__soundInstance.setPan (value.pan);
 		
 		return value;
 		
@@ -129,33 +88,9 @@ class SoundChannel extends EventDispatcher {
 	
 	
 	
-	private function howl_onEnd (_):Void {
+	private function soundInstance_onComplete (_):Void {
 		
-		if (!__loop) {
-			
-			__dispose ();
-			dispatchEvent (new Event (Event.SOUND_COMPLETE));
-			
-		}
-		
-	}
-	
-	
-	private function howl_onPlay (soundID:String):Void {
-		
-		__soundID = soundID;
-		
-		if (__stopped) {
-			
-			__dispose ();
-			
-		} else {
-			
-			__howl.volume (__soundTransform.volume, __soundID);
-			__howl.pos (__startTime, __soundID);
-			if (__loop) __howl.loop (true);
-			
-		}
+		dispatchEvent (new Event (Event.SOUND_COMPLETE));
 		
 	}
 	
