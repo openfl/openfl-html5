@@ -99,7 +99,21 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	public function contains (child:DisplayObject):Bool {
 		
+		#if (haxe_ver > 3.100)
+		
 		return __children.indexOf (child) > -1;
+		
+		#else
+		
+		for (i in __children) {
+			
+			if (i == child) return true;
+			
+		}
+		
+		return false;
+		
+		#end
 		
 	}
 	
@@ -238,8 +252,31 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		if (child1.parent == this && child2.parent == this) {
 			
+			#if (haxe_ver > 3.100)
+			
 			var index1 = __children.indexOf (child1);
 			var index2 = __children.indexOf (child2);
+			
+			#else
+			
+			var index1 = -1;
+			var index2 = -1;
+			
+			for (i in 0...__children.length) {
+				
+				if (__children[i] == child1) {
+					
+					index1 = i;
+					
+				} else if (__children[i] == child2) {
+					
+					index2 = i;
+					
+				}
+				
+			}
+			
+			#end
 			
 			__children[index1] = child2;
 			__children[index2] = child1;

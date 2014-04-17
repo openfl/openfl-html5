@@ -681,8 +681,18 @@ class Graphics {
 							} else {
 								
 								__context.lineWidth = thickness;
+								
+								#if (haxe_ver > 3.100)
 								__context.lineJoin = joints;
 								__context.lineCap = caps;
+								#else
+								__context.lineJoin = Std.string (joints).toLowerCase ();
+								__context.lineCap = switch (caps) {
+									case CapsStyle.NONE: "butt";
+									default: Std.string (caps).toLowerCase ();
+								}
+								#end
+								
 								__context.miterLimit = miterLimit;
 								__context.strokeStyle =  "#" + StringTools.hex (color, 6);
 								

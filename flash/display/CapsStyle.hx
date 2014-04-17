@@ -1,6 +1,8 @@
 package flash.display;
 
 
+#if (haxe_ver > 3.100)
+
 @:enum abstract CapsStyle(String) to String {
 	
 	var NONE = "butt";
@@ -8,3 +10,15 @@ package flash.display;
 	var SQUARE = "square";
 	
 }
+
+#else
+
+enum CapsStyle {
+	
+	NONE;
+	ROUND;
+	SQUARE;
+	
+}
+
+#end

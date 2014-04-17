@@ -1,6 +1,8 @@
 package flash.ui;
 
 
+#if (haxe_ver > 3.100)
+
 @:enum abstract KeyLocation(Int) {
 	
 	var STANDARD = 0;
@@ -9,3 +11,16 @@ package flash.ui;
 	var NUM_PAD = 3;
 	
 }
+
+#else
+
+enum KeyLocation {
+	
+	STANDARD;
+	LEFT;
+	RIGHT;
+	NUM_PAD;
+	
+}
+
+#end
