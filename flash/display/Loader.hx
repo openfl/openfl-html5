@@ -122,6 +122,7 @@ class Loader extends Sprite {
 	private function BitmapData_onLoad (bitmapData:BitmapData):Void {
 		
 		contentLoaderInfo.content = new Bitmap (bitmapData);
+		content = contentLoaderInfo.content;
 		addChild (contentLoaderInfo.content);
 		
 		var event = new Event (Event.COMPLETE);
