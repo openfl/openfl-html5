@@ -714,9 +714,9 @@ class Stage extends Sprite {
 			
 			rect = __div.getBoundingClientRect ();
 			//__mouseX = (event.clientX - rect.left) * (__div.style.width / rect.width);
-			__mouseX = (event.clientX - rect.left) * (rect.width);
+			__mouseX = (event.clientX - rect.left);
 			//__mouseY = (event.clientY - rect.top) * (__div.style.height / rect.height);
-			__mouseY = (event.clientY - rect.top) * (rect.height);
+			__mouseY = (event.clientY - rect.top);
 			
 		}
 		
