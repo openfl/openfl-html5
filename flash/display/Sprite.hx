@@ -137,7 +137,11 @@ class Sprite extends DisplayObjectContainer {
 					
 					__canvas = cast Browser.document.createElement ("canvas");	
 					__canvasContext = __canvas.getContext ("2d");
-					__canvas.style.position = "absolute";
+					
+					var style = __canvas.style;
+					style.setProperty ("position", "absolute", null);
+					style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+					
 					renderSession.element.appendChild (__canvas);
 					
 				}
