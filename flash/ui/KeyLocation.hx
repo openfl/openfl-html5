@@ -14,12 +14,12 @@ package flash.ui;
 
 #else
 
-enum KeyLocation {
+@:fakeEnum(Int) enum KeyLocation {
 	
 	STANDARD;
 	LEFT;
-	RIGHT;
 	NUM_PAD;
+	RIGHT;
 	
 }
 

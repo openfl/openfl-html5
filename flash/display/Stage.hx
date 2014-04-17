@@ -815,17 +815,13 @@ class Stage extends Sprite {
 		var keyCode = (event.keyCode != null ? event.keyCode : event.which);
 		keyCode = Keyboard.__convertMozillaCode (keyCode);
 		
-		var keyLocation = KeyLocation.STANDARD;
+		var location = untyped (event).location != null ? untyped (event).location : event.keyLocation;
 		
-		if (untyped (event).location != null) {
-			
-			keyLocation = cast (untyped (event).location, KeyLocation);
-			
-		} else if (event.keyLocation != null) {
-			
-			keyLocation = cast (event.keyLocation, KeyLocation);
-			
-		}
+		#if (haxe_ver > 3.100)
+		var keyLocation = cast (location, KeyLocation);
+		#else
+		var keyLocation = Type.createEnumIndex (KeyLocation, location);
+		#end
 		
 		dispatchEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, keyLocation, event.ctrlKey, event.altKey, event.shiftKey));
 		
