@@ -98,6 +98,15 @@ class Stage extends Sprite {
 		style.setProperty ("-ms-user-select", "none", null);
 		style.setProperty ("-o-user-select", "none", null);
 		
+		// Disable image drag on Firefox
+		Browser.document.addEventListener ("dragstart", function (e) {
+			if (e.target.nodeName.toLowerCase() == "img") {
+				e.preventDefault();
+				return false;
+			}
+			return true;
+		}, false);
+		
 		#end
 		
 		__originalWidth = width;
