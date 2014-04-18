@@ -266,19 +266,21 @@ class Stage extends Sprite {
 	
 	private function __fireEvent (event:Event, stack:Array<DisplayObject>):Void {
 		
-		var l = stack.length;
-		var obj;
+		var length = stack.length;
 		
-		if (l > 0) {
+		if (length == 0) {
+			
+			event.eventPhase = EventPhase.AT_TARGET;
+			event.target.dispatchEvent (event);
+			
+		} else {
 			
 			event.eventPhase = EventPhase.CAPTURING_PHASE;
 			event.target = stack[stack.length - 1];
 			
-			for (i in 0...l - 1) {
+			for (i in 0...length - 1) {
 				
-				obj = stack[i];
-				event.currentTarget = obj;
-				obj.dispatchEvent (event);
+				stack[i].dispatchEvent (event);
 				
 				if (event.__isCancelled) {
 					
@@ -288,41 +290,33 @@ class Stage extends Sprite {
 				
 			}
 			
-		} else {
+			event.eventPhase = EventPhase.AT_TARGET;
+			event.target.dispatchEvent (event);
 			
-			event.target = this;
-			
-		}
-		
-		event.eventPhase = EventPhase.AT_TARGET;
-		//event.currentTarget = event.target;
-		event.target.dispatchEvent (event);
-		
-		if (event.__isCancelled) {
-			
-			return;
-			
-		}
-		
-		if (l > 0 && event.bubbles) {
-			
-			event.eventPhase = EventPhase.BUBBLING_PHASE;
-			
-			var i = l - 2;
-			
-			while (i >= 0) {
+			if (event.__isCancelled) {
 				
-				obj = stack[i];
-				event.currentTarget = obj;
-				obj.dispatchEvent (event);
+				return;
 				
-				if (event.__isCancelled) {
+			}
+			
+			if (event.bubbles) {
+				
+				event.eventPhase = EventPhase.BUBBLING_PHASE;
+				var i = length - 2;
+				
+				while (i >= 0) {
 					
-					return;
+					stack[i].dispatchEvent (event);
+					
+					if (event.__isCancelled) {
+						
+						return;
+						
+					}
+					
+					i--;
 					
 				}
-				
-				i--;
 				
 			}
 			
