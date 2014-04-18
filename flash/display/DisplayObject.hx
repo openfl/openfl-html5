@@ -47,7 +47,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private var __cacheWorldAlpha:Float;
 	private var __cacheWorldTransform:Matrix;
 	private var __filters:Array<BitmapFilter>;
-	private var __id:Int;
 	private var __interactive:Bool;
 	private var __isMask:Bool;
 	private var __mask:DisplayObject;
@@ -73,7 +72,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		
 		__worldAlpha = 1;
 		__worldTransform = new Matrix ();
-		__id = __instanceCount++;
+		name = "instance" + (++__instanceCount);
 		
 	}
 	
@@ -156,6 +155,13 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	
 	private function __getBounds (rect:Rectangle, matrix:Matrix):Void {
+		
+		
+		
+	}
+	
+	
+	private function __getInteractive (stack:Array<DisplayObject>):Void {
 		
 		
 		
@@ -361,12 +367,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	
 	private function get_name ():String {
-		
-		if (name == null) {
-			
-			return "instance" + __id;
-			
-		}
 		
 		return name;
 		

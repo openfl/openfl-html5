@@ -56,6 +56,12 @@ class Sprite extends DisplayObjectContainer {
 		
 		if (super.__hitTest (x, y, shapeFlag, stack, interactiveOnly)) {
 			
+			if (name == "Box") {
+			
+			trace ("Super true");
+			
+		}
+			
 			return true;
 			
 		} else if (__graphics != null && __graphics.__hitTest (x, y, shapeFlag, __worldTransform)) {

@@ -66,6 +66,8 @@ class Stage extends Sprite {
 		this.__element = element;
 		this.color = color;
 		
+		this.name = null;
+		
 		__mouseX = 0;
 		__mouseY = 0;
 		
@@ -265,16 +267,16 @@ class Stage extends Sprite {
 	private function __fireEvent (event:Event, stack:Array<DisplayObject>):Void {
 		
 		var l = stack.length;
+		var obj;
 		
 		if (l > 0) {
 			
-			// First, the "capture" phase ...
 			event.eventPhase = EventPhase.CAPTURING_PHASE;
-			stack.reverse ();
-			event.target = stack[0];
+			event.target = stack[stack.length - 1];
 			
-			for (obj in stack) {
+			for (i in 0...l - 1) {
 				
+				obj = stack[i];
 				event.currentTarget = obj;
 				obj.dispatchEvent (event);
 				
@@ -286,12 +288,15 @@ class Stage extends Sprite {
 				
 			}
 			
+		} else {
+			
+			event.target = this;
+			
 		}
 		
-		// Next, the "target"
 		event.eventPhase = EventPhase.AT_TARGET;
-		event.currentTarget = this;
-		dispatchEvent (event);
+		event.currentTarget = event.target;
+		event.target.dispatchEvent (event);
 		
 		if (event.__isCancelled) {
 			
@@ -299,14 +304,15 @@ class Stage extends Sprite {
 			
 		}
 		
-		// Last, the "bubbles" phase
-		if (event.bubbles) {
+		if (l > 0 && event.bubbles) {
 			
 			event.eventPhase = EventPhase.BUBBLING_PHASE;
-			stack.reverse ();
 			
-			for (obj in stack) {
+			var i = l - 2;
+			
+			while (i >= 0) {
 				
+				obj = stack[i];
 				event.currentTarget = obj;
 				obj.dispatchEvent (event);
 				
@@ -316,9 +322,18 @@ class Stage extends Sprite {
 					
 				}
 				
+				i--;
+				
 			}
 			
 		}
+		
+	}
+	
+	
+	private override function __getInteractive (stack:Array<DisplayObject>):Void {
+		
+		stack.push (this);
 		
 	}
 	
@@ -903,13 +918,19 @@ class Stage extends Sprite {
 			
 			if (__focus != null) {
 				
-				__focus.dispatchEvent (new FocusEvent (FocusEvent.FOCUS_OUT, true, false, value, false, 0));
+				var event = new FocusEvent (FocusEvent.FOCUS_OUT, false, false, value, false, 0);
+				__stack = [];
+				__focus.__getInteractive (__stack);
+				__fireEvent (event, __stack);
 				
 			}
 			
 			if (value != null) {
 				
-				value.dispatchEvent (new FocusEvent (FocusEvent.FOCUS_IN, true, false, __focus, false, 0));
+				var event = new FocusEvent (FocusEvent.FOCUS_IN, false, false, __focus, false, 0);
+				__stack = [];
+				value.__getInteractive (__stack);
+				__fireEvent (event, __stack);
 				
 			}
 			
