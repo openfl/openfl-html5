@@ -415,66 +415,90 @@ class TextField extends InteractiveObject {
 	
 	public override function __renderDOM (renderSession:RenderSession):Void {
 		
-		if (!__renderable) return;
+		//if (!__renderable) return;
 		
-		if (__dirty) {
-			
-			if (__text != "") {
+		if (stage != null && visible) {
+		
+			if (__dirty) {
 				
-				if (__div == null) {
+				if (__text != "") {
 					
-					__div = cast Browser.document.createElement ("div");
+					if (__div == null) {
+						
+						__div = cast Browser.document.createElement ("div");
+						
+						var style = __div.style;
+						style.position = "absolute";
+						style.setProperty ("top", "0", null);
+						style.setProperty ("left", "0", null);
+						style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+						style.setProperty ("cursor", "inherit", null);
+						
+						renderSession.element.appendChild (__div);
+						
+					}
+					
+					// TODO: Handle ranges using span
+					// TODO: Vertical align
+					
+					__div.innerHTML = __text;
 					
 					var style = __div.style;
-					style.position = "absolute";
-					style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
-					style.setProperty ("cursor", "inherit", null);
+					style.setProperty ("font", __getFont (__textFormat), null);
+					style.setProperty ("color", "#" + StringTools.hex (__textFormat.color, 6), null);
 					
-					renderSession.element.appendChild (__div);
+					if (autoSize != TextFieldAutoSize.NONE) {
+						
+						style.setProperty ("width", "auto", null);
+						
+					} else {
+						
+						style.setProperty ("width", __width + "px", null);
+						
+					}
+					
+					style.setProperty ("height", __height + "px", null);
+					
+					switch (__textFormat.align) {
+						
+						case TextFormatAlign.CENTER:
+							
+							style.setProperty ("text-align", "center", null);
+						
+						case TextFormatAlign.RIGHT:
+							
+							style.setProperty ("text-align", "right", null);
+						
+						default:
+							
+							style.setProperty ("text-align", "left", null);
+						
+					}
+					
+					style.setProperty ("opacity", Std.string (__worldAlpha), null);
+					style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+					
+					__dirty = false;
+					
+				} else {
+					
+					if (__div != null) {
+						
+						renderSession.element.removeChild (__div);
+						__div = null;
+						
+					}
 					
 				}
 				
-				// TODO: Handle ranges using span
+			}
+			
+		} else {
+			
+			if (__div != null) {
 				
-				var style = __div.style;
-				style.setProperty ("font", __getFont (__textFormat), null);
-				style.setProperty ("color", "#" + StringTools.hex (__textFormat.color, 6), null);
-				style.setProperty ("width", __width + "px", null);
-				style.setProperty ("height", __height + "px", null);
-				
-				switch (__textFormat.align) {
-					
-					case TextFormatAlign.CENTER:
-						
-						style.setProperty ("text-align", "center", null);
-					
-					case TextFormatAlign.RIGHT:
-						
-						style.setProperty ("text-align", "right", null);
-					
-					default:
-						
-						style.setProperty ("text-align", "left", null);
-					
-				}
-				
-				// TODO: Vertical align
-				
-				__div.innerHTML = __text;
-				
-				style.setProperty ("opacity", Std.string (__worldAlpha), null);
-				style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
-				
-				__dirty = false;
-				
-			} else {
-				
-				if (__div != null) {
-					
-					renderSession.element.removeChild (__div);
-					__div = null;
-					
-				}
+				renderSession.element.removeChild (__div);
+				__div = null;
 				
 			}
 			

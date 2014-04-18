@@ -142,9 +142,9 @@ class Bitmap extends DisplayObjectContainer {
 	
 	public override function __renderDOM (renderSession:RenderSession):Void {
 		
-		if (!__renderable) return;
+		//if (!__renderable) return;
 		
-		if (bitmapData != null && bitmapData.__valid) {
+		if (stage != null && visible && bitmapData != null && bitmapData.__valid) {
 			
 			if (bitmapData.__sourceImage != null) {
 				
@@ -202,6 +202,8 @@ class Bitmap extends DisplayObjectContainer {
 			
 			var style = __canvas.style;
 			style.setProperty ("position", "absolute", null);
+			style.setProperty ("top", "0", null);
+			style.setProperty ("left", "0", null);
 			style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 			
 			renderSession.element.appendChild (__canvas);
@@ -235,6 +237,8 @@ class Bitmap extends DisplayObjectContainer {
 			
 			var style = __image.style;
 			style.setProperty ("position", "absolute", null);
+			style.setProperty ("top", "0", null);
+			style.setProperty ("left", "0", null);
 			style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 			
 			renderSession.element.appendChild (__image);

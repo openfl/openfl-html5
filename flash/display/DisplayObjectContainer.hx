@@ -17,6 +17,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	public var tabChildren:Bool;
 	
 	private var __children:Array<DisplayObject>;
+	private var __removedChildren:Array<DisplayObject>;
 	
 	
 	public function new () {
@@ -26,6 +27,7 @@ class DisplayObjectContainer extends InteractiveObject {
 		mouseChildren = true;
 		
 		__children = new Array<DisplayObject> ();
+		__removedChildren = new Array<DisplayObject> ();
 		
 	}
 	
@@ -180,6 +182,7 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 			child.parent = null;
 			__children.remove (child);
+			__removedChildren.push (child);
 			
 		}
 		
@@ -431,6 +434,8 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 		}
 		
+		__removedChildren = [];
+		
 		if (__mask != null) {
 			
 			renderSession.maskManager.popMask ();
@@ -442,7 +447,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	public override function __renderDOM (renderSession:RenderSession):Void {
 		
-		if (!__renderable) return;
+		//if (!__renderable) return;
 		
 		//if (__mask != null) {
 			
@@ -455,6 +460,14 @@ class DisplayObjectContainer extends InteractiveObject {
 			child.__renderDOM (renderSession);
 			
 		}
+		
+		for (orphan in __removedChildren) {
+			
+			orphan.__renderDOM (renderSession);
+			
+		}
+		
+		__removedChildren = [];
 		
 		//if (__mask != null) {
 			

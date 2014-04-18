@@ -150,7 +150,10 @@ class EventDispatcher implements IEventDispatcher {
 	
 	public function toString ():String { 
 		
-		return untyped "[ " +  this.__name__ + " ]";
+		var full = Type.getClassName (Type.getClass (this));
+		var short = full.split (".").pop ();
+		
+		return untyped "[object " + short + "]";
 		
 	}
 	

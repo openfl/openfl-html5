@@ -17,6 +17,8 @@ import flash.geom.Transform;
 class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	
+	private static var __instanceCount = 0;
+	
 	@:isVar public var alpha (get, set):Float;
 	public var blendMode:BlendMode;
 	public var cacheAsBitmap:Bool;
@@ -26,7 +28,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public var mask (get, set):DisplayObject;
 	public var mouseX (get, null):Float;
 	public var mouseY (get, null):Float;
-	public var name:String;
+	@:isVar public var name (get, set):String;
 	public var parent (default, null):DisplayObjectContainer;
 	@:isVar public var rotation (get, set):Float;
 	public var scale9Grid:Rectangle;
@@ -45,6 +47,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private var __cacheWorldAlpha:Float;
 	private var __cacheWorldTransform:Matrix;
 	private var __filters:Array<BitmapFilter>;
+	private var __id:Int;
 	private var __interactive:Bool;
 	private var __isMask:Bool;
 	private var __mask:DisplayObject;
@@ -70,6 +73,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		
 		__worldAlpha = 1;
 		__worldTransform = new Matrix ();
+		__id = __instanceCount++;
 		
 	}
 	
@@ -352,6 +356,26 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private function get_mouseY ():Float {
 		
 		return globalToLocal (new Point (0, stage.__mouseY)).y;
+		
+	}
+	
+	
+	private function get_name ():String {
+		
+		if (name == null) {
+			
+			return "instance" + __id;
+			
+		}
+		
+		return name;
+		
+	}
+	
+	
+	private function set_name (value:String):String {
+		
+		return name = value;
 		
 	}
 	

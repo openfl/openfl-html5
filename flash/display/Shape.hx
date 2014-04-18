@@ -93,52 +93,67 @@ class Shape extends DisplayObject {
 	
 	public override function __renderDOM (renderSession:RenderSession):Void {
 		
-		if (!__renderable) return;
+		//if (!__renderable) return;
 		
-		if (__graphics != null && __graphics.__dirty) {
+		if (stage != null && visible && __graphics != null) {
+		
+			if (__graphics != null && __graphics.__dirty) {
+				
+				__graphics.__render ();
+				
+				if (__graphics.__canvas != null) {
+					
+					if (__canvas == null) {
+						
+						__canvas = cast Browser.document.createElement ("canvas");	
+						__canvasContext = __canvas.getContext ("2d");
+						
+						var style = __canvas.style;
+						style.setProperty ("position", "absolute", null);
+						style.setProperty ("top", "0", null);
+						style.setProperty ("left", "0", null);
+						style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+						
+						renderSession.element.appendChild (__canvas);
+						
+					}
+					
+					__canvas.width = __graphics.__canvas.width;
+					__canvas.height = __graphics.__canvas.height;
+					
+					if (!__worldTransform.equals (__cacheWorldTransform)) {
+						
+						var transform = new Matrix ();
+						transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
+						transform = transform.mult (__worldTransform);
+						
+						__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.z++), null);
+						__cacheWorldTransform = __worldTransform.clone ();
+						
+					}
+					
+					__canvasContext.globalAlpha = __worldAlpha;
+					__canvasContext.drawImage (__graphics.__canvas, 0, 0);
+					
+				} else {
+					
+					if (__canvas != null) {
+						
+						renderSession.element.removeChild (__canvas);
+						__canvas = null;
+						
+					}
+					
+				}
+				
+			}
+				
+		} else {
 			
-			__graphics.__render ();
-			
-			if (__graphics.__canvas != null) {
+			if (__canvas != null) {
 				
-				if (__canvas == null) {
-					
-					__canvas = cast Browser.document.createElement ("canvas");	
-					__canvasContext = __canvas.getContext ("2d");
-					
-					var style = __canvas.style;
-					style.setProperty ("position", "absolute", null);
-					style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
-					
-					renderSession.element.appendChild (__canvas);
-					
-				}
-				
-				__canvas.width = __graphics.__canvas.width;
-				__canvas.height = __graphics.__canvas.height;
-				
-				if (!__worldTransform.equals (__cacheWorldTransform)) {
-					
-					var transform = new Matrix ();
-					transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
-					transform = transform.mult (__worldTransform);
-					
-					__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.z++), null);
-					__cacheWorldTransform = __worldTransform.clone ();
-					
-				}
-				
-				__canvasContext.globalAlpha = __worldAlpha;
-				__canvasContext.drawImage (__graphics.__canvas, 0, 0);
-				
-			} else {
-				
-				if (__canvas != null) {
-					
-					renderSession.element.removeChild (__canvas);
-					__canvas = null;
-					
-				}
+				renderSession.element.removeChild (__canvas);
+				__canvas = null;
 				
 			}
 			
