@@ -50,6 +50,7 @@ class Event {
 		this.type = type;
 		this.bubbles = bubbles;
 		this.cancelable = cancelable;
+		eventPhase = EventPhase.AT_TARGET;
 		
 	}
 	
@@ -61,6 +62,13 @@ class Event {
 		event.target = target;
 		event.currentTarget = currentTarget;
 		return event;
+		
+	}
+	
+	
+	public function isDefaultPrevented ():Bool {
+		
+		return (__isCancelled || __isCancelledNow);
 		
 	}
 	

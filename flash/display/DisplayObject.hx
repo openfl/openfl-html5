@@ -4,6 +4,7 @@ package flash.display;
 import flash.display.Stage;
 import flash.errors.TypeError;
 import flash.events.Event;
+import flash.events.EventPhase;
 import flash.events.EventDispatcher;
 import flash.filters.BitmapFilter;
 import flash.geom.ColorTransform;
@@ -13,6 +14,7 @@ import flash.geom.Rectangle;
 import flash.geom.Transform;
 
 
+@:access(flash.events.Event)
 @:access(flash.display.Stage)
 class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
@@ -73,6 +75,28 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		__worldAlpha = 1;
 		__worldTransform = new Matrix ();
 		name = "instance" + (++__instanceCount);
+		
+	}
+	
+	
+	public override function dispatchEvent (event:Event):Bool {
+		
+		var result = super.dispatchEvent (event);
+		
+		if (event.__isCancelled) {
+			
+			return true;
+			
+		}
+		
+		if (event.bubbles && parent != null && parent != this) {
+			
+			event.eventPhase = EventPhase.BUBBLING_PHASE;
+			parent.dispatchEvent (event);
+			
+		}
+		
+		return result;
 		
 	}
 	

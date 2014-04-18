@@ -191,7 +191,7 @@ class TextField extends InteractiveObject {
 		font += format.size + "px";
 		font += "/" + (format.size + format.leading + 4) + "px ";
 		
-		font += switch (format.font) {
+		font += "'" + switch (format.font) {
 			
 			case "_sans": "sans-serif";
 			case "_serif": "serif";
@@ -199,6 +199,8 @@ class TextField extends InteractiveObject {
 			default: format.font;
 			
 		}
+		
+		font += "'";
 		
 		return font;
 		
