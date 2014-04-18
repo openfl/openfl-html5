@@ -476,7 +476,6 @@ class TextField extends InteractiveObject {
 					}
 					
 					style.setProperty ("opacity", Std.string (__worldAlpha), null);
-					style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
 					
 					__dirty = false;
 					
@@ -488,6 +487,17 @@ class TextField extends InteractiveObject {
 						__div = null;
 						
 					}
+					
+				}
+				
+			}
+			
+			if (__div != null) {
+				
+				if (!__worldTransform.equals (__cacheWorldTransform)) {
+					
+					__div.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+					__cacheWorldTransform = __worldTransform.clone ();
 					
 				}
 				

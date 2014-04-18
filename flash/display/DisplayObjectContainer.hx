@@ -463,7 +463,11 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		for (orphan in __removedChildren) {
 			
-			orphan.__renderDOM (renderSession);
+			if (orphan.stage == null) {
+				
+				orphan.__renderDOM (renderSession);
+				
+			}
 			
 		}
 		

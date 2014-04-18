@@ -128,7 +128,7 @@ class Sprite extends DisplayObjectContainer {
 		//if (!__renderable) return;
 		
 		if (stage != null && visible && __graphics != null) {
-		
+			
 			if (__graphics.__dirty) {
 				
 				__graphics.__render ();
@@ -152,19 +152,6 @@ class Sprite extends DisplayObjectContainer {
 					
 					__canvas.width = __graphics.__canvas.width;
 					__canvas.height = __graphics.__canvas.height;
-					
-					if (!__worldTransform.equals (__cacheWorldTransform)) {
-						
-						var transform = new Matrix ();
-						transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
-						transform = transform.mult (__worldTransform);
-						
-						__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.z++), null);
-						__cacheWorldTransform = __worldTransform.clone ();
-						
-					}
-					
-					__canvasContext.globalAlpha = __worldAlpha;
 					__canvasContext.drawImage (__graphics.__canvas, 0, 0);
 					
 				} else {
@@ -177,6 +164,23 @@ class Sprite extends DisplayObjectContainer {
 					}
 					
 				}
+				
+			}
+			
+			if (__canvas != null) {
+				
+				if (!__worldTransform.equals (__cacheWorldTransform)) {
+					
+					var transform = new Matrix ();
+					transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
+					transform = transform.mult (__worldTransform);
+					
+					__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.z++), null);
+					__cacheWorldTransform = __worldTransform.clone ();
+					
+				}
+				
+				__canvasContext.globalAlpha = __worldAlpha;
 				
 			}
 			

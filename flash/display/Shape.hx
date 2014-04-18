@@ -97,7 +97,7 @@ class Shape extends DisplayObject {
 		
 		if (stage != null && visible && __graphics != null) {
 		
-			if (__graphics != null && __graphics.__dirty) {
+			if (__graphics.__dirty) {
 				
 				__graphics.__render ();
 				
@@ -145,6 +145,23 @@ class Shape extends DisplayObject {
 					}
 					
 				}
+				
+			}
+			
+			if (__canvas != null) {
+				
+				if (!__worldTransform.equals (__cacheWorldTransform)) {
+					
+					var transform = new Matrix ();
+					transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
+					transform = transform.mult (__worldTransform);
+					
+					__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.z++), null);
+					__cacheWorldTransform = __worldTransform.clone ();
+					
+				}
+				
+				__canvasContext.globalAlpha = __worldAlpha;
 				
 			}
 				
