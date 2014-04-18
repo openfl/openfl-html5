@@ -59,7 +59,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private var __worldAlpha:Float;
 	
 	
-	public function new () {
+	private function new () {
 		
 		super ();
 		
