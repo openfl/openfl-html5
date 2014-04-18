@@ -56,7 +56,11 @@ class Event {
 	
 	public function clone ():Event {
 		
-		return new Event (type, bubbles, cancelable);
+		var event = new Event (type, bubbles, cancelable);
+		event.eventPhase = eventPhase;
+		event.target = target;
+		event.currentTarget = currentTarget;
+		return event;
 		
 	}
 	

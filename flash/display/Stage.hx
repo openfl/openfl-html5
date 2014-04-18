@@ -295,7 +295,7 @@ class Stage extends Sprite {
 		}
 		
 		event.eventPhase = EventPhase.AT_TARGET;
-		event.currentTarget = event.target;
+		//event.currentTarget = event.target;
 		event.target.dispatchEvent (event);
 		
 		if (event.__isCancelled) {
@@ -918,18 +918,20 @@ class Stage extends Sprite {
 			
 			if (__focus != null) {
 				
-				var event = new FocusEvent (FocusEvent.FOCUS_OUT, false, false, value, false, 0);
+				var event = new FocusEvent (FocusEvent.FOCUS_OUT, true, false, value, false, 0);
 				__stack = [];
 				__focus.__getInteractive (__stack);
+				__stack.reverse ();
 				__fireEvent (event, __stack);
 				
 			}
 			
 			if (value != null) {
 				
-				var event = new FocusEvent (FocusEvent.FOCUS_IN, false, false, __focus, false, 0);
+				var event = new FocusEvent (FocusEvent.FOCUS_IN, true, false, __focus, false, 0);
 				__stack = [];
 				value.__getInteractive (__stack);
+				__stack.reverse ();
 				__fireEvent (event, __stack);
 				
 			}

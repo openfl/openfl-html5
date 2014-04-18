@@ -17,13 +17,24 @@ class FocusEvent extends Event {
 	public var shiftKey:Bool;
 	
 	
-	public function new (type:String, bubbles:Bool = false, cancelable:Bool = false, inObject:InteractiveObject = null, inShiftKey:Bool = false, inKeyCode:Int = 0) {
+	public function new (type:String, bubbles:Bool = false, cancelable:Bool = false, relatedObject:InteractiveObject = null, shiftKey:Bool = false, keyCode:Int = 0) {
 		
 		super (type, bubbles, cancelable);
 		
-		keyCode = inKeyCode;
-		shiftKey = (inShiftKey == null ? false : inShiftKey);
-		relatedObject = inObject;
+		this.keyCode = keyCode;
+		this.shiftKey = (shiftKey == null ? false : shiftKey);
+		this.relatedObject = relatedObject;
+		
+	}
+	
+	
+	public override function clone ():Event {
+		
+		var event = new FocusEvent (type, bubbles, cancelable, relatedObject, shiftKey, keyCode);
+		event.target = target;
+		event.currentTarget = currentTarget;
+		event.eventPhase = eventPhase;
+		return event;
 		
 	}
 	
