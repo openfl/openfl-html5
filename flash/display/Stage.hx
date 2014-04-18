@@ -844,7 +844,24 @@ class Stage extends Sprite {
 		var keyLocation = Type.createEnumIndex (KeyLocation, location);
 		#end
 		
-		dispatchEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, keyLocation, event.ctrlKey, event.altKey, event.shiftKey));
+		var stack = new Array <DisplayObject> ();
+		
+		if (__focus == null) {
+			
+			__getInteractive (stack);
+			
+		} else {
+			
+			__focus.__getInteractive (stack);
+			
+		}
+		
+		if (stack.length > 0) {
+			
+			stack.reverse ();
+			__fireEvent (new KeyboardEvent (event.type == "keydown" ? KeyboardEvent.KEY_DOWN : KeyboardEvent.KEY_UP, true, false, event.charCode, keyCode, keyLocation, event.ctrlKey, event.altKey, event.shiftKey), stack);
+			
+		}
 		
 	}
 	

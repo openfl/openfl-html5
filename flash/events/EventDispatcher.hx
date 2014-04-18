@@ -83,7 +83,8 @@ class EventDispatcher implements IEventDispatcher {
 			
 			if (listener.useCapture == capture) {
 				
-				listener.callback (event.clone ());
+				//listener.callback (event.clone ());
+				listener.callback (event);
 				
 				if (event.__isCancelledNow) {
 					
