@@ -3,6 +3,7 @@ package flash.display;
 
 import flash.events.Event;
 import flash.events.EventPhase;
+import flash.events.FocusEvent;
 import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
 import flash.events.TouchEvent;
@@ -25,7 +26,7 @@ class Stage extends Sprite {
 	public var align:StageAlign;
 	public var color (get, set):Int;
 	public var displayState:StageDisplayState;
-	public var focus:InteractiveObject;
+	public var focus (get, set):InteractiveObject;
 	public var frameRate:Float;
 	public var quality:StageQuality;
 	public var stageFocusRect:Bool;
@@ -42,6 +43,7 @@ class Stage extends Sprite {
 	private var __div:DivElement;
 	private var __element:HtmlElement;
 	private var __eventQueue:Array<js.html.Event>;
+	private var __focus:InteractiveObject;
 	private var __fullscreen:Bool;
 	private var __invalidated:Bool;
 	private var __mouseX:Float = 0;
@@ -208,7 +210,7 @@ class Stage extends Sprite {
 		#end
 		
 		var windowEvents = [ "keydown", "keyup" ];
-		var elementEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup", "click", "dblclick" ];
+		var elementEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup", "click", "dblclick", "focus", "blur" ];
 		
 		for (event in windowEvents) {
 			
@@ -344,6 +346,7 @@ class Stage extends Sprite {
 				case "keydown", "keyup": window_onKey (cast event);
 				case "touchstart", "touchend", "touchmove": element_onTouch (cast event);
 				case "mousedown", "mouseup", "mousemove", "click", "dblclick": element_onMouse (cast event);
+				case "focus", "blur": element_onFocus (cast event);
 				default:
 				
 			}
@@ -546,6 +549,15 @@ class Stage extends Sprite {
 	// Event Handlers
 	
 	
+	
+	
+	private function element_onFocus (event:js.html.Event):Void {
+		
+		//var focusEvent = new FocusEvent (FocusEvent.FOCUS_IN, true, false, this, false, 0);
+		//focusEvent.target = this;
+		//__fireEvent (focusEvent, [ this ]);
+		
+	}
 	
 	
 	private function element_onTouch (event:js.html.TouchEvent):Void {
@@ -874,6 +886,38 @@ class Stage extends Sprite {
 		__colorString = "#" + StringTools.hex (value, 6);
 		
 		return __color = value;
+		
+	}
+	
+	
+	private function get_focus ():InteractiveObject {
+		
+		return __focus;
+		
+	}
+	
+	
+	private function set_focus (value:InteractiveObject):InteractiveObject {
+		
+		if (value != __focus) {
+			
+			if (__focus != null) {
+				
+				__focus.dispatchEvent (new FocusEvent (FocusEvent.FOCUS_OUT, true, false, value, false, 0));
+				
+			}
+			
+			if (value != null) {
+				
+				value.dispatchEvent (new FocusEvent (FocusEvent.FOCUS_IN, true, false, __focus, false, 0));
+				
+			}
+			
+			__focus = value;
+			
+		}
+		
+		return __focus;
 		
 	}
 	

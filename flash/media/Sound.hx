@@ -94,7 +94,11 @@ class Sound extends EventDispatcher {
 	
 	private static function __init__ ():Void {
 		
-		SoundJS.alternateExtensions = [ "ogg", "mp3", "wav" ];
+		if (untyped window.createjs != null) {
+			
+			SoundJS.alternateExtensions = [ "ogg", "mp3", "wav" ];
+			
+		}
 		
 	}
 	
