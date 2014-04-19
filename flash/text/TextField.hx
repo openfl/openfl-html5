@@ -410,7 +410,6 @@ class TextField extends InteractiveObject {
 			if (scrollRect == null) {
 				
 				context.drawImage (__canvas, 0, 0);
-				context.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
 				
 			} else {
 				
