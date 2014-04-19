@@ -84,7 +84,7 @@ class Sprite extends DisplayObjectContainer {
 			__graphics.__render ();
 			
 			if (__graphics.__canvas != null) {
-					
+				
 				if (__mask != null) {
 					
 					renderSession.maskManager.pushMask (__mask);
@@ -106,7 +106,15 @@ class Sprite extends DisplayObjectContainer {
 					
 				}
 				
-				context.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
+				if (scrollRect == null) {
+					
+					context.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
+					
+				} else {
+					
+					context.drawImage (__graphics.__canvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x, __graphics.__bounds.y, scrollRect.width, scrollRect.height);
+					
+				}
 				
 				if (__mask != null) {
 					

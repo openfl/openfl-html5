@@ -422,6 +422,12 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		if (!__renderable) return;
 		
+		if (scrollRect != null) {
+			
+			renderSession.maskManager.pushRect (scrollRect, __worldTransform);
+			
+		}
+		
 		if (__mask != null) {
 			
 			renderSession.maskManager.pushMask (__mask);
@@ -437,6 +443,12 @@ class DisplayObjectContainer extends InteractiveObject {
 		__removedChildren = [];
 		
 		if (__mask != null) {
+			
+			renderSession.maskManager.popMask ();
+			
+		}
+		
+		if (scrollRect != null) {
 			
 			renderSession.maskManager.popMask ();
 			

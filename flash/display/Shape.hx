@@ -82,7 +82,15 @@ class Shape extends DisplayObject {
 					
 				}
 				
-				context.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
+				if (scrollRect == null) {
+					
+					context.drawImage (__graphics.__canvas, __graphics.__bounds.x, __graphics.__bounds.y);
+					
+				} else {
+					
+					context.drawImage (__graphics.__canvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x, __graphics.__bounds.y, scrollRect.width, scrollRect.height);
+					
+				}
 				
 			}
 			

@@ -9,6 +9,7 @@ import flash.events.MouseEvent;
 import flash.events.TouchEvent;
 import flash.geom.Matrix;
 import flash.geom.Point;
+import flash.geom.Rectangle;
 import flash.ui.Keyboard;
 import flash.ui.KeyLocation;
 import js.html.CanvasElement;
@@ -1016,6 +1017,20 @@ class MaskManager {
 		context.clip ();
 		
 		//mask.worldAlpha = cacheAlpha;
+		
+	}
+	
+	
+	public function pushRect (rect:Rectangle, transform:Matrix):Void {
+		
+		var context = renderSession.context;
+		context.save ();
+		
+		context.setTransform (transform.a, transform.c, transform.b, transform.d, transform.tx, transform.ty);
+		
+		context.beginPath ();
+		context.rect (rect.x, rect.y, rect.width, rect.height);
+		context.clip ();
 		
 	}
 	
