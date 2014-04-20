@@ -76,7 +76,7 @@ class Bitmap extends DisplayObjectContainer {
 	
 	public override function __renderCanvas (renderSession:RenderSession):Void {
 		
-		if (!__renderable) return;
+		if (!__renderable || __worldAlpha <= 0) return;
 		
 		var context = renderSession.context;
 		

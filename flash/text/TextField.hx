@@ -257,7 +257,7 @@ class TextField extends InteractiveObject {
 	
 	public override function __renderCanvas (renderSession:RenderSession):Void {
 		
-		if (!__renderable) return;
+		if (!__renderable || __worldAlpha <= 0) return;
 		
 		if (__dirty) {
 			

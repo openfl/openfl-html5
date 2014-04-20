@@ -217,6 +217,16 @@ class Rectangle {
 	
 	public function union (toUnion:Rectangle):Rectangle {
 		
+		if (width == 0 || height == 0) {
+			
+			return toUnion.clone ();
+			
+		} else if (toUnion.width == 0 || toUnion.height == 0) {
+			
+			return clone ();
+			
+		}
+		
 		var x0 = x > toUnion.x ? toUnion.x : x;
 		var x1 = right < toUnion.right ? toUnion.right : right;
 		var y0 = y > toUnion.y ? toUnion.y : y;

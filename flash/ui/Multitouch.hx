@@ -55,9 +55,7 @@ class Multitouch {
 	
 	private static function get_supportsTouchEvents ():Bool {
 		
-		// just one of many possible tests from http://modernizr.github.com/Modernizr/touch.html
-		var supported = Reflect.hasField(Browser.window, "ontouchstart");
-		return supported;
+		return untyped __js__("('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch");
 		
 	}
 	

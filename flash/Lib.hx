@@ -92,6 +92,17 @@ import js.Browser;
 	}
 	
 	
+	public static function preventDefaultTouchMove ():Void {
+		
+		Browser.document.addEventListener ("touchmove", function (evt:js.html.Event):Void {
+			
+			evt.preventDefault ();
+			
+		}, false);
+		
+	}
+	
+	
 	public static function trace (arg:Dynamic):Void {
 		
 		haxe.Log.trace (arg);

@@ -329,19 +329,26 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		// TODO the bounds have already been calculated this render session so return what we have
 		
+		var matrixCache = null;
+		
 		if (matrix != null) {
 			
 			var matrixCache = __worldTransform;
 			__worldTransform = matrix;
 			__updateChildren ();
-			__worldTransform = matrixCache;
 			
 		}
-		
+			
 		for (child in __children) {
 			
 			if (!child.__renderable) continue;
-			child.__getBounds (rect, matrix);
+			child.__getBounds (rect, null);
+			
+		}
+			
+		if (matrix != null) {
+			
+			__worldTransform = matrixCache;
 			
 		}
 		
@@ -420,7 +427,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	public override function __renderCanvas (renderSession:RenderSession):Void {
 		
-		if (!__renderable) return;
+		if (!__renderable || __worldAlpha <= 0) return;
 		
 		if (scrollRect != null) {
 			
@@ -508,12 +515,17 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		if (this.stage != stage) {
 			
+			if (this.stage != null) {
+				
+				dispatchEvent (new Event (Event.REMOVED_FROM_STAGE, false, false));
+				
+			}
+			
 			this.stage = stage;
 			
 			if (stage != null) {
 				
-				var evt = new Event (Event.ADDED_TO_STAGE, false, false);
-				dispatchEvent (evt);
+				dispatchEvent (new Event (Event.ADDED_TO_STAGE, false, false));
 				
 			}
 			
@@ -545,7 +557,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	public override function __updateChildren ():Void {
 		
-		__renderable = (visible && alpha > 0 && scaleX != 0 && scaleY != 0 && !__isMask);
+		__renderable = (visible && scaleX != 0 && scaleY != 0 && !__isMask);
 		if (!__renderable && !__isMask) return;
 		
 		for (child in __children) {

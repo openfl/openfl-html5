@@ -113,11 +113,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		}
 		
 		var bounds = new Rectangle ();
-		
-		var matrixCache = __worldTransform;
-		__worldTransform = matrix;
 		__getBounds (bounds, matrix);
-		__worldTransform = matrixCache;
 		
 		return bounds;
 		
@@ -231,6 +227,12 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		
 		if (this.stage != stage) {
 			
+			if (this.stage != null) {
+				
+				dispatchEvent (new Event (Event.REMOVED_FROM_STAGE, false, false));
+				
+			}
+			
 			this.stage = stage;
 			
 			if (stage != null) {
@@ -246,7 +248,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	public function __update ():Void {
 		
-		__renderable = (visible && alpha > 0 && scaleX != 0 && scaleY != 0 && !__isMask);
+		__renderable = (visible && scaleX != 0 && scaleY != 0 && !__isMask);
 		if (!__renderable && !__isMask) return;
 		
 		if (rotation != __rotationCache) {
