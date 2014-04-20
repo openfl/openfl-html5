@@ -272,7 +272,7 @@ class Stage extends Sprite {
 		if (length == 0) {
 			
 			event.eventPhase = EventPhase.AT_TARGET;
-			event.target.dispatchEvent (event);
+			event.target.__broadcast (event);
 			
 		} else {
 			
@@ -281,7 +281,7 @@ class Stage extends Sprite {
 			
 			for (i in 0...length - 1) {
 				
-				stack[i].dispatchEvent (event);
+				stack[i].__broadcast (event);
 				
 				if (event.__isCancelled) {
 					
@@ -292,7 +292,7 @@ class Stage extends Sprite {
 			}
 			
 			event.eventPhase = EventPhase.AT_TARGET;
-			event.target.dispatchEvent (event);
+			event.target.__broadcast (event);
 			
 			if (event.__isCancelled) {
 				
@@ -307,7 +307,7 @@ class Stage extends Sprite {
 				
 				while (i >= 0) {
 					
-					stack[i].dispatchEvent (event);
+					stack[i].__broadcast (event);
 					
 					if (event.__isCancelled) {
 						
@@ -773,7 +773,6 @@ class Stage extends Sprite {
 			__fireEvent (MouseEvent.__create (type, event, new Point (mouseX, mouseY), this), [ this ]);
 			
 		}
-		
 		
 		/*case "mousemove":
 				

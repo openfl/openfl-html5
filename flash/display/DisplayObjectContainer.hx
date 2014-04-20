@@ -9,6 +9,7 @@ import flash.geom.Point;
 import flash.geom.Rectangle;
 
 
+@:access(flash.events.Event)
 class DisplayObjectContainer extends InteractiveObject {
 	
 	
@@ -299,7 +300,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
-	private override function __broadcast (event:Event):Void {
+	private override function __broadcast (event:Event):Bool {
 		
 		if (event.target == null) {
 			
@@ -311,14 +312,15 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 			child.__broadcast (event);
 			
+			if (event.__isCancelled) {
+				
+				return true;
+				
+			}
+			
 		}
 		
-		if (__eventMap != null && hasEventListener (event.type)) {
-			
-			event.currentTarget = this;
-			dispatchEvent (event);
-			
-		}
+		return super.__broadcast (event);
 		
 	}
 	
