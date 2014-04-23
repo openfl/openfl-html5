@@ -43,10 +43,14 @@ class Bitmap extends DisplayObjectContainer {
 	
 	private override function __getBounds (rect:Rectangle, matrix:Matrix):Void {
 		
-		var bounds = new Rectangle (0, 0, bitmapData.width, bitmapData.height);
-		bounds = bounds.transform (__worldTransform);
-		
-		rect.__expand (bounds.x, bounds.y, bounds.width, bounds.height);
+		if (bitmapData != null) {
+			
+			var bounds = new Rectangle (0, 0, bitmapData.width, bitmapData.height);
+			bounds = bounds.transform (__worldTransform);
+			
+			rect.__expand (bounds.x, bounds.y, bounds.width, bounds.height);
+			
+		}
 		
 	}
 	
