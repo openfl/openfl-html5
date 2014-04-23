@@ -842,8 +842,50 @@ class TextField extends InteractiveObject {
 	}
 	
 	
-	public function get_textWidth ():Float { return __width - 4; }
-	public function get_textHeight ():Float { return __height - 4; }
+	public function get_textWidth ():Float {
+		
+		if (__canvas != null) {
+			
+			var sizes = __measureText ();
+			var total:Float = 0;
+			
+			for (size in sizes) {
+				
+				total += size;
+				
+			}
+			
+			return total;
+			
+		} else if (__div != null) {
+			
+			return __div.clientWidth;
+			
+		} else {
+			
+			var div = Browser.document.createElement ("div");
+			div.innerHTML = __text;
+			div.style.setProperty ("font", __getFont (__textFormat), null);
+			div.style.position = "absolute";
+			div.style.top = "-100%";
+			Browser.document.body.appendChild (div);
+			var clientWidth = div.offsetWidth;
+			Browser.document.body.removeChild (div);
+			
+			return clientWidth;
+			
+		}
+		
+	}
+	
+	
+	public function get_textHeight ():Float {
+		
+		// TODO: Make this more accurate
+		
+		return __textFormat.size * 1.185;
+		
+	}
 	
 	
 	public function set_type (value:TextFieldType):TextFieldType {
