@@ -300,31 +300,6 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
-	private override function __broadcast (event:Event):Bool {
-		
-		if (event.target == null) {
-			
-			event.target = this;
-			
-		}
-		
-		for (child in __children) {
-			
-			child.__broadcast (event);
-			
-			if (event.__isCancelled) {
-				
-				return true;
-				
-			}
-			
-		}
-		
-		return super.__broadcast (event);
-		
-	}
-	
-	
 	private override function __getBounds (rect:Rectangle, matrix:Matrix):Void {
 		
 		if (__children.length == 0) return;
