@@ -272,7 +272,7 @@ class Stage extends Sprite {
 		if (length == 0) {
 			
 			event.eventPhase = EventPhase.AT_TARGET;
-			event.target.__broadcast (event);
+			event.target.__broadcast (event, false);
 			
 		} else {
 			
@@ -281,7 +281,7 @@ class Stage extends Sprite {
 			
 			for (i in 0...length - 1) {
 				
-				stack[i].__broadcast (event);
+				stack[i].__broadcast (event, false);
 				
 				if (event.__isCancelled) {
 					
@@ -292,7 +292,7 @@ class Stage extends Sprite {
 			}
 			
 			event.eventPhase = EventPhase.AT_TARGET;
-			event.target.__broadcast (event);
+			event.target.__broadcast (event, false);
 			
 			if (event.__isCancelled) {
 				
@@ -307,7 +307,7 @@ class Stage extends Sprite {
 				
 				while (i >= 0) {
 					
-					stack[i].__broadcast (event);
+					stack[i].__broadcast (event, false);
 					
 					if (event.__isCancelled) {
 						
@@ -365,12 +365,12 @@ class Stage extends Sprite {
 		
 		untyped __eventQueue.length = 0;
 		
-		__broadcast (new Event (Event.ENTER_FRAME));
+		__broadcast (new Event (Event.ENTER_FRAME), true);
 		
 		if (__invalidated) {
 			
 			__invalidated = false;
-			__broadcast (new Event (Event.RENDER));
+			__broadcast (new Event (Event.RENDER), true);
 			
 		}
 		
@@ -877,21 +877,21 @@ class Stage extends Sprite {
 		__resize ();
 		
 		var event = new Event (Event.RESIZE);
-		__broadcast (event);
+		__broadcast (event, false);
 		
 	}
 	
 	private function window_onFocus (event:js.html.Event):Void {
 		
 		var event = new Event (Event.ACTIVATE);
-		__broadcast (event);
+		__broadcast (event, true);
 		
 	}
 	
 	private function window_onBlur (event:js.html.Event):Void {
 		
 		var event = new Event (Event.DEACTIVATE);
-		__broadcast (event);
+		__broadcast (event, true);
 		
 	}
 	
