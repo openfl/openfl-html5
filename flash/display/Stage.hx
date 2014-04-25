@@ -375,12 +375,7 @@ class Stage extends Sprite {
 		}
 		
 		__renderable = true;
-		
-		if (DisplayObject.__worldDirty) {
-			
-			__update ();
-			
-		}
+		__update ();
 		
 		if (__canvas != null) {
 			
@@ -413,8 +408,6 @@ class Stage extends Sprite {
 			__renderDOM (__renderSession);
 			
 		}
-		
-		DisplayObject.__worldDirty = false;
 		
 		/*// run interaction!
 		if(stage.interactive) {
@@ -512,6 +505,18 @@ class Stage extends Sprite {
 				__div.style.cursor = cursor;
 				
 			}
+			
+		}
+		
+	}
+	
+	
+	public override function __update ():Void {
+		
+		if (DisplayObject.__worldDirty) {
+			
+			super.__update ();
+			DisplayObject.__worldDirty = false;
 			
 		}
 		

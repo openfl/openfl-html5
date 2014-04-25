@@ -112,11 +112,11 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	public function getBounds (targetCoordinateSpace:DisplayObject):Rectangle {
 		
-		var matrix = __worldTransform;
+		var matrix = __getTransform ();
 		
 		if (targetCoordinateSpace != null) {
 			
-			matrix = __worldTransform.clone ();
+			matrix = matrix.clone ();
 			matrix.concat (targetCoordinateSpace.__worldTransform.clone ().invert ());
 			
 		}
@@ -139,7 +139,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	public function globalToLocal (pos:Point):Point {
 		
-		return __worldTransform.clone ().invert ().transformPoint (pos);
+		return __getTransform ().clone ().invert ().transformPoint (pos);
 		
 	}
 	
@@ -160,7 +160,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	public function localToGlobal (point:Point):Point {
 		
-		return __worldTransform.transformPoint (point);
+		return __getTransform ().transformPoint (point);
 		
 	}
 	
@@ -203,6 +203,19 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private function __getLocalBounds (rect:Rectangle):Void {
 		
 		
+		
+	}
+	
+	
+	private function __getTransform ():Matrix {
+		
+		if (__worldDirty) {
+			
+			Lib.current.stage.__update ();
+			
+		}
+		
+		return __worldTransform;
 		
 	}
 	

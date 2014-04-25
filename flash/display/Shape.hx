@@ -31,7 +31,7 @@ class Shape extends DisplayObject {
 		
 		if (__graphics != null) {
 			
-			__graphics.__getBounds (rect, __worldTransform);
+			__graphics.__getBounds (rect, __getTransform ());
 			
 		}
 		
