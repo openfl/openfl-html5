@@ -50,6 +50,8 @@ class Graphics {
 	public function beginBitmapFill (bitmap:BitmapData, matrix:Matrix = null, repeat:Bool = true, smooth:Bool = false):Void {
 		
 		__commands.push (BeginBitmapFill (bitmap, matrix, repeat, smooth));
+		
+		__visible = true;
 			
 	}
 	
@@ -57,6 +59,8 @@ class Graphics {
 	public function beginFill (rgb:Int, alpha:Float = 1):Void {
 		
 		__commands.push (BeginFill (rgb & 0xFFFFFF, alpha));
+		
+		if (alpha > 0) __visible = true;
 		
 	}
 	
@@ -80,6 +84,7 @@ class Graphics {
 		}
 		
 		__bounds = null;
+		__visible = false;
 		
 	}
 	
@@ -180,7 +185,7 @@ class Graphics {
 		__commands.push (DrawTiles (sheet, tileData, smooth, flags));
 		
 		__dirty = true;
-		
+		__visible = true;
 		
 	}
 	
@@ -356,21 +361,8 @@ class Graphics {
 			__inPath = false;
 			__positionX = 0;
 			__positionY = 0;
-			__visible = false;
 			
-			for (command in __commands) {
-				
-				switch (command) {
-					
-					case BeginBitmapFill (_, _, _, _): __visible = true;
-					case BeginFill (_, alpha): if (alpha > 0) __visible = true;
-					default:
-					
-				}
-				
-			}
-			
-			if (__commands.length == 0 || __bounds.width == 0 || __bounds.height == 0 || !__visible) {
+			if (!__visible || __commands.length == 0 || __bounds.width == 0 || __bounds.height == 0) {
 				
 				__canvas = null;
 				__context = null;
