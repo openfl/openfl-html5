@@ -375,7 +375,12 @@ class Stage extends Sprite {
 		}
 		
 		__renderable = true;
-		__update ();
+		
+		if (DisplayObject.__worldDirty) {
+			
+			__update ();
+			
+		}
 		
 		if (__canvas != null) {
 			
@@ -408,6 +413,8 @@ class Stage extends Sprite {
 			__renderDOM (__renderSession);
 			
 		}
+		
+		DisplayObject.__worldDirty = false;
 		
 		/*// run interaction!
 		if(stage.interactive) {

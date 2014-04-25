@@ -426,7 +426,7 @@ class TextField extends InteractiveObject {
 		
 		//if (!__renderable) return;
 		
-		if (stage != null && visible) {
+		if (stage != null && __worldVisible) {
 		
 			if (__dirty) {
 				
@@ -444,6 +444,7 @@ class TextField extends InteractiveObject {
 						style.setProperty ("cursor", "inherit", null);
 						
 						renderSession.element.appendChild (__div);
+						__worldTransformChanged = true;
 						
 					}
 					
@@ -484,8 +485,6 @@ class TextField extends InteractiveObject {
 						
 					}
 					
-					style.setProperty ("opacity", Std.string (__worldAlpha), null);
-					
 					__dirty = false;
 					
 				} else {
@@ -503,10 +502,15 @@ class TextField extends InteractiveObject {
 			
 			if (__div != null) {
 				
-				if (!__worldTransform.equals (__cacheWorldTransform)) {
+				if (__worldAlphaChanged) {
+					
+					__div.style.setProperty ("opacity", Std.string (__worldAlpha), null);
+					
+				}
+				
+				if (__worldTransformChanged) {
 					
 					__div.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
-					__cacheWorldTransform = __worldTransform.clone ();
 					
 				}
 				

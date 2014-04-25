@@ -20,6 +20,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	
 	private static var __instanceCount = 0;
+	private static var __worldDirty = true;
 	
 	@:isVar public var alpha (get, set):Float;
 	public var blendMode:BlendMode;
@@ -47,8 +48,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public var __worldTransform:Matrix;
 	
 	private var __cacheScrollRect:Rectangle;
-	private var __cacheWorldAlpha:Float;
-	private var __cacheWorldTransform:Matrix;
 	private var __filters:Array<BitmapFilter>;
 	private var __interactive:Bool;
 	private var __isMask:Bool;
@@ -59,6 +58,10 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private var __rotationSine:Float;
 	private var __transform:Transform;
 	private var __worldAlpha:Float;
+	private var __worldAlphaChanged:Bool;
+	private var __worldTransformChanged:Bool;
+	private var __worldVisible:Bool;
+	private var __worldVisibleChanged:Bool;
 	
 	
 	private function new () {
@@ -75,6 +78,11 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		
 		__worldAlpha = 1;
 		__worldTransform = new Matrix ();
+		
+		#if dom
+		__worldVisible = true;
+		#end
+		
 		name = "instance" + (++__instanceCount);
 		
 	}
@@ -275,25 +283,55 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			b00 = parentTransform.a, b01 = parentTransform.b,
 			b10 = parentTransform.c, b11 = parentTransform.d;
 			
+			#if dom
+			var cache = __worldTransform.clone ();
+			#end
 			__worldTransform.a = a00 * b00 + a01 * b10;
 			__worldTransform.b = a00 * b01 + a01 * b11;
 			__worldTransform.c = a10 * b00 + a11 * b10;
 			__worldTransform.d = a10 * b01 + a11 * b11;
 			__worldTransform.tx = x * b00 + y * b10 + parentTransform.tx;
 			__worldTransform.ty = x * b01 + y * b11 + parentTransform.ty;
+			#if dom
+			__worldTransformChanged = !__worldTransform.equals (cache);
+			#end
 			
+			#if dom
+			var worldVisible = (parent.__worldVisible && visible);
+			__worldVisibleChanged = (__worldVisible != worldVisible);
+			__worldVisible = worldVisible;
+			
+			var worldAlpha = alpha * parent.__worldAlpha;
+			__worldAlphaChanged = (__worldAlpha != worldAlpha);
+			__worldAlpha = worldAlpha;
+			#else
 			__worldAlpha = alpha * parent.__worldAlpha;
+			#end
 			
 		} else {
 			
+			#if dom
+			var cache = __worldTransform.clone ();
+			#end
 			__worldTransform.a = __rotationCosine * scaleX;
 			__worldTransform.c = -__rotationSine * scaleY;
 			__worldTransform.tx = x;
 			__worldTransform.b = __rotationSine * scaleX;
 			__worldTransform.d = __rotationCosine * scaleY;
 			__worldTransform.ty = y;
+			#if dom
+			__worldTransformChanged = !__worldTransform.equals (cache);
+			#end
 			
+			#if dom
+			__worldVisibleChanged = (__worldVisible != visible);
+			__worldVisible = visible;
+			
+			__worldAlphaChanged = (__worldAlpha != alpha);
 			__worldAlpha = alpha;
+			#else
+			__worldAlpha = alpha;
+			#end
 			
 		}
 		
@@ -323,6 +361,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_alpha (value:Float):Float {
 		
+		__worldDirty = true;
 		return alpha = value;
 		
 	}
@@ -361,6 +400,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_height (value:Float):Float {
 		
+		__worldDirty = true;
 		return 0;
 		
 	}
@@ -375,6 +415,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_mask (value:DisplayObject):DisplayObject {
 		
+		__worldDirty = true;
 		if (__mask != null) __mask.__isMask = false;
 		if (value != null) value.__isMask = true;
 		return __mask = value;
@@ -419,6 +460,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_rotation (value:Float):Float {
 		
+		__worldDirty = true;
 		return rotation = value;
 		
 	}
@@ -433,6 +475,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_scaleX (value:Float):Float {
 		
+		__worldDirty = true;
 		return scaleX = value;
 		
 	}
@@ -447,6 +490,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_scaleY (value:Float):Float {
 		
+		__worldDirty = true;
 		return scaleY = value;
 		
 	}
@@ -479,6 +523,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			
 		}
 		
+		__worldDirty = true;
 		__transform.matrix = value.matrix.clone ();
 		__transform.colorTransform = new ColorTransform (value.colorTransform.redMultiplier, value.colorTransform.greenMultiplier, value.colorTransform.blueMultiplier, value.colorTransform.alphaMultiplier, value.colorTransform.redOffset, value.colorTransform.greenOffset, value.colorTransform.blueOffset, value.colorTransform.alphaOffset);
 		
@@ -496,6 +541,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_visible (value:Bool):Bool {
 		
+		__worldDirty = true;
 		return visible = value;
 		
 	}
@@ -510,6 +556,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_width (value:Float):Float {
 		
+		__worldDirty = true;
 		return 0;
 		
 	}
@@ -524,6 +571,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_x (value:Float):Float {
 		
+		__worldDirty = true;
 		return x = value;
 		
 	}
@@ -538,6 +586,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_y (value:Float):Float {
 		
+		__worldDirty = true;
 		return y = value;
 		
 	}

@@ -164,7 +164,7 @@ class Bitmap extends DisplayObjectContainer {
 		
 		//if (!__renderable) return;
 		
-		if (stage != null && visible && bitmapData != null && bitmapData.__valid) {
+		if (stage != null && __worldVisible && bitmapData != null && bitmapData.__valid) {
 			
 			if (bitmapData.__sourceImage != null) {
 				
@@ -202,7 +202,6 @@ class Bitmap extends DisplayObjectContainer {
 		if (__image != null) {
 			
 			renderSession.element.removeChild (__image);
-			__cacheWorldTransform = null;
 			__image = null;
 			
 		}
@@ -227,6 +226,7 @@ class Bitmap extends DisplayObjectContainer {
 			style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 			
 			renderSession.element.appendChild (__canvas);
+			__worldTransformChanged = true;
 			
 		}
 		
@@ -235,10 +235,9 @@ class Bitmap extends DisplayObjectContainer {
 		__canvas.width = bitmapData.width;
 		__canvas.height = bitmapData.height;
 		
-		if (!__worldTransform.equals (__cacheWorldTransform)) {
-			
+		if (__worldTransformChanged) {
+		
 			__canvas.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
-			__cacheWorldTransform = __worldTransform.clone ();
 			
 		}
 		
@@ -271,20 +270,19 @@ class Bitmap extends DisplayObjectContainer {
 			style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 			
 			renderSession.element.appendChild (__image);
+			__worldTransformChanged = true;
 			
 		}
 		
-		if (__worldAlpha != __cacheWorldAlpha) {
+		if (__worldAlphaChanged) {
 			
 			__image.style.setProperty ("opacity", Std.string (__worldAlpha), null);
-			__cacheWorldAlpha = __worldAlpha;
 			
 		}
 		
-		if (!__worldTransform.equals (__cacheWorldTransform)) {
+		if (__worldTransformChanged) {
 			
 			__image.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
-			__cacheWorldTransform = __worldTransform.clone ();
 			
 		}
 		

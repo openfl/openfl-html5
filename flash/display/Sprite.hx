@@ -135,7 +135,7 @@ class Sprite extends DisplayObjectContainer {
 		
 		//if (!__renderable) return;
 		
-		if (stage != null && visible && __graphics != null) {
+		if (stage != null && __worldVisible && __graphics != null) {
 			
 			if (__graphics.__dirty) {
 				
@@ -155,6 +155,7 @@ class Sprite extends DisplayObjectContainer {
 						style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 						
 						renderSession.element.appendChild (__canvas);
+						__worldTransformChanged = true;
 						
 					}
 					
@@ -186,14 +187,13 @@ class Sprite extends DisplayObjectContainer {
 			
 			if (__canvas != null) {
 				
-				if (!__worldTransform.equals (__cacheWorldTransform)) {
+				if (__worldTransformChanged) {
 					
 					var transform = new Matrix ();
 					transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
 					transform = transform.mult (__worldTransform);
 					
 					__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.z++), null);
-					__cacheWorldTransform = __worldTransform.clone ();
 					
 				}
 				
