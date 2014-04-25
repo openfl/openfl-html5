@@ -44,7 +44,6 @@ class Stage extends Sprite {
 	private var __dirty:Bool;
 	private var __div:DivElement;
 	private var __element:HtmlElement;
-	private var __eventQueue:Array<js.html.Event>;
 	private var __focus:InteractiveObject;
 	private var __fullscreen:Bool;
 	private var __invalidated:Bool;
@@ -176,7 +175,6 @@ class Stage extends Sprite {
 		
 		quality = StageQuality.HIGH;
 		__clearBeforeRender = true;
-		__eventQueue = [];
 		__stack = [];
 		
 		__renderSession = new RenderSession ();
@@ -214,30 +212,34 @@ class Stage extends Sprite {
 		Browser.document.body.appendChild (__stats.domElement);
 		#end
 		
-		var windowEvents = [ "keydown", "keyup" ];
-		var elementEvents = [ "touchstart", "touchmove", "touchend", "mousedown", "mousemove", "mouseup", "click", "dblclick", "focus", "blur" ];
+		var keyEvents = [ "keydown", "keyup" ];
+		var touchEvents = [ "touchstart", "touchmove", "touchend" ];
+		var mouseEvents = [ "mousedown", "mousemove", "mouseup", "click", "dblclick" ];
+		var focusEvents = [ "focus", "blur" ];
 		
-		for (event in windowEvents) {
+		var element = __canvas != null ? __canvas : __div;
+		
+		for (type in keyEvents) {
 			
-			Browser.window.addEventListener (event, __queueEvent, false);
+			Browser.window.addEventListener (type, window_onKey, false);
 			
 		}
 		
-		if (__canvas != null) {
+		for (type in touchEvents) {
 			
-			for (event in elementEvents) {
-				
-				__canvas.addEventListener (event, __queueEvent, true);
-				
-			}
+			element.addEventListener (type, element_onTouch, true);
 			
-		} else {
+		}
+		
+		for (type in mouseEvents) {
 			
-			for (event in elementEvents) {
-				
-				__div.addEventListener (event, __queueEvent, true);
-				
-			}
+			element.addEventListener (type, element_onMouse, true);
+			
+		}
+		
+		for (type in focusEvents) {
+			
+			element.addEventListener (type, element_onFocus, true);
 			
 		}
 		
@@ -335,37 +337,11 @@ class Stage extends Sprite {
 	}
 	
 	
-	private function __queueEvent (event:js.html.Event):Void {
-		
-		__eventQueue.push (event);
-		
-	}
-	
-	
 	private function __render ():Void {
 		
 		#if stats
 		__stats.begin ();
 		#end
-		
-		//__renderable = true;
-		//__update ();
-		
-		for (event in __eventQueue) {
-			
-			switch (event.type) {
-				
-				case "keydown", "keyup": window_onKey (cast event);
-				case "touchstart", "touchend", "touchmove": element_onTouch (cast event);
-				case "mousedown", "mouseup", "mousemove", "click", "dblclick": element_onMouse (cast event);
-				case "focus", "blur": element_onFocus (cast event);
-				default:
-				
-			}
-			
-		}
-		
-		untyped __eventQueue.length = 0;
 		
 		__broadcast (new Event (Event.ENTER_FRAME), true);
 		
@@ -377,7 +353,6 @@ class Stage extends Sprite {
 		}
 		
 		__renderable = true;
-		
 		__update (false);
 		//DisplayObject.__worldDirty = false;
 		
