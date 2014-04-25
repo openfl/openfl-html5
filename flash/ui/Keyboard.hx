@@ -76,10 +76,13 @@ class Keyboard {
 	
 	public static inline var BACKSPACE = 8;
 	public static inline var TAB = 9;
+	public static inline var ALTERNATE = 18;
 	public static inline var ENTER = 13;
+	public static inline var COMMAND = 15;
 	public static inline var SHIFT = 16;
 	public static inline var CONTROL = 17;
-	public static inline var CAPS_LOCK = 18;
+	public static inline var CAPS_LOCK = 20;
+	public static inline var NUMPAD = 21;
 	public static inline var ESCAPE = 27;
 	public static inline var SPACE = 32;
 	public static inline var PAGE_UP = 33;
@@ -105,6 +108,7 @@ class Keyboard {
 	public static inline var LEFTBRACKET = 219;
 	public static inline var BACKSLASH = 220;
 	public static inline var RIGHTBRACKET = 221;
+	public static inline var QUOTE = 222;
 	
 	// Mozilla keyCodes
 	// reference: https://developer.mozilla.org/en/DOM/Event/UIEvent/KeyEvent
