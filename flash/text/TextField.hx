@@ -313,20 +313,22 @@ class TextField extends InteractiveObject {
 					
 					if (border || background) {
 						
-						if (border) {
-							
-							__context.lineWidth = 1;
-							__context.strokeStyle = "#" + StringTools.hex (borderColor, 6);
-							
-						}
+						__context.rect (0, 0, __width, __height);
 						
 						if (background) {
 							
 							__context.fillStyle = "#" + StringTools.hex (backgroundColor, 6);
+							__context.fill ();
 							
 						}
 						
-						__context.rect (0, 0, __width, __height);
+						if (border) {
+							
+							__context.lineWidth = 1;
+							__context.strokeStyle = "#" + StringTools.hex (borderColor, 6);
+							__context.stroke ();
+							
+						}
 						
 					}
 					
@@ -364,20 +366,22 @@ class TextField extends InteractiveObject {
 					
 					if (border || background) {
 						
-						if (border) {
-							
-							__context.lineWidth = 1;
-							__context.strokeStyle = "#" + StringTools.hex (borderColor, 6);
-							
-						}
+						__context.rect (0, 0, __width, __height);
 						
 						if (background) {
 							
 							__context.fillStyle = "#" + StringTools.hex (backgroundColor, 6);
+							__context.fill ();
 							
 						}
 						
-						__context.rect (0, 0, __width, __height);
+						if (border) {
+							
+							__context.lineWidth = 1;
+							__context.strokeStyle = "#" + StringTools.hex (borderColor, 6);
+							__context.stroke ();
+							
+						}
 						
 					}
 					
@@ -681,7 +685,7 @@ class TextField extends InteractiveObject {
 	
 	private function set_defaultTextFormat (value:TextFormat):TextFormat {
 		
-		__textFormat = __defaultTextFormat.clone ();
+		//__textFormat = __defaultTextFormat.clone ();
 		__textFormat.__merge (value);
 		return value;
 		
@@ -895,7 +899,7 @@ class TextField extends InteractiveObject {
 			
 			for (range in __ranges) {
 				
-				range.format.color = null;
+				range.format.color = value;
 				
 			}
 			
