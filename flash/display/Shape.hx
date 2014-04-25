@@ -107,7 +107,7 @@ class Shape extends DisplayObject {
 		
 		if (stage != null && __worldVisible && __graphics != null) {
 		
-			if (__graphics.__dirty || __worldClipChanged || __worldAlphaChanged) {
+			if (__graphics.__dirty || __worldClipChanged || __worldAlphaChanged || __worldTransformChanged || __worldVisibleChanged) {
 				
 				__graphics.__render ();
 				
@@ -125,7 +125,8 @@ class Shape extends DisplayObject {
 						__style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 						
 						renderSession.element.appendChild (__canvas);
-						__worldTransformChanged = true;
+						
+						__reset ();
 						
 					}
 					

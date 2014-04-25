@@ -261,6 +261,19 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
+	private function __reset ():Void {
+		
+		#if dom
+		__worldAlphaChanged = true;
+		__worldClipChanged = true;
+		__worldTransformChanged = true;
+		__worldVisibleChanged = true;
+		__worldZ = -1;
+		#end
+		
+	}
+	
+	
 	private function __setStageReference (stage:Stage):Void {
 		
 		if (this.stage != stage) {

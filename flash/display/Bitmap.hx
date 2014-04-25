@@ -231,10 +231,7 @@ class Bitmap extends DisplayObjectContainer {
 			
 			renderSession.element.appendChild (__canvas);
 			
-			__worldAlphaChanged = true;
-			__worldClipChanged = true;
-			__worldTransformChanged = true;
-			__worldZ = -1;
+			__reset ();
 			
 		}
 		
@@ -287,10 +284,7 @@ class Bitmap extends DisplayObjectContainer {
 			
 			renderSession.element.appendChild (__image);
 			
-			__worldAlphaChanged = true;
-			__worldClipChanged = true;
-			__worldTransformChanged = true;
-			__worldZ = -1;
+			__reset ();
 			
 		}
 		

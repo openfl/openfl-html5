@@ -446,7 +446,8 @@ class TextField extends InteractiveObject {
 						__style.setProperty ("cursor", "inherit", null);
 						
 						renderSession.element.appendChild (__div);
-						__worldTransformChanged = true;
+						
+						__reset ();
 						
 					}
 					
