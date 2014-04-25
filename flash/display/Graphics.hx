@@ -216,6 +216,8 @@ class Graphics {
 		__halfStrokeWidth = (thickness != null) ? thickness / 2 : 0;
 		__commands.push (LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit));
 		
+		if (alpha != null) __visible = true;
+		
 	}
 	
 	
