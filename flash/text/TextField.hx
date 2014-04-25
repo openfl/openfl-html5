@@ -432,7 +432,7 @@ class TextField extends InteractiveObject {
 		
 			if (__dirty) {
 				
-				if (__text != "") {
+				if (__text != "" || background || border) {
 					
 					if (__div == null) {
 						
@@ -455,6 +455,26 @@ class TextField extends InteractiveObject {
 					// TODO: Vertical align
 					
 					__div.innerHTML = __text;
+					
+					if (background) {
+						
+						__style.setProperty ("background-color", "#" + StringTools.hex (backgroundColor, 6), null);
+						
+					} else {
+						
+						__style.removeProperty ("background-color");
+						
+					}
+					
+					if (border) {
+						
+						__style.setProperty ("border", "solid 1px #" + StringTools.hex (borderColor, 6), null);
+						
+					} else {
+						
+						__style.removeProperty ("border");
+						
+					}
 					
 					__style.setProperty ("font", __getFont (__textFormat), null);
 					__style.setProperty ("color", "#" + StringTools.hex (__textFormat.color, 6), null);
