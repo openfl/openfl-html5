@@ -375,7 +375,9 @@ class Stage extends Sprite {
 		}
 		
 		__renderable = true;
-		__update ();
+		
+		super.__update ();
+		DisplayObject.__worldDirty = false;
 		
 		if (__canvas != null) {
 			

@@ -226,7 +226,11 @@ class Bitmap extends DisplayObjectContainer {
 			style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 			
 			renderSession.element.appendChild (__canvas);
+			
+			__worldAlphaChanged = true;
+			__worldClipChanged = true;
 			__worldTransformChanged = true;
+			__worldZ = -1;
 			
 		}
 		
@@ -237,19 +241,27 @@ class Bitmap extends DisplayObjectContainer {
 		
 		if (__worldTransformChanged) {
 		
-			__canvas.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+			__canvas.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (), null);
+			
+		}
+		
+		if (__worldZ != ++renderSession.z) {
+			
+			__worldZ = renderSession.z;
+			__canvas.style.setProperty ("z-index", Std.string (__worldZ), null);
 			
 		}
 		
 		__canvasContext.globalAlpha = __worldAlpha;
 		
-		if (scrollRect == null) {
+		if (__worldClip == null) {
 			
 			__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
 			
 		} else {
 			
-			__canvasContext.drawImage (bitmapData.__sourceCanvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, 0, 0, scrollRect.width, scrollRect.height);
+			var clip = __worldClip.transform (__worldTransform.clone ().invert ());
+			__canvasContext.drawImage (bitmapData.__sourceCanvas, clip.x, clip.y, clip.width, clip.height, 0, 0, clip.width, clip.height);
 			
 		}
 		
@@ -270,7 +282,11 @@ class Bitmap extends DisplayObjectContainer {
 			style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 			
 			renderSession.element.appendChild (__image);
+			
+			__worldAlphaChanged = true;
+			__worldClipChanged = true;
 			__worldTransformChanged = true;
+			__worldZ = -1;
 			
 		}
 		
@@ -282,23 +298,29 @@ class Bitmap extends DisplayObjectContainer {
 		
 		if (__worldTransformChanged) {
 			
-			__image.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+			__image.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (), null);
 			
 		}
 		
-		if ((scrollRect != null && !scrollRect.equals (__cacheScrollRect)) || (scrollRect == null && __cacheScrollRect != null)) {
+		if (__worldZ != ++renderSession.z) {
 			
-			if (scrollRect == null) {
+			__worldZ = renderSession.z;
+			__image.style.setProperty ("z-index", Std.string (__worldZ), null);
+			
+		}
+		
+		if (__worldClipChanged) {
+			
+			if (__worldClip == null) {
 				
 				__image.style.removeProperty ("clip");
 				
 			} else {
 				
-				__image.style.setProperty ("clip", "rect(" + scrollRect.x + "px, " + scrollRect.x + "px, " + scrollRect.bottom + "px, " + scrollRect.right + "px)", null);
+				var clip = __worldClip.transform (__worldTransform.clone ().invert ());
+				__image.style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
 				
 			}
-			
-			__cacheScrollRect = scrollRect == null ? null : scrollRect.clone ();
 			
 		}
 		

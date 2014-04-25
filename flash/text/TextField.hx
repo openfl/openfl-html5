@@ -510,23 +510,29 @@ class TextField extends InteractiveObject {
 				
 				if (__worldTransformChanged) {
 					
-					__div.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
+					__div.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (), null);
 					
 				}
 				
-				if ((scrollRect != null && !scrollRect.equals (__cacheScrollRect)) || (scrollRect == null && __cacheScrollRect != null)) {
+				if (__worldZ != ++renderSession.z) {
 					
-					if (scrollRect == null) {
+					__worldZ = renderSession.z;
+					__div.style.setProperty ("z-index", Std.string (__worldZ), null);
+					
+				}
+				
+				if (__worldClipChanged) {
+					
+					if (__worldClip == null) {
 						
 						__div.style.removeProperty ("clip");
 						
 					} else {
 						
-						__div.style.setProperty ("clip", "rect(" + scrollRect.x + "px, " + scrollRect.x + "px, " + scrollRect.bottom + "px, " + scrollRect.right + "px)", null);
+						var clip = __worldClip.transform (__worldTransform.clone ().invert ());
+						__div.style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
 						
 					}
-					
-					__cacheScrollRect = scrollRect == null ? null : scrollRect.clone ();
 					
 				}
 				

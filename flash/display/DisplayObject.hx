@@ -37,7 +37,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public var scale9Grid:Rectangle;
 	@:isVar public var scaleX (get, set):Float;
 	@:isVar public var scaleY (get, set):Float;
-	public var scrollRect:Rectangle;
+	@:isVar public var scrollRect (get, set):Rectangle;
 	public var stage (default, null):Stage;
 	public var transform (get, set):Transform;
 	@:isVar public var visible (get, set):Bool;
@@ -47,7 +47,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	public var __worldTransform:Matrix;
 	
-	private var __cacheScrollRect:Rectangle;
 	private var __filters:Array<BitmapFilter>;
 	private var __interactive:Bool;
 	private var __isMask:Bool;
@@ -59,9 +58,12 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private var __transform:Transform;
 	private var __worldAlpha:Float;
 	private var __worldAlphaChanged:Bool;
+	private var __worldClip:Rectangle;
+	private var __worldClipChanged:Bool;
 	private var __worldTransformChanged:Bool;
 	private var __worldVisible:Bool;
 	private var __worldVisibleChanged:Bool;
+	private var __worldZ:Int;
 	
 	
 	private function new () {
@@ -296,20 +298,28 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			b00 = parentTransform.a, b01 = parentTransform.b,
 			b10 = parentTransform.c, b11 = parentTransform.d;
 			
-			#if dom
-			var cache = __worldTransform.clone ();
-			#end
+			#if !dom
+			
 			__worldTransform.a = a00 * b00 + a01 * b10;
 			__worldTransform.b = a00 * b01 + a01 * b11;
 			__worldTransform.c = a10 * b00 + a11 * b10;
 			__worldTransform.d = a10 * b01 + a11 * b11;
 			__worldTransform.tx = x * b00 + y * b10 + parentTransform.tx;
 			__worldTransform.ty = x * b01 + y * b11 + parentTransform.ty;
-			#if dom
-			__worldTransformChanged = !__worldTransform.equals (cache);
-			#end
 			
-			#if dom
+			__worldAlpha = alpha * parent.__worldAlpha;
+			
+			#else
+			
+			var cache = __worldTransform.clone ();
+			__worldTransform.a = a00 * b00 + a01 * b10;
+			__worldTransform.b = a00 * b01 + a01 * b11;
+			__worldTransform.c = a10 * b00 + a11 * b10;
+			__worldTransform.d = a10 * b01 + a11 * b11;
+			__worldTransform.tx = x * b00 + y * b10 + parentTransform.tx;
+			__worldTransform.ty = x * b01 + y * b11 + parentTransform.ty;
+			__worldTransformChanged = !__worldTransform.equals (cache);
+			
 			var worldVisible = (parent.__worldVisible && visible);
 			__worldVisibleChanged = (__worldVisible != worldVisible);
 			__worldVisible = worldVisible;
@@ -317,33 +327,71 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			var worldAlpha = alpha * parent.__worldAlpha;
 			__worldAlphaChanged = (__worldAlpha != worldAlpha);
 			__worldAlpha = worldAlpha;
-			#else
-			__worldAlpha = alpha * parent.__worldAlpha;
+			
+			var worldClip = null;
+			if (parent.__worldClip != null) worldClip = parent.__worldClip.clone ();
+			
+			if (scrollRect != null) {
+				
+				var bounds = scrollRect.clone ();
+				bounds = bounds.transform (__worldTransform);
+				
+				if (worldClip != null) {
+					
+					bounds.__contract (worldClip.x, worldClip.y, worldClip.width, worldClip.height);
+					
+				}
+				
+				worldClip = bounds;
+				
+			}
+			
+			__worldClipChanged = ((worldClip == null && __worldClip != null) || (worldClip != null && !worldClip.equals (__worldClip)));
+			__worldClip = worldClip;
+			
 			#end
 			
 		} else {
 			
-			#if dom
-			var cache = __worldTransform.clone ();
-			#end
+			#if !dom
+			
 			__worldTransform.a = __rotationCosine * scaleX;
 			__worldTransform.c = -__rotationSine * scaleY;
 			__worldTransform.tx = x;
 			__worldTransform.b = __rotationSine * scaleX;
 			__worldTransform.d = __rotationCosine * scaleY;
 			__worldTransform.ty = y;
-			#if dom
-			__worldTransformChanged = !__worldTransform.equals (cache);
-			#end
 			
-			#if dom
+			__worldAlpha = alpha;
+			
+			#else
+			
+			var cache = __worldTransform.clone ();
+			__worldTransform.a = __rotationCosine * scaleX;
+			__worldTransform.c = -__rotationSine * scaleY;
+			__worldTransform.tx = x;
+			__worldTransform.b = __rotationSine * scaleX;
+			__worldTransform.d = __rotationCosine * scaleY;
+			__worldTransform.ty = y;
+			__worldTransformChanged = !__worldTransform.equals (cache);
+			
 			__worldVisibleChanged = (__worldVisible != visible);
 			__worldVisible = visible;
 			
 			__worldAlphaChanged = (__worldAlpha != alpha);
 			__worldAlpha = alpha;
-			#else
-			__worldAlpha = alpha;
+			
+			var worldClip = null;
+			
+			if (scrollRect != null) {
+				
+				worldClip = scrollRect.clone ().transform (__worldTransform);
+				
+			}
+			
+			__worldClipChanged = ((worldClip == null && __worldClip != null) || (worldClip != null && !worldClip.equals (__worldClip)));
+			__worldClip = worldClip;
+			
 			#end
 			
 		}
@@ -505,6 +553,23 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		
 		__worldDirty = true;
 		return scaleY = value;
+		
+	}
+	
+	
+	private function get_scrollRect ():Rectangle {
+		
+		return scrollRect;
+		
+	}
+	
+	
+	private function set_scrollRect (value:Rectangle):Rectangle {
+		
+		#if dom
+		__worldDirty = true;
+		#end
+		return scrollRect = value;
 		
 	}
 	

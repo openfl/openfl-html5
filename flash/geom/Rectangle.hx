@@ -237,6 +237,25 @@ class Rectangle {
 	}
 	
 	
+	public function __contract (x:Float, y:Float, width:Float, height:Float):Void {
+		
+		if (this.width == 0 && this.height == 0) {
+			
+			return;
+			
+		}
+		
+		var cacheRight = right;
+		var cacheBottom = bottom;
+		
+		if (this.x < x) this.x = x;
+		if (this.y < y) this.y = y;
+		if (cacheRight > x + width) this.width = x + width - this.x;
+		if (cacheBottom > y + height) this.height = y + height - this.y;
+		
+	}
+	
+	
 	public function __expand (x:Float, y:Float, width:Float, height:Float):Void {
 		
 		if (this.width == 0 && this.height == 0) {

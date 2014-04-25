@@ -105,7 +105,7 @@ class Shape extends DisplayObject {
 		
 		if (stage != null && __worldVisible && __graphics != null) {
 		
-			if (__graphics.__dirty) {
+			if (__graphics.__dirty || __worldClipChanged) {
 				
 				__graphics.__render ();
 				
@@ -130,25 +130,16 @@ class Shape extends DisplayObject {
 					__canvas.width = __graphics.__canvas.width;
 					__canvas.height = __graphics.__canvas.height;
 					
-					if (__worldTransformChanged) {
-						
-						var transform = new Matrix ();
-						transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
-						transform = transform.mult (__worldTransform);
-						
-						__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.z++), null);
-						
-					}
-					
 					__canvasContext.globalAlpha = __worldAlpha;
 					
-					if (scrollRect == null) {
+					if (__worldClip == null) {
 						
 						__canvasContext.drawImage (__graphics.__canvas, 0, 0);
 						
 					} else {
 						
-						__canvasContext.drawImage (__graphics.__canvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x, __graphics.__bounds.y, scrollRect.width, scrollRect.height);
+						var clip = __worldClip.transform (__worldTransform.clone ().invert ());
+						__canvasContext.drawImage (__graphics.__canvas, clip.x, clip.y, clip.width, clip.height, __graphics.__bounds.x, __graphics.__bounds.y, clip.width, clip.height);
 						
 					}
 					
@@ -173,7 +164,14 @@ class Shape extends DisplayObject {
 					transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
 					transform = transform.mult (__worldTransform);
 					
-					__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.z++), null);
+					__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (), null);
+					
+				}
+				
+				if (__worldZ != ++renderSession.z) {
+					
+					__worldZ = renderSession.z;
+					__canvas.style.setProperty ("z-index", Std.string (__worldZ), null);
 					
 				}
 				
