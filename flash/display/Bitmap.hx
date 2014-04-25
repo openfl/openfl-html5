@@ -7,6 +7,7 @@ import flash.geom.Point;
 import flash.geom.Rectangle;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
+import js.html.CSSStyleDeclaration;
 import js.html.ImageElement;
 import js.Browser;
 
@@ -22,6 +23,7 @@ class Bitmap extends DisplayObjectContainer {
 	private var __canvas:CanvasElement;
 	private var __canvasContext:CanvasRenderingContext2D;
 	private var __image:ImageElement;
+	private var __style:CSSStyleDeclaration;
 	
 	
 	public function new (bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) {
@@ -182,6 +184,7 @@ class Bitmap extends DisplayObjectContainer {
 				
 				renderSession.element.removeChild (__image);
 				__image = null;
+				__style = null;
 				
 			}
 			
@@ -189,6 +192,7 @@ class Bitmap extends DisplayObjectContainer {
 				
 				renderSession.element.removeChild (__canvas);
 				__canvas = null;
+				__style = null;
 				
 			}
 			
@@ -219,11 +223,11 @@ class Bitmap extends DisplayObjectContainer {
 				
 			}
 			
-			var style = __canvas.style;
-			style.setProperty ("position", "absolute", null);
-			style.setProperty ("top", "0", null);
-			style.setProperty ("left", "0", null);
-			style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+			__style = __canvas.style;
+			__style.setProperty ("position", "absolute", null);
+			__style.setProperty ("top", "0", null);
+			__style.setProperty ("left", "0", null);
+			__style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 			
 			renderSession.element.appendChild (__canvas);
 			
@@ -241,14 +245,14 @@ class Bitmap extends DisplayObjectContainer {
 		
 		if (__worldTransformChanged) {
 		
-			__canvas.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (), null);
+			__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
 			
 		}
 		
 		if (__worldZ != ++renderSession.z) {
 			
 			__worldZ = renderSession.z;
-			__canvas.style.setProperty ("z-index", Std.string (__worldZ), null);
+			__style.setProperty ("z-index", Std.string (__worldZ), null);
 			
 		}
 		
@@ -275,11 +279,11 @@ class Bitmap extends DisplayObjectContainer {
 			__image = cast Browser.document.createElement ("img");
 			__image.src = bitmapData.__sourceImage.src;
 			
-			var style = __image.style;
-			style.setProperty ("position", "absolute", null);
-			style.setProperty ("top", "0", null);
-			style.setProperty ("left", "0", null);
-			style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+			__style = __image.style;
+			__style.setProperty ("position", "absolute", null);
+			__style.setProperty ("top", "0", null);
+			__style.setProperty ("left", "0", null);
+			__style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 			
 			renderSession.element.appendChild (__image);
 			
@@ -292,20 +296,28 @@ class Bitmap extends DisplayObjectContainer {
 		
 		if (__worldAlphaChanged) {
 			
-			__image.style.setProperty ("opacity", Std.string (__worldAlpha), null);
+			if (__worldAlpha < 1) {
+				
+				__style.setProperty ("opacity", Std.string (__worldAlpha), null);
+				
+			} else {
+				
+				__style.removeProperty ("opacity");
+				
+			}
 			
 		}
 		
 		if (__worldTransformChanged) {
 			
-			__image.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (), null);
+			__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
 			
 		}
 		
 		if (__worldZ != ++renderSession.z) {
 			
 			__worldZ = renderSession.z;
-			__image.style.setProperty ("z-index", Std.string (__worldZ), null);
+			__style.setProperty ("z-index", Std.string (__worldZ), null);
 			
 		}
 		
@@ -313,12 +325,12 @@ class Bitmap extends DisplayObjectContainer {
 			
 			if (__worldClip == null) {
 				
-				__image.style.removeProperty ("clip");
+				__style.removeProperty ("clip");
 				
 			} else {
 				
 				var clip = __worldClip.transform (__worldTransform.clone ().invert ());
-				__image.style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
+				__style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
 				
 			}
 			

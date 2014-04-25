@@ -11,6 +11,6 @@ interface IBitmapDrawable {
 	
 	function __renderCanvas (renderSession:RenderSession):Void;
 	function __renderMask (renderSession:RenderSession):Void;
-	function __updateChildren ():Void;
+	function __updateChildren (transformOnly:Bool):Void;
 	
 }

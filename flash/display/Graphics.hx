@@ -34,6 +34,7 @@ class Graphics {
 	private var __inPath:Bool;
 	private var __positionX:Float;
 	private var __positionY:Float;
+	private var __visible:Bool;
 	
 	
 	public function new () {
@@ -355,8 +356,21 @@ class Graphics {
 			__inPath = false;
 			__positionX = 0;
 			__positionY = 0;
+			__visible = false;
 			
-			if (__commands.length == 0 || __bounds.width == 0 || __bounds.height == 0) {
+			for (command in __commands) {
+				
+				switch (command) {
+					
+					case BeginBitmapFill (_, _, _, _): __visible = true;
+					case BeginFill (_, alpha): if (alpha > 0) __visible = true;
+					default:
+					
+				}
+				
+			}
+			
+			if (__commands.length == 0 || __bounds.width == 0 || __bounds.height == 0 || !__visible) {
 				
 				__canvas = null;
 				__context = null;

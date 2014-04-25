@@ -341,7 +341,7 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 			var matrixCache = __worldTransform;
 			__worldTransform = matrix;
-			__updateChildren ();
+			__updateChildren (true);
 			
 		}
 			
@@ -366,7 +366,7 @@ class DisplayObjectContainer extends InteractiveObject {
 		var matrixCache = __worldTransform;
 		__worldTransform = new Matrix ();
 		
-		__updateChildren ();
+		__updateChildren (true);
 		
 		/*for (child in __children) {
 			
@@ -548,29 +548,28 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
-	public override function __update ():Void {
+	public override function __update (transformOnly:Bool):Void {
 		
-		super.__update ();
+		super.__update (transformOnly);
 		
 		if (!__renderable) return;
 		
 		for (child in __children) {
 			
-			child.__update ();
+			child.__update (transformOnly);
 			
 		}
 		
 	}
 	
 	
-	public override function __updateChildren ():Void {
+	public override function __updateChildren (transformOnly):Void {
 		
-		__renderable = (visible && scaleX != 0 && scaleY != 0 && !__isMask);
-		if (!__renderable && !__isMask) return;
+		super.__updateChildren (transformOnly);
 		
 		for (child in __children) {
 			
-			child.__update ();
+			child.__update (transformOnly);
 			
 		}
 		

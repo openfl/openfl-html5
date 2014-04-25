@@ -292,7 +292,7 @@ class BitmapData implements IBitmapDrawable {
 		
 		var matrixCache = source.__worldTransform;
 		source.__worldTransform = matrix != null ? matrix : new Matrix ();
-		source.__updateChildren ();
+		source.__updateChildren (false);
 		source.__renderCanvas (renderSession);
 		source.__worldTransform = matrixCache;
 		
@@ -1087,7 +1087,7 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
-	public function __updateChildren ():Void {
+	public function __updateChildren (transformOnly:Bool):Void {
 		
 		
 		

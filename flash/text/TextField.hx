@@ -12,6 +12,7 @@ import flash.text.TextFormatAlign;
 import haxe.xml.Fast;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
+import js.html.CSSStyleDeclaration;
 import js.html.DivElement;
 import js.Browser;
 
@@ -65,6 +66,7 @@ class TextField extends InteractiveObject {
 	private var __height:Float;
 	private var __isHTML:Bool;
 	private var __ranges:Array<TextFormatRange>;
+	private var __style:CSSStyleDeclaration;
 	private var __text:String;
 	private var __textFormat:TextFormat;
 	private var __width:Float;
@@ -436,12 +438,12 @@ class TextField extends InteractiveObject {
 						
 						__div = cast Browser.document.createElement ("div");
 						
-						var style = __div.style;
-						style.position = "absolute";
-						style.setProperty ("top", "0", null);
-						style.setProperty ("left", "0", null);
-						style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
-						style.setProperty ("cursor", "inherit", null);
+						__style = __div.style;
+						__style.position = "absolute";
+						__style.setProperty ("top", "0", null);
+						__style.setProperty ("left", "0", null);
+						__style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+						__style.setProperty ("cursor", "inherit", null);
 						
 						renderSession.element.appendChild (__div);
 						__worldTransformChanged = true;
@@ -453,35 +455,34 @@ class TextField extends InteractiveObject {
 					
 					__div.innerHTML = __text;
 					
-					var style = __div.style;
-					style.setProperty ("font", __getFont (__textFormat), null);
-					style.setProperty ("color", "#" + StringTools.hex (__textFormat.color, 6), null);
+					__style.setProperty ("font", __getFont (__textFormat), null);
+					__style.setProperty ("color", "#" + StringTools.hex (__textFormat.color, 6), null);
 					
 					if (autoSize != TextFieldAutoSize.NONE) {
 						
-						style.setProperty ("width", "auto", null);
+						__style.setProperty ("width", "auto", null);
 						
 					} else {
 						
-						style.setProperty ("width", __width + "px", null);
+						__style.setProperty ("width", __width + "px", null);
 						
 					}
 					
-					style.setProperty ("height", __height + "px", null);
+					__style.setProperty ("height", __height + "px", null);
 					
 					switch (__textFormat.align) {
 						
 						case TextFormatAlign.CENTER:
 							
-							style.setProperty ("text-align", "center", null);
+							__style.setProperty ("text-align", "center", null);
 						
 						case TextFormatAlign.RIGHT:
 							
-							style.setProperty ("text-align", "right", null);
+							__style.setProperty ("text-align", "right", null);
 						
 						default:
 							
-							style.setProperty ("text-align", "left", null);
+							__style.setProperty ("text-align", "left", null);
 						
 					}
 					
@@ -504,20 +505,28 @@ class TextField extends InteractiveObject {
 				
 				if (__worldAlphaChanged) {
 					
-					__div.style.setProperty ("opacity", Std.string (__worldAlpha), null);
+					if (__worldAlpha < 1) {
+						
+						__style.setProperty ("opacity", Std.string (__worldAlpha), null);
+						
+					} else {
+						
+						__style.removeProperty ("opacity");
+						
+					}
 					
 				}
 				
 				if (__worldTransformChanged) {
 					
-					__div.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (), null);
+					__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
 					
 				}
 				
 				if (__worldZ != ++renderSession.z) {
 					
 					__worldZ = renderSession.z;
-					__div.style.setProperty ("z-index", Std.string (__worldZ), null);
+					__style.setProperty ("z-index", Std.string (__worldZ), null);
 					
 				}
 				
@@ -525,12 +534,12 @@ class TextField extends InteractiveObject {
 					
 					if (__worldClip == null) {
 						
-						__div.style.removeProperty ("clip");
+						__style.removeProperty ("clip");
 						
 					} else {
 						
 						var clip = __worldClip.transform (__worldTransform.clone ().invert ());
-						__div.style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
+						__style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
 						
 					}
 					
@@ -544,6 +553,7 @@ class TextField extends InteractiveObject {
 				
 				renderSession.element.removeChild (__div);
 				__div = null;
+				__style = null;
 				
 			}
 			
@@ -688,127 +698,134 @@ class TextField extends InteractiveObject {
 		__ranges = null;
 		__isHTML = true;
 		
-		value = new EReg ("<br>", "g").replace (value, "\n");
-		value = new EReg ("<br/>", "g").replace (value, "\n");
-		
-		// crude solution
-		
-		var segments = value.split ("<font");
-		
-		if (segments.length == 1) {
+		if (#if dom false && #end __div == null) {
 			
-			value = new EReg ("<.*?>", "g").replace (value, "");
-			return __text = value;
+			value = new EReg ("<br>", "g").replace (value, "\n");
+			value = new EReg ("<br/>", "g").replace (value, "\n");
 			
-		} else {
+			// crude solution
 			
-			value = "";
-			__ranges = [];
+			var segments = value.split ("<font");
 			
-			// crude search for font
+			if (segments.length == 1) {
+				
+				value = new EReg ("<.*?>", "g").replace (value, "");
+				return __text = value;
+				
+			} else {
+				
+				value = "";
+				__ranges = [];
+				
+				// crude search for font
+				
+				for (segment in segments) {
+					
+					if (segment == "") continue;
+					
+					var closeFontIndex = segment.indexOf ("</font>");
+					
+					if (closeFontIndex > -1) {
+						
+						var start = segment.indexOf (">") + 1;
+						var end = closeFontIndex;
+						var format = __textFormat.clone ();
+						
+						var faceIndex = segment.indexOf ("face=");
+						var colorIndex = segment.indexOf ("color=");
+						var sizeIndex = segment.indexOf ("size=");
+						
+						if (faceIndex > -1 && faceIndex < start) {
+							
+							format.font = segment.substr (faceIndex + 6, segment.indexOf ("\"", faceIndex));
+							
+						}
+						
+						if (colorIndex > -1 && colorIndex < start) {
+							
+							format.color = Std.parseInt ("0x" + segment.substr (colorIndex + 8, 6));
+							
+						}
+						
+						if (sizeIndex > -1 && sizeIndex < start) {
+							
+							format.size = Std.parseInt (segment.substr (sizeIndex + 6, segment.indexOf ("\"", sizeIndex)));
+							
+						}
+						
+						var sub = segment.substring (start, end);
+						sub = new EReg ("<.*?>", "g").replace (sub, "");
+						
+						__ranges.push (new TextFormatRange (format, value.length, value.length + sub.length));
+						value += sub;
+						
+						if (closeFontIndex + 7 < segment.length) {
+							
+							sub = segment.substr (closeFontIndex + 7);
+							__ranges.push (new TextFormatRange (__textFormat, value.length, value.length + sub.length));
+							value += sub;
+							
+						}
+						
+					} else {
+						
+						__ranges.push (new TextFormatRange (__textFormat, value.length, value.length + segment.length));
+						value += segment;
+						
+					}
+					
+				}
+				
+			}
+			
+			
+			// crude
+			
+			/*var segments = value.split ("<");
+			var format = __textFormat;
+			var rangeFormat = null;
 			
 			for (segment in segments) {
 				
-				if (segment == "") continue;
-				
-				var closeFontIndex = segment.indexOf ("</font>");
-				
-				if (closeFontIndex > -1) {
+				if (segment != "") {
 					
-					var start = segment.indexOf (">") + 1;
-					var end = closeFontIndex;
-					var format = __textFormat.clone ();
+					var caretIndex = segment.indexOf (">");
 					
-					var faceIndex = segment.indexOf ("face=");
-					var colorIndex = segment.indexOf ("color=");
-					var sizeIndex = segment.indexOf ("size=");
-					
-					if (faceIndex > -1 && faceIndex < start) {
+					if (caretIndex > -1) {
 						
-						format.font = segment.substr (faceIndex + 6, segment.indexOf ("\"", faceIndex));
+						if (StringTools.startsWith (segment, "font ")) {
+							
+							// parse font
+							rangeFormat = format.clone ();
+							rangeFormat.color = 0xFF0000;
+							
+						}
 						
 					}
 					
-					if (colorIndex > -1 && colorIndex < start) {
-						
-						format.color = Std.parseInt ("0x" + segment.substr (colorIndex + 8, 6));
-						
-					}
-					
-					if (sizeIndex > -1 && sizeIndex < start) {
-						
-						format.size = Std.parseInt (segment.substr (sizeIndex + 6, segment.indexOf ("\"", sizeIndex)));
-						
-					}
-					
-					var sub = segment.substring (start, end);
-					sub = new EReg ("<.*?>", "g").replace (sub, "");
-					
-					__ranges.push (new TextFormatRange (format, value.length, value.length + sub.length));
-					value += sub;
-					
-					if (closeFontIndex + 7 < segment.length) {
-						
-						sub = segment.substr (closeFontIndex + 7);
-						__ranges.push (new TextFormatRange (__textFormat, value.length, value.length + sub.length));
-						value += sub;
-						
-					}
-					
-				} else {
-					
-					__ranges.push (new TextFormatRange (__textFormat, value.length, value.length + segment.length));
-					value += segment;
+					if (segment.indexOf (">") > )
 					
 				}
 				
-			}
+			}*/
 			
+			
+			
+			/*value = new EReg ("</p>", "g").replace (value, "\n");
+			value = new EReg ("<br>", "g").replace (value, "\n");
+			value = new EReg ("<.*?>", "g").replace (value, "");
+			
+			var first = Math.floor (value.length / 2);
+			var format = __textFormat.clone ();
+			format.color = 0xFF00FF;
+			
+			__ranges = [ new TextFormatRange (__textFormat, 0, first), new TextFormatRange (format, first, value.length) ];
+			*/
+			
+			
+				
 		}
 		
-		
-		// crude
-		
-		/*var segments = value.split ("<");
-		var format = __textFormat;
-		var rangeFormat = null;
-		
-		for (segment in segments) {
-			
-			if (segment != "") {
-				
-				var caretIndex = segment.indexOf (">");
-				
-				if (caretIndex > -1) {
-					
-					if (StringTools.startsWith (segment, "font ")) {
-						
-						// parse font
-						rangeFormat = format.clone ();
-						rangeFormat.color = 0xFF0000;
-						
-					}
-					
-				}
-				
-				if (segment.indexOf (">") > )
-				
-			}
-			
-		}*/
-		
-		
-		
-		/*value = new EReg ("</p>", "g").replace (value, "\n");
-		value = new EReg ("<br>", "g").replace (value, "\n");
-		value = new EReg ("<.*?>", "g").replace (value, "");
-		
-		var first = Math.floor (value.length / 2);
-		var format = __textFormat.clone ();
-		format.color = 0xFF00FF;
-		
-		__ranges = [ new TextFormatRange (__textFormat, 0, first), new TextFormatRange (format, first, value.length) ];
-		*/
 		return __text = value;
 		
 	}

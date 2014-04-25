@@ -6,6 +6,7 @@ import flash.geom.Matrix;
 import flash.geom.Rectangle;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
+import js.html.CSSStyleDeclaration;
 import js.Browser;
 
 
@@ -18,6 +19,7 @@ class Shape extends DisplayObject {
 	private var __canvas:CanvasElement;
 	private var __canvasContext:CanvasRenderingContext2D;
 	private var __graphics:Graphics;
+	private var __style:CSSStyleDeclaration;
 	
 	
 	public function new () {
@@ -105,7 +107,7 @@ class Shape extends DisplayObject {
 		
 		if (stage != null && __worldVisible && __graphics != null) {
 		
-			if (__graphics.__dirty || __worldClipChanged) {
+			if (__graphics.__dirty || __worldClipChanged || __worldAlphaChanged) {
 				
 				__graphics.__render ();
 				
@@ -116,11 +118,11 @@ class Shape extends DisplayObject {
 						__canvas = cast Browser.document.createElement ("canvas");	
 						__canvasContext = __canvas.getContext ("2d");
 						
-						var style = __canvas.style;
-						style.setProperty ("position", "absolute", null);
-						style.setProperty ("top", "0", null);
-						style.setProperty ("left", "0", null);
-						style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+						__style = __canvas.style;
+						__style.setProperty ("position", "absolute", null);
+						__style.setProperty ("top", "0", null);
+						__style.setProperty ("left", "0", null);
+						__style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
 						
 						renderSession.element.appendChild (__canvas);
 						__worldTransformChanged = true;
@@ -164,14 +166,14 @@ class Shape extends DisplayObject {
 					transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
 					transform = transform.mult (__worldTransform);
 					
-					__canvas.style.setProperty (renderSession.transformProperty, transform.to3DString (), null);
+					__style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.roundPixels), null);
 					
 				}
 				
 				if (__worldZ != ++renderSession.z) {
 					
 					__worldZ = renderSession.z;
-					__canvas.style.setProperty ("z-index", Std.string (__worldZ), null);
+					__style.setProperty ("z-index", Std.string (__worldZ), null);
 					
 				}
 				
@@ -185,6 +187,7 @@ class Shape extends DisplayObject {
 				
 				renderSession.element.removeChild (__canvas);
 				__canvas = null;
+				__style = null;
 				
 			}
 			

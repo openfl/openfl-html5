@@ -41,6 +41,7 @@ class Stage extends Sprite {
 	private var __colorString:String;
 	private var __context:CanvasRenderingContext2D;
 	private var __cursor:String;
+	private var __dirty:Bool;
 	private var __div:DivElement;
 	private var __element:HtmlElement;
 	private var __eventQueue:Array<js.html.Event>;
@@ -57,6 +58,7 @@ class Stage extends Sprite {
 	private var __stats:Dynamic;
 	#end
 	private var __transparent:Bool;
+	private var __wasDirty:Bool;
 	
 	
 	
@@ -376,8 +378,8 @@ class Stage extends Sprite {
 		
 		__renderable = true;
 		
-		super.__update ();
-		DisplayObject.__worldDirty = false;
+		__update (false);
+		//DisplayObject.__worldDirty = false;
 		
 		if (__canvas != null) {
 			
@@ -513,38 +515,46 @@ class Stage extends Sprite {
 	}
 	
 	
-	public override function __update ():Void {
+	public override function __update (transformOnly:Bool):Void {
 		
-		if (DisplayObject.__worldDirty) {
+		if (transformOnly) {
 			
-			super.__update ();
-			DisplayObject.__worldDirty = false;
+			if (DisplayObject.__worldTransformDirty) {
+				
+				super.__update (true);
+				
+				DisplayObject.__worldTransformDirty = false;
+				__dirty = true;
+				
+			}
+			
+		} else {
+			
+			if (DisplayObject.__worldTransformDirty || __dirty || DisplayObject.__worldDirty) {
+				
+				super.__update (false);
+				
+				#if dom
+				__wasDirty = true;
+				#end
+				
+				DisplayObject.__worldTransformDirty = false;
+				DisplayObject.__worldDirty = false;
+				__dirty = false;
+				
+			} #if dom else if (__wasDirty) {
+				
+				// If we were dirty last time, we need at least one more
+				// update in order to clear "changed" properties
+				
+				super.__update (false);
+				__wasDirty = false;
+				
+			} #end
 			
 		}
 		
 	}
-	
-	
-	/*public override function __update ():Void {
-		
-		super.__update ();
-		
-		for (event in __eventQueue) {
-			
-			switch (event.type) {
-				
-				case "keydown", "keyup": window_onKey (cast event);
-				case "touchstart", "touchend", "touchmove": canvas_onTouch (cast event);
-				case "mousedown", "mouseup", "mousemove", "click", "dblclick": canvas_onMouse (cast event);
-				default:
-				
-			}
-			
-		}
-		
-		untyped __eventQueue.length = 0;
-		
-	}*/
 	
 	
 	

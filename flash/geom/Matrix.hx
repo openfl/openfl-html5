@@ -250,7 +250,7 @@ class Matrix {
 	}
 	
 	
-	public inline function to3DString (tz:Float = 1):String {
+	public inline function to3DString (roundPixels:Bool = false):String {
 		
 		// identityMatrix
 		//  [a,b,tx,0],
@@ -260,7 +260,15 @@ class Matrix {
 		//
 		// matrix3d(a,       b, 0, 0, c, d,       0, 0, 0, 0, 1, 0, tx,     ty, 0, 1)
 		
-		return "matrix3d(" + a + ", " + b + ", " + "0, 0, " + c + ", " + d + ", " + "0, 0, 0, 0, 1, 0, " + tx + ", " + ty + ", " + tz + ", 1)";
+		if (roundPixels) {
+			
+			return "matrix3d(" + a + ", " + b + ", " + "0, 0, " + c + ", " + d + ", " + "0, 0, 0, 0, 1, 0, " + Std.int (tx) + ", " + Std.int (ty) + ", 0, 1)";
+			
+		} else {
+			
+			return "matrix3d(" + a + ", " + b + ", " + "0, 0, " + c + ", " + d + ", " + "0, 0, 0, 0, 1, 0, " + tx + ", " + ty + ", 0, 1)";
+			
+		}
 		
 	}
 	

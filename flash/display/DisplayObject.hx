@@ -21,8 +21,9 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private static var __instanceCount = 0;
 	private static var __worldDirty = true;
+	private static var __worldTransformDirty = true;
 	
-	@:isVar public var alpha (get, set):Float;
+	public var alpha (get, set):Float;
 	public var blendMode:BlendMode;
 	public var cacheAsBitmap:Bool;
 	public var filters (get, set):Array<BitmapFilter>;
@@ -31,39 +32,49 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public var mask (get, set):DisplayObject;
 	public var mouseX (get, null):Float;
 	public var mouseY (get, null):Float;
-	@:isVar public var name (get, set):String;
+	public var name (get, set):String;
 	public var parent (default, null):DisplayObjectContainer;
-	@:isVar public var rotation (get, set):Float;
+	public var rotation (get, set):Float;
 	public var scale9Grid:Rectangle;
-	@:isVar public var scaleX (get, set):Float;
-	@:isVar public var scaleY (get, set):Float;
-	@:isVar public var scrollRect (get, set):Rectangle;
+	public var scaleX (get, set):Float;
+	public var scaleY (get, set):Float;
+	public var scrollRect (get, set):Rectangle;
 	public var stage (default, null):Stage;
 	public var transform (get, set):Transform;
-	@:isVar public var visible (get, set):Bool;
+	public var visible (get, set):Bool;
 	public var width (get, set):Float;
-	@:isVar public var x (get, set):Float;
-	@:isVar public var y (get, set):Float;
+	public var x (get, set):Float;
+	public var y (get, set):Float;
 	
 	public var __worldTransform:Matrix;
 	
+	private var __alpha:Float;
 	private var __filters:Array<BitmapFilter>;
 	private var __interactive:Bool;
 	private var __isMask:Bool;
 	private var __mask:DisplayObject;
+	private var __name:String;
 	private var __renderable:Bool;
+	private var __rotation:Float;
 	private var __rotationCache:Float;
 	private var __rotationCosine:Float;
 	private var __rotationSine:Float;
+	private var __scaleX:Float;
+	private var __scaleY:Float;
+	private var __scrollRect:Rectangle;
 	private var __transform:Transform;
+	private var __visible:Bool;
 	private var __worldAlpha:Float;
 	private var __worldAlphaChanged:Bool;
 	private var __worldClip:Rectangle;
 	private var __worldClipChanged:Bool;
+	private var __worldTransformCache:Matrix;
 	private var __worldTransformChanged:Bool;
 	private var __worldVisible:Bool;
 	private var __worldVisibleChanged:Bool;
 	private var __worldZ:Int;
+	private var __x:Float;
+	private var __y:Float;
 	
 	
 	private function new () {
@@ -211,9 +222,9 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function __getTransform ():Matrix {
 		
-		if (__worldDirty) {
+		if (__worldTransformDirty) {
 			
-			Lib.current.stage.__update ();
+			Lib.current.stage.__update (true);
 			
 		}
 		
@@ -273,7 +284,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
-	public function __update ():Void {
+	public function __update (transformOnly:Bool):Void {
 		
 		__renderable = (visible && scaleX != 0 && scaleY != 0 && !__isMask);
 		if (!__renderable && !__isMask) return;
@@ -298,63 +309,15 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			b00 = parentTransform.a, b01 = parentTransform.b,
 			b10 = parentTransform.c, b11 = parentTransform.d;
 			
-			#if !dom
-			
 			__worldTransform.a = a00 * b00 + a01 * b10;
 			__worldTransform.b = a00 * b01 + a01 * b11;
 			__worldTransform.c = a10 * b00 + a11 * b10;
 			__worldTransform.d = a10 * b01 + a11 * b11;
 			__worldTransform.tx = x * b00 + y * b10 + parentTransform.tx;
 			__worldTransform.ty = x * b01 + y * b11 + parentTransform.ty;
-			
-			__worldAlpha = alpha * parent.__worldAlpha;
-			
-			#else
-			
-			var cache = __worldTransform.clone ();
-			__worldTransform.a = a00 * b00 + a01 * b10;
-			__worldTransform.b = a00 * b01 + a01 * b11;
-			__worldTransform.c = a10 * b00 + a11 * b10;
-			__worldTransform.d = a10 * b01 + a11 * b11;
-			__worldTransform.tx = x * b00 + y * b10 + parentTransform.tx;
-			__worldTransform.ty = x * b01 + y * b11 + parentTransform.ty;
-			__worldTransformChanged = !__worldTransform.equals (cache);
-			
-			var worldVisible = (parent.__worldVisible && visible);
-			__worldVisibleChanged = (__worldVisible != worldVisible);
-			__worldVisible = worldVisible;
-			
-			var worldAlpha = alpha * parent.__worldAlpha;
-			__worldAlphaChanged = (__worldAlpha != worldAlpha);
-			__worldAlpha = worldAlpha;
-			
-			var worldClip = null;
-			if (parent.__worldClip != null) worldClip = parent.__worldClip.clone ();
-			
-			if (scrollRect != null) {
-				
-				var bounds = scrollRect.clone ();
-				bounds = bounds.transform (__worldTransform);
-				
-				if (worldClip != null) {
-					
-					bounds.__contract (worldClip.x, worldClip.y, worldClip.width, worldClip.height);
-					
-				}
-				
-				worldClip = bounds;
-				
-			}
-			
-			__worldClipChanged = ((worldClip == null && __worldClip != null) || (worldClip != null && !worldClip.equals (__worldClip)));
-			__worldClip = worldClip;
-			
-			#end
 			
 		} else {
 			
-			#if !dom
-			
 			__worldTransform.a = __rotationCosine * scaleX;
 			__worldTransform.c = -__rotationSine * scaleY;
 			__worldTransform.tx = x;
@@ -362,46 +325,98 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			__worldTransform.d = __rotationCosine * scaleY;
 			__worldTransform.ty = y;
 			
-			__worldAlpha = alpha;
+		}
+		
+		if (!transformOnly) {
 			
-			#else
+			#if dom
+			__worldTransformChanged = !__worldTransform.equals (__worldTransformCache);
+			__worldTransformCache = __worldTransform.clone ();
+			#end
 			
-			var cache = __worldTransform.clone ();
-			__worldTransform.a = __rotationCosine * scaleX;
-			__worldTransform.c = -__rotationSine * scaleY;
-			__worldTransform.tx = x;
-			__worldTransform.b = __rotationSine * scaleX;
-			__worldTransform.d = __rotationCosine * scaleY;
-			__worldTransform.ty = y;
-			__worldTransformChanged = !__worldTransform.equals (cache);
-			
-			__worldVisibleChanged = (__worldVisible != visible);
-			__worldVisible = visible;
-			
-			__worldAlphaChanged = (__worldAlpha != alpha);
-			__worldAlpha = alpha;
-			
-			var worldClip = null;
-			
-			if (scrollRect != null) {
+			if (parent != null) {
 				
-				worldClip = scrollRect.clone ().transform (__worldTransform);
+				#if !dom
+				
+				__worldAlpha = alpha * parent.__worldAlpha;
+				
+				#else
+				
+				var worldVisible = (parent.__worldVisible && visible);
+				__worldVisibleChanged = (__worldVisible != worldVisible);
+				__worldVisible = worldVisible;
+				
+				var worldAlpha = alpha * parent.__worldAlpha;
+				__worldAlphaChanged = (__worldAlpha != worldAlpha);
+				__worldAlpha = worldAlpha;
+				
+				var worldClip = null;
+				if (parent.__worldClip != null) worldClip = parent.__worldClip.clone ();
+				
+				if (scrollRect != null) {
+					
+					var bounds = scrollRect.clone ();
+					bounds = bounds.transform (__worldTransform);
+					
+					if (worldClip != null) {
+						
+						bounds.__contract (worldClip.x, worldClip.y, worldClip.width, worldClip.height);
+						
+					}
+					
+					worldClip = bounds;
+					
+				}
+				
+				__worldClipChanged = ((worldClip == null && __worldClip != null) || (worldClip != null && !worldClip.equals (__worldClip)));
+				__worldClip = worldClip;
+				
+				#end
+				
+			} else {
+				
+				#if !dom
+				
+				__worldAlpha = alpha;
+				
+				#else
+				
+				__worldVisibleChanged = (__worldVisible != visible);
+				__worldVisible = visible;
+				
+				__worldAlphaChanged = (__worldAlpha != alpha);
+				__worldAlpha = alpha;
+				
+				var worldClip = null;
+				
+				if (scrollRect != null) {
+					
+					worldClip = scrollRect.clone ().transform (__worldTransform);
+					
+				}
+				
+				__worldClipChanged = ((worldClip == null && __worldClip != null) || (worldClip != null && !worldClip.equals (__worldClip)));
+				__worldClip = worldClip;
+				
+				#end
 				
 			}
-			
-			__worldClipChanged = ((worldClip == null && __worldClip != null) || (worldClip != null && !worldClip.equals (__worldClip)));
-			__worldClip = worldClip;
-			
-			#end
 			
 		}
 		
 	}
 	
 	
-	public function __updateChildren ():Void {
+	public function __updateChildren (transformOnly:Bool):Void {
 		
+		__renderable = (visible && scaleX != 0 && scaleY != 0 && !__isMask);
+		if (!__renderable && !__isMask) return;
+		__worldAlpha = alpha;
 		
+		// This method is used internally for temporary transforms, so
+		// we want to flag the transforms as dirty to be "fixed" later
+		
+		__worldTransformDirty = true;
 		
 	}
 	
@@ -415,7 +430,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function get_alpha ():Float {
 		
-		return alpha;
+		return __alpha;
 		
 	}
 	
@@ -423,7 +438,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private function set_alpha (value:Float):Float {
 		
 		__worldDirty = true;
-		return alpha = value;
+		return __alpha = value;
 		
 	}
 	
@@ -461,7 +476,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_height (value:Float):Float {
 		
-		__worldDirty = true;
+		__worldTransformDirty = true;
 		return 0;
 		
 	}
@@ -500,66 +515,66 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function get_name ():String {
 		
-		return name;
+		return __name;
 		
 	}
 	
 	
 	private function set_name (value:String):String {
 		
-		return name = value;
+		return __name = value;
 		
 	}
 	
 	
 	private function get_rotation ():Float {
 		
-		return rotation;
+		return __rotation;
 		
 	}
 	
 	
 	private function set_rotation (value:Float):Float {
 		
-		__worldDirty = true;
-		return rotation = value;
+		__worldTransformDirty = true;
+		return __rotation = value;
 		
 	}
 	
 	
 	private function get_scaleX ():Float {
 		
-		return scaleX;
+		return __scaleX;
 		
 	}
 	
 	
 	private function set_scaleX (value:Float):Float {
 		
-		__worldDirty = true;
-		return scaleX = value;
+		__worldTransformDirty = true;
+		return __scaleX = value;
 		
 	}
 	
 	
 	private function get_scaleY ():Float {
 		
-		return scaleY;
+		return __scaleY;
 		
 	}
 	
 	
 	private function set_scaleY (value:Float):Float {
 		
-		__worldDirty = true;
-		return scaleY = value;
+		__worldTransformDirty = true;
+		return __scaleY = value;
 		
 	}
 	
 	
 	private function get_scrollRect ():Rectangle {
 		
-		return scrollRect;
+		return __scrollRect;
 		
 	}
 	
@@ -569,7 +584,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		#if dom
 		__worldDirty = true;
 		#end
-		return scrollRect = value;
+		return __scrollRect = value;
 		
 	}
 	
@@ -601,7 +616,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			
 		}
 		
-		__worldDirty = true;
+		__worldTransformDirty = true;
 		__transform.matrix = value.matrix.clone ();
 		__transform.colorTransform = new ColorTransform (value.colorTransform.redMultiplier, value.colorTransform.greenMultiplier, value.colorTransform.blueMultiplier, value.colorTransform.alphaMultiplier, value.colorTransform.redOffset, value.colorTransform.greenOffset, value.colorTransform.blueOffset, value.colorTransform.alphaOffset);
 		
@@ -612,7 +627,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function get_visible ():Bool {
 		
-		return visible;
+		return __visible;
 		
 	}
 	
@@ -620,7 +635,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private function set_visible (value:Bool):Bool {
 		
 		__worldDirty = true;
-		return visible = value;
+		return __visible = value;
 		
 	}
 	
@@ -634,7 +649,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_width (value:Float):Float {
 		
-		__worldDirty = true;
+		__worldTransformDirty = true;
 		return 0;
 		
 	}
@@ -642,30 +657,30 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function get_x ():Float {
 		
-		return x;
+		return __x;
 		
 	}
 	
 	
 	private function set_x (value:Float):Float {
 		
-		__worldDirty = true;
-		return x = value;
+		__worldTransformDirty = true;
+		return __x = value;
 		
 	}
 	
 	
 	private function get_y ():Float {
 		
-		return y;
+		return __y;
 		
 	}
 	
 	
 	private function set_y (value:Float):Float {
 		
-		__worldDirty = true;
-		return y = value;
+		__worldTransformDirty = true;
+		return __y = value;
 		
 	}
 	
