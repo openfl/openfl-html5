@@ -510,6 +510,22 @@ class TextField extends InteractiveObject {
 					
 				}
 				
+				if ((scrollRect != null && !scrollRect.equals (__cacheScrollRect)) || (scrollRect == null && __cacheScrollRect != null)) {
+					
+					if (scrollRect == null) {
+						
+						__div.style.removeProperty ("clip");
+						
+					} else {
+						
+						__div.style.setProperty ("clip", "rect(" + scrollRect.x + "px, " + scrollRect.x + "px, " + scrollRect.bottom + "px, " + scrollRect.right + "px)", null);
+						
+					}
+					
+					__cacheScrollRect = scrollRect == null ? null : scrollRect.clone ();
+					
+				}
+				
 			}
 			
 		} else {

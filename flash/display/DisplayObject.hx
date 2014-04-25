@@ -46,6 +46,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	public var __worldTransform:Matrix;
 	
+	private var __cacheScrollRect:Rectangle;
 	private var __cacheWorldAlpha:Float;
 	private var __cacheWorldTransform:Matrix;
 	private var __filters:Array<BitmapFilter>;

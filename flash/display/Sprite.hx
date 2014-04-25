@@ -160,7 +160,16 @@ class Sprite extends DisplayObjectContainer {
 					
 					__canvas.width = __graphics.__canvas.width;
 					__canvas.height = __graphics.__canvas.height;
-					__canvasContext.drawImage (__graphics.__canvas, 0, 0);
+					
+					if (scrollRect == null) {
+						
+						__canvasContext.drawImage (__graphics.__canvas, 0, 0);
+						
+					} else {
+						
+						__canvasContext.drawImage (__graphics.__canvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x, __graphics.__bounds.y, scrollRect.width, scrollRect.height);
+						
+					}
 					
 				} else {
 					

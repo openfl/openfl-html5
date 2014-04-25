@@ -243,7 +243,16 @@ class Bitmap extends DisplayObjectContainer {
 		}
 		
 		__canvasContext.globalAlpha = __worldAlpha;
-		__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
+		
+		if (scrollRect == null) {
+			
+			__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
+			
+		} else {
+			
+			__canvasContext.drawImage (bitmapData.__sourceCanvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, 0, 0, scrollRect.width, scrollRect.height);
+			
+		}
 		
 	}
 	
@@ -276,6 +285,22 @@ class Bitmap extends DisplayObjectContainer {
 			
 			__image.style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.z++), null);
 			__cacheWorldTransform = __worldTransform.clone ();
+			
+		}
+		
+		if ((scrollRect != null && !scrollRect.equals (__cacheScrollRect)) || (scrollRect == null && __cacheScrollRect != null)) {
+			
+			if (scrollRect == null) {
+				
+				__image.style.removeProperty ("clip");
+				
+			} else {
+				
+				__image.style.setProperty ("clip", "rect(" + scrollRect.x + "px, " + scrollRect.x + "px, " + scrollRect.bottom + "px, " + scrollRect.right + "px)", null);
+				
+			}
+			
+			__cacheScrollRect = scrollRect == null ? null : scrollRect.clone ();
 			
 		}
 		

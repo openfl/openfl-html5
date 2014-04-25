@@ -480,6 +480,8 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 		//}
 		
+		// TODO: scrollRect
+		
 		for (child in __children) {
 			
 			child.__renderDOM (renderSession);

@@ -141,7 +141,16 @@ class Shape extends DisplayObject {
 					}
 					
 					__canvasContext.globalAlpha = __worldAlpha;
-					__canvasContext.drawImage (__graphics.__canvas, 0, 0);
+					
+					if (scrollRect == null) {
+						
+						__canvasContext.drawImage (__graphics.__canvas, 0, 0);
+						
+					} else {
+						
+						__canvasContext.drawImage (__graphics.__canvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x, __graphics.__bounds.y, scrollRect.width, scrollRect.height);
+						
+					}
 					
 				} else {
 					
