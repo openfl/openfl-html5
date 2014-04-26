@@ -107,7 +107,7 @@ class Shape extends DisplayObject {
 		
 		if (stage != null && __worldVisible && __graphics != null) {
 		
-			if (__graphics.__dirty || __worldClipChanged || __worldAlphaChanged || __worldTransformChanged || __worldVisibleChanged) {
+			if (__graphics.__dirty || __worldClipChanged || (__worldClip != null && __worldTransformChanged) || __worldAlphaChanged) {
 				
 				__graphics.__render ();
 				
