@@ -271,6 +271,13 @@ class Bitmap extends DisplayObjectContainer {
 	
 	private function __renderDOMImage (renderSession:RenderSession):Void {
 		
+		if (__canvas != null) {
+			
+			renderSession.element.removeChild (__canvas);
+			__canvas = null;
+			
+		}
+		
 		if (__image == null) {
 			
 			__image = cast Browser.document.createElement ("img");
