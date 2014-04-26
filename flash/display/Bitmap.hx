@@ -166,7 +166,7 @@ class Bitmap extends DisplayObjectContainer {
 		
 		//if (!__renderable) return;
 		
-		if (stage != null && __worldVisible && bitmapData != null && bitmapData.__valid) {
+		if (stage != null && __worldVisible && __renderable && bitmapData != null && bitmapData.__valid) {
 			
 			if (bitmapData.__sourceImage != null) {
 				
