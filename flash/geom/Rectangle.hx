@@ -250,8 +250,8 @@ class Rectangle {
 		
 		if (this.x < x) this.x = x;
 		if (this.y < y) this.y = y;
-		if (cacheRight > x + width) this.width = x + width - this.x;
-		if (cacheBottom > y + height) this.height = y + height - this.y;
+		if (this.right > x + width) this.width = x + width - this.x;
+		if (this.bottom > y + height) this.height = y + height - this.y;
 		
 	}
 	

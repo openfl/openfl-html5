@@ -255,14 +255,22 @@ class Bitmap extends DisplayObjectContainer {
 		
 		__canvasContext.globalAlpha = __worldAlpha;
 		
-		if (__worldClip == null) {
+		__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
 			
-			__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
+		if (__worldClipChanged) {
 			
-		} else {
+			// TODO: Clip canvas instead of using CSS
 			
-			var clip = __worldClip.transform (__worldTransform.clone ().invert ());
-			__canvasContext.drawImage (bitmapData.__sourceCanvas, clip.x, clip.y, clip.width, clip.height, 0, 0, clip.width, clip.height);
+			if (__worldClip == null) {
+				
+				__style.removeProperty ("clip");
+				
+			} else {
+				
+				var clip = __worldClip.transform (__worldTransform.clone ().invert ());
+				__style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
+				
+			}
 			
 		}
 		

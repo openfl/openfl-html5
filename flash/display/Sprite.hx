@@ -139,7 +139,7 @@ class Sprite extends DisplayObjectContainer {
 		
 		if (stage != null && __worldVisible && __renderable && __graphics != null) {
 			
-			if (__graphics.__dirty || __worldClipChanged || (__worldClip != null && __worldTransformChanged) || __worldAlphaChanged) {
+			if (__graphics.__dirty || __worldAlphaChanged) {
 				
 				__graphics.__render ();
 				
@@ -165,16 +165,7 @@ class Sprite extends DisplayObjectContainer {
 					__canvas.width = __graphics.__canvas.width;
 					__canvas.height = __graphics.__canvas.height;
 					
-					if (__worldClip == null) {
-						
-						__canvasContext.drawImage (__graphics.__canvas, 0, 0);
-						
-					} else {
-						
-						var clip = __worldClip.transform (__worldTransform.clone ().invert ());
-						__canvasContext.drawImage (__graphics.__canvas, clip.x, clip.y, clip.width, clip.height, __graphics.__bounds.x, __graphics.__bounds.y, clip.width, clip.height);
-						
-					}
+					__canvasContext.drawImage (__graphics.__canvas, 0, 0);
 					
 				} else {
 					
@@ -205,6 +196,23 @@ class Sprite extends DisplayObjectContainer {
 					
 					__worldZ = renderSession.z;
 					__style.setProperty ("z-index", Std.string (__worldZ), null);
+					
+				}
+				
+				if (__worldClipChanged) {
+					
+					// TODO: Clip canvas instead of using CSS
+					
+					if (__worldClip == null) {
+						
+						__style.removeProperty ("clip");
+						
+					} else {
+						
+						var clip = __worldClip.transform (__worldTransform.clone ().invert ());
+						__style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
+						
+					}
 					
 				}
 				
