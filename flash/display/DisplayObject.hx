@@ -371,12 +371,12 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 					
 					if (__worldClipOffset != null) {
 						
-						__worldClipOffset.x -= bounds.x;
-						__worldClipOffset.y -= bounds.y;
+						__worldClipOffset.x -= bounds.x - __worldTransform.tx;
+						__worldClipOffset.y -= bounds.y - __worldTransform.ty;
 						
 					} else {
 						
-						__worldClipOffset = new Point (-bounds.x, -bounds.y);
+						__worldClipOffset = new Point (-bounds.x + __worldTransform.tx, -bounds.y + __worldTransform.ty);
 						
 					}
 					
@@ -406,14 +406,14 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 					
 					if (worldClip != null) {
 						
-						worldClipOffset.x -= bounds.x;
-						worldClipOffset.y -= bounds.y;
+						worldClipOffset.x -= bounds.x - __worldTransform.tx;
+						worldClipOffset.y -= bounds.y - __worldTransform.ty;
 						
 						bounds.__contract (worldClip.x, worldClip.y, worldClip.width, worldClip.height);
 						
 					} else {
 						
-						worldClipOffset = new Point (-bounds.x, -bounds.y);
+						worldClipOffset = new Point (-bounds.x + __worldTransform.tx, -bounds.y + __worldTransform.ty);
 						
 					}
 					
@@ -432,7 +432,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 				if (scrollRect != null) {
 					
 					var clip = scrollRect.clone ().transform (__worldTransform);
-					__worldClipOffset = new Point (-clip.x, -clip.y);
+					__worldClipOffset = new Point (-clip.x + __worldTransform.tx, -clip.y + __worldTransform.ty);
 					
 				}
 				
@@ -446,7 +446,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 				if (scrollRect != null) {
 					
 					worldClip = scrollRect.clone ().transform (__worldTransform);
-					worldClipOffset = new Point (-worldClip.x, -worldClip.y);
+					worldClipOffset = new Point (-worldClip.x + __worldTransform.tx, -worldClip.y + __worldTransform.ty);
 					
 				}
 				

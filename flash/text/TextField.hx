@@ -550,17 +550,21 @@ class TextField extends InteractiveObject {
 					
 				}
 				
-				if (__worldClipOffset != null) {
+				if (__worldTransformChanged || __worldClipOffsetChanged) {
 					
-					var transform = __worldTransform.clone ();
-					transform.tx += __worldClipOffset.x;
-					transform.ty += __worldClipOffset.y;
-					
-					__style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.roundPixels), null);
-					
-				} else {
-					
-					__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
+					if (__worldClipOffset != null) {
+						
+						var transform = __worldTransform.clone ();
+						transform.tx += __worldClipOffset.x;
+						transform.ty += __worldClipOffset.y;
+						
+						__style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.roundPixels), null);
+						
+					} else {
+						
+						__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
+						
+					}
 					
 				}
 				
