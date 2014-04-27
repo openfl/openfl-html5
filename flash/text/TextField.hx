@@ -448,8 +448,8 @@ class TextField extends InteractiveObject {
 		//if (!__renderable) return;
 		
 		if (stage != null && __worldVisible && __renderable) {
-		
-			if (__dirty) {
+			
+			if (__dirty || __div == null) {
 				
 				if (__text != "" || background || border) {
 					
