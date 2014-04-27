@@ -74,21 +74,6 @@ class Shape extends DisplayObject {
 				context.globalAlpha = __worldAlpha;
 				var transform = __worldTransform;
 				
-				if (__worldClipOffset != null) {
-					
-					transform = transform.clone ();
-					transform.tx += __worldClipOffset.x;
-					transform.ty += __worldClipOffset.y;
-					
-					if (scrollRect != null) {
-						
-						transform.tx += scrollRect.x;
-						transform.ty += scrollRect.y;
-						
-					}
-					
-				}
-				
 				if (renderSession.roundPixels) {
 					
 					context.setTransform (transform.a, transform.b, transform.c, transform.d, Std.int (transform.tx), Std.int (transform.ty));
@@ -105,7 +90,7 @@ class Shape extends DisplayObject {
 					
 				} else {
 					
-					context.drawImage (__graphics.__canvas, scrollRect.x - __graphics.__bounds.x, scrollRect.y - __graphics.__bounds.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x, __graphics.__bounds.y, scrollRect.width, scrollRect.height);
+					context.drawImage (__graphics.__canvas, scrollRect.x - __graphics.__bounds.x, scrollRect.y - __graphics.__bounds.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x + scrollRect.x, __graphics.__bounds.y + scrollRect.y, scrollRect.width, scrollRect.height);
 					
 				}
 				
@@ -166,18 +151,11 @@ class Shape extends DisplayObject {
 			
 			if (__canvas != null) {
 				
-				if (__worldTransformChanged || __worldClipOffsetChanged) {
+				if (__worldTransformChanged) {
 					
 					var transform = new Matrix ();
 					transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
 					transform = transform.mult (__worldTransform);
-					
-					if (__worldClipOffset != null) {
-						
-						transform.tx += __worldClipOffset.x;
-						transform.ty += __worldClipOffset.y;
-						
-					}
 					
 					__style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.roundPixels), null);
 					

@@ -403,21 +403,6 @@ class TextField extends InteractiveObject {
 			context.globalAlpha = __worldAlpha;
 			var transform = __worldTransform;
 			
-			if (__worldClipOffset != null) {
-				
-				transform = transform.clone ();
-				transform.tx += __worldClipOffset.x;
-				transform.ty += __worldClipOffset.y;
-				
-				if (scrollRect != null) {
-					
-					transform.tx += scrollRect.x;
-					transform.ty += scrollRect.y;
-					
-				}
-				
-			}
-			
 			if (renderSession.roundPixels) {
 				
 				context.setTransform (transform.a, transform.b, transform.c, transform.d, Std.int (transform.tx), Std.int (transform.ty));
@@ -434,7 +419,7 @@ class TextField extends InteractiveObject {
 				
 			} else {
 				
-				context.drawImage (__canvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, 0, 0, scrollRect.width, scrollRect.height);
+				context.drawImage (__canvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height);
 				
 			}
 			
@@ -557,21 +542,9 @@ class TextField extends InteractiveObject {
 					
 				}
 				
-				if (__worldTransformChanged || __worldClipOffsetChanged) {
+				if (__worldTransformChanged) {
 					
-					if (__worldClipOffset != null) {
-						
-						var transform = __worldTransform.clone ();
-						transform.tx += __worldClipOffset.x;
-						transform.ty += __worldClipOffset.y;
-						
-						__style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.roundPixels), null);
-						
-					} else {
-						
-						__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
-						
-					}
+					__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
 					
 				}
 				

@@ -68,8 +68,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private var __worldAlphaChanged:Bool;
 	private var __worldClip:Rectangle;
 	private var __worldClipChanged:Bool;
-	private var __worldClipOffset:Point;
-	private var __worldClipOffsetChanged:Bool;
 	private var __worldTransformCache:Matrix;
 	private var __worldTransformChanged:Bool;
 	private var __worldVisible:Bool;
@@ -268,7 +266,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		#if dom
 		__worldAlphaChanged = true;
 		__worldClipChanged = true;
-		__worldClipOffsetChanged = true;
 		__worldTransformChanged = true;
 		__worldVisibleChanged = true;
 		__worldZ = -1;
@@ -329,17 +326,37 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			__worldTransform.b = a00 * b01 + a01 * b11;
 			__worldTransform.c = a10 * b00 + a11 * b10;
 			__worldTransform.d = a10 * b01 + a11 * b11;
-			__worldTransform.tx = x * b00 + y * b10 + parentTransform.tx;
-			__worldTransform.ty = x * b01 + y * b11 + parentTransform.ty;
+			
+			if (scrollRect == null) {
+				
+				__worldTransform.tx = x * b00 + y * b10 + parentTransform.tx;
+				__worldTransform.ty = x * b01 + y * b11 + parentTransform.ty;
+				
+			} else {
+				
+				__worldTransform.tx = (x - scrollRect.x) * b00 + (y - scrollRect.y) * b10 + parentTransform.tx;
+				__worldTransform.ty = (x - scrollRect.x) * b01 + (y - scrollRect.y) * b11 + parentTransform.ty;
+				
+			}
 			
 		} else {
 			
 			__worldTransform.a = __rotationCosine * scaleX;
 			__worldTransform.c = -__rotationSine * scaleY;
-			__worldTransform.tx = x;
 			__worldTransform.b = __rotationSine * scaleX;
 			__worldTransform.d = __rotationCosine * scaleY;
-			__worldTransform.ty = y;
+			
+			if (scrollRect == null) {
+				
+				__worldTransform.tx = x;
+				__worldTransform.ty = y;
+				
+			} else {
+				
+				__worldTransform.tx = y - scrollRect.x;
+				__worldTransform.ty = y - scrollRect.y;
+				
+			}
 			
 		}
 		
@@ -348,8 +365,8 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			#if dom
 			__worldTransformChanged = !__worldTransform.equals (__worldTransformCache);
 			__worldTransformCache = __worldTransform.clone ();
+			
 			var worldClip:Rectangle = null;
-			var worldClipOffset:Point = null;
 			#end
 			
 			if (parent != null) {
@@ -357,30 +374,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 				#if !dom
 				
 				__worldAlpha = alpha * parent.__worldAlpha;
-				
-				if (parent.__worldClipOffset != null) {
-					
-					__worldClipOffset = parent.__worldClipOffset.clone ();
-					
-				}
-				
-				if (scrollRect != null) {
-					
-					var bounds = scrollRect.clone ();
-					bounds = bounds.transform (__worldTransform);
-					
-					if (__worldClipOffset != null) {
-						
-						__worldClipOffset.x -= bounds.x - __worldTransform.tx;
-						__worldClipOffset.y -= bounds.y - __worldTransform.ty;
-						
-					} else {
-						
-						__worldClipOffset = new Point (-bounds.x + __worldTransform.tx, -bounds.y + __worldTransform.ty);
-						
-					}
-					
-				}
 				
 				#else
 				
@@ -395,7 +388,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 				if (parent.__worldClip != null) {
 					
 					worldClip = parent.__worldClip.clone ();
-					worldClipOffset = parent.__worldClipOffset.clone ();
 					
 				}
 				
@@ -406,14 +398,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 					
 					if (worldClip != null) {
 						
-						worldClipOffset.x -= bounds.x - __worldTransform.tx;
-						worldClipOffset.y -= bounds.y - __worldTransform.ty;
-						
-						bounds.__contract (worldClip.x, worldClip.y, worldClip.width, worldClip.height);
-						
-					} else {
-						
-						worldClipOffset = new Point (-bounds.x + __worldTransform.tx, -bounds.y + __worldTransform.ty);
+						bounds.__contract (worldClip.x - scrollRect.x, worldClip.y - scrollRect.y, worldClip.width, worldClip.height);
 						
 					}
 					
@@ -427,16 +412,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 				
 				__worldAlpha = alpha;
 				
-				#if !dom
-				
-				if (scrollRect != null) {
-					
-					var clip = scrollRect.clone ().transform (__worldTransform);
-					__worldClipOffset = new Point (-clip.x, -clip.y);
-					
-				}
-				
-				#else
+				#if dom
 				
 				__worldVisibleChanged = (__worldVisible != visible);
 				__worldVisible = visible;
@@ -446,7 +422,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 				if (scrollRect != null) {
 					
 					worldClip = scrollRect.clone ().transform (__worldTransform);
-					worldClipOffset = new Point (-worldClip.x, -worldClip.y);
 					
 				}
 				
@@ -456,9 +431,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			
 			#if dom
 			__worldClipChanged = ((worldClip == null && __worldClip != null) || (worldClip != null && !worldClip.equals (__worldClip)));
-			__worldClipOffsetChanged = ((worldClipOffset == null && __worldClipOffset != null) || (worldClipOffset != null && !worldClipOffset.equals (__worldClipOffset)));
 			__worldClip = worldClip;
-			__worldClipOffset = worldClipOffset;
 			#end
 			
 		}
