@@ -99,6 +99,14 @@ class Bitmap extends DisplayObjectContainer {
 			context.globalAlpha = __worldAlpha;
 			var transform = __worldTransform;
 			
+			if (__worldClipOffset != null) {
+				
+				transform = transform.clone ();
+				transform.tx += __worldClipOffset.x;
+				transform.ty += __worldClipOffset.y;
+				
+			}
+			
 			if (renderSession.roundPixels) {
 				
 				context.setTransform (transform.a, transform.b, transform.c, transform.d, Std.int (transform.tx), Std.int (transform.ty));
@@ -240,8 +248,16 @@ class Bitmap extends DisplayObjectContainer {
 		__canvas.width = bitmapData.width;
 		__canvas.height = bitmapData.height;
 		
-		if (__worldTransformChanged) {
-		
+		if (__worldClipOffset != null) {
+			
+			var transform = __worldTransform.clone ();
+			transform.tx += __worldClipOffset.x;
+			transform.ty += __worldClipOffset.y;
+			
+			__style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.roundPixels), null);
+			
+		} else {
+			
 			__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
 			
 		}
@@ -317,9 +333,21 @@ class Bitmap extends DisplayObjectContainer {
 			
 		}
 		
-		if (__worldTransformChanged) {
+		if (__worldTransformChanged || __worldClipOffsetChanged) {
 			
-			__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
+			if (__worldClipOffset != null) {
+				
+				var transform = __worldTransform.clone ();
+				transform.tx += __worldClipOffset.x;
+				transform.ty += __worldClipOffset.y;
+				
+				__style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.roundPixels), null);
+				
+			} else {
+				
+				__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
+				
+			}
 			
 		}
 		

@@ -437,7 +437,10 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		if (scrollRect != null) {
 			
-			renderSession.maskManager.pushRect (scrollRect, __worldTransform);
+			var rect = scrollRect.clone ();
+			rect.x = 0;
+			rect.y = 0;
+			renderSession.maskManager.pushRect (rect, __worldTransform);
 			
 		}
 		

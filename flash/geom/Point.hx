@@ -42,7 +42,7 @@ class Point {
 	
 	public function equals (toCompare:Point):Bool {
 		
-		return toCompare.x == x && toCompare.y == y;
+		return toCompare != null && toCompare.x == x && toCompare.y == y;
 		
 	}
 	

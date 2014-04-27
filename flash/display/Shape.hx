@@ -74,6 +74,14 @@ class Shape extends DisplayObject {
 				context.globalAlpha = __worldAlpha;
 				var transform = __worldTransform;
 				
+				if (__worldClipOffset != null) {
+					
+					transform = transform.clone ();
+					transform.tx += __worldClipOffset.x;
+					transform.ty += __worldClipOffset.y;
+					
+				}
+				
 				if (renderSession.roundPixels) {
 					
 					context.setTransform (transform.a, transform.b, transform.c, transform.d, Std.int (transform.tx), Std.int (transform.ty));
@@ -150,11 +158,18 @@ class Shape extends DisplayObject {
 			
 			if (__canvas != null) {
 				
-				if (__worldTransformChanged) {
+				if (__worldTransformChanged || __worldClipOffsetChanged) {
 					
 					var transform = new Matrix ();
 					transform.translate (__graphics.__bounds.x, __graphics.__bounds.y);
 					transform = transform.mult (__worldTransform);
+					
+					if (__worldClipOffset != null) {
+						
+						transform.tx += __worldClipOffset.x;
+						transform.ty += __worldClipOffset.y;
+						
+					}
 					
 					__style.setProperty (renderSession.transformProperty, transform.to3DString (renderSession.roundPixels), null);
 					
