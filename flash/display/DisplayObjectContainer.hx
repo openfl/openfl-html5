@@ -52,9 +52,7 @@ class DisplayObjectContainer extends InteractiveObject {
 				
 			}
 			
-			// TODO: Should this be necessary?
-			
-			//child.__update ();
+			DisplayObject.__worldDirty = true;
 			
 		}
 		
@@ -93,6 +91,7 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 		}
 		
+		DisplayObject.__worldDirty = true;
 		__children.insert (index, child);
 		
 		return child;
@@ -184,6 +183,8 @@ class DisplayObjectContainer extends InteractiveObject {
 			child.parent = null;
 			__children.remove (child);
 			__removedChildren.push (child);
+			
+			DisplayObject.__worldDirty = true;
 			
 		}
 		
