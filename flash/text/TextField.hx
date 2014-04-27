@@ -62,11 +62,9 @@ class TextField extends InteractiveObject {
 	private var __context:CanvasRenderingContext2D;
 	private var __dirty:Bool;
 	private var __div:DivElement;
-	//private var __graphics:Graphics;
 	private var __height:Float;
 	private var __isHTML:Bool;
 	private var __ranges:Array<TextFormatRange>;
-	private var __style:CSSStyleDeclaration;
 	private var __text:String;
 	private var __textFormat:TextFormat;
 	private var __width:Float;
@@ -101,7 +99,6 @@ class TextField extends InteractiveObject {
 		}
 		
 		__textFormat = __defaultTextFormat.clone ();
-		//__graphics = new Graphics ();
 		
 	}
 	
@@ -267,27 +264,13 @@ class TextField extends InteractiveObject {
 				
 				__canvas = null;
 				__context = null;
-				//__graphics.clear ();
 				
 			} else {
-				
-				//var font = new Font ();
-				//trace (font.hasGlyph ("a"));
-				//__graphics.beginFill (0xFF0000);
-				//font.__setScale (20);
-				//font.__render (__graphics, "a".charCodeAt (0), 0, 0, false);
-				//__graphics.endFill ();
-				
-				//__graphics.beginFill (0xFF0000);
-				//__graphics.drawRect (0, 0, 100, 100);
 				
 				if (__canvas == null) {
 					
 					__canvas = cast Browser.document.createElement ("canvas");
 					__context = __canvas.getContext ("2d");
-					//untyped (__context).mozImageSmoothingEnabled = false;
-					//untyped (__context).webkitImageSmoothingEnabled = false;
-					//__context.imageSmoothingEnabled = false;
 					
 				}
 				
@@ -389,14 +372,11 @@ class TextField extends InteractiveObject {
 				
 			}
 			
-			//__graphics.__render ();
-			
 			__dirty = false;
 			
 		}
 		
 		if (__canvas != null) {
-		//if (__graphics.__canvas != null) {
 			
 			var context = renderSession.context;
 			
@@ -430,8 +410,6 @@ class TextField extends InteractiveObject {
 	
 	public override function __renderDOM (renderSession:RenderSession):Void {
 		
-		//if (!__renderable) return;
-		
 		if (stage != null && __worldVisible && __renderable) {
 			
 			if (__dirty || __div == null) {
@@ -441,17 +419,8 @@ class TextField extends InteractiveObject {
 					if (__div == null) {
 						
 						__div = cast Browser.document.createElement ("div");
-						
-						__style = __div.style;
-						__style.position = "absolute";
-						__style.setProperty ("top", "0", null);
-						__style.setProperty ("left", "0", null);
-						__style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+						__initializeElement (__div, renderSession);
 						__style.setProperty ("cursor", "inherit", null);
-						
-						renderSession.element.appendChild (__div);
-						
-						__reset ();
 						
 					}
 					
@@ -528,47 +497,7 @@ class TextField extends InteractiveObject {
 			
 			if (__div != null) {
 				
-				if (__worldAlphaChanged) {
-					
-					if (__worldAlpha < 1) {
-						
-						__style.setProperty ("opacity", Std.string (__worldAlpha), null);
-						
-					} else {
-						
-						__style.removeProperty ("opacity");
-						
-					}
-					
-				}
-				
-				if (__worldTransformChanged) {
-					
-					__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
-					
-				}
-				
-				if (__worldZ != ++renderSession.z) {
-					
-					__worldZ = renderSession.z;
-					__style.setProperty ("z-index", Std.string (__worldZ), null);
-					
-				}
-				
-				if (__worldClipChanged) {
-					
-					if (__worldClip == null) {
-						
-						__style.removeProperty ("clip");
-						
-					} else {
-						
-						var clip = __worldClip.transform (__worldTransform.clone ().invert ());
-						__style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
-						
-					}
-					
-				}
+				__applyStyle (renderSession, true, true);
 				
 			}
 			
@@ -803,52 +732,6 @@ class TextField extends InteractiveObject {
 				
 			}
 			
-			
-			// crude
-			
-			/*var segments = value.split ("<");
-			var format = __textFormat;
-			var rangeFormat = null;
-			
-			for (segment in segments) {
-				
-				if (segment != "") {
-					
-					var caretIndex = segment.indexOf (">");
-					
-					if (caretIndex > -1) {
-						
-						if (StringTools.startsWith (segment, "font ")) {
-							
-							// parse font
-							rangeFormat = format.clone ();
-							rangeFormat.color = 0xFF0000;
-							
-						}
-						
-					}
-					
-					if (segment.indexOf (">") > )
-					
-				}
-				
-			}*/
-			
-			
-			
-			/*value = new EReg ("</p>", "g").replace (value, "\n");
-			value = new EReg ("<br>", "g").replace (value, "\n");
-			value = new EReg ("<.*?>", "g").replace (value, "");
-			
-			var first = Math.floor (value.length / 2);
-			var format = __textFormat.clone ();
-			format.color = 0xFF00FF;
-			
-			__ranges = [ new TextFormatRange (__textFormat, 0, first), new TextFormatRange (format, first, value.length) ];
-			*/
-			
-			
-				
 		}
 		
 		return __text = value;

@@ -12,6 +12,8 @@ import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
 import flash.geom.Transform;
+import js.html.CSSStyleDeclaration;
+import js.html.Element;
 
 
 @:access(flash.events.Event)
@@ -62,6 +64,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	private var __scaleX:Float;
 	private var __scaleY:Float;
 	private var __scrollRect:Rectangle;
+	private var __style:CSSStyleDeclaration;
 	private var __transform:Transform;
 	private var __visible:Bool;
 	private var __worldAlpha:Float;
@@ -178,6 +181,53 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
+	private function __applyStyle (renderSession:RenderSession, setTransform:Bool, setAlpha:Bool):Void {
+		
+		if (setTransform && __worldTransformChanged) {
+			
+			__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
+			
+		}
+		
+		if (__worldZ != ++renderSession.z) {
+			
+			__worldZ = renderSession.z;
+			__style.setProperty ("z-index", Std.string (__worldZ), null);
+			
+		}
+		
+		if (setAlpha && __worldAlphaChanged) {
+			
+			if (__worldAlpha < 1) {
+				
+				__style.setProperty ("opacity", Std.string (__worldAlpha), null);
+				
+			} else {
+				
+				__style.removeProperty ("opacity");
+				
+			}
+			
+		}
+		
+		if (__worldClipChanged) {
+			
+			if (__worldClip == null) {
+				
+				__style.removeProperty ("clip");
+				
+			} else {
+				
+				var clip = __worldClip.transform (__worldTransform.clone ().invert ());
+				__style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
+				
+			}
+			
+		}
+		
+	}
+	
+	
 	private function __broadcast (event:Event, notifyChilden:Bool):Bool {
 		
 		if (__eventMap != null && hasEventListener (event.type)) {
@@ -240,6 +290,25 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
+	private function __initializeElement (element:Element, renderSession:RenderSession):Void {
+		
+		__style = element.style;
+		__style.setProperty ("position", "absolute", null);
+		__style.setProperty ("top", "0", null);
+		__style.setProperty ("left", "0", null);
+		__style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
+		
+		renderSession.element.appendChild (element);
+		
+		__worldAlphaChanged = true;
+		__worldClipChanged = true;
+		__worldTransformChanged = true;
+		__worldVisibleChanged = true;
+		__worldZ = -1;
+		
+	}
+	
+	
 	public function __renderCanvas (renderSession:RenderSession):Void {
 		
 		
@@ -257,19 +326,6 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public function __renderMask (renderSession:RenderSession):Void {
 		
 		
-		
-	}
-	
-	
-	private function __reset ():Void {
-		
-		#if dom
-		__worldAlphaChanged = true;
-		__worldClipChanged = true;
-		__worldTransformChanged = true;
-		__worldVisibleChanged = true;
-		__worldZ = -1;
-		#end
 		
 	}
 	

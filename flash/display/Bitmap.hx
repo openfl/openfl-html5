@@ -23,7 +23,6 @@ class Bitmap extends DisplayObjectContainer {
 	private var __canvas:CanvasElement;
 	private var __canvasContext:CanvasRenderingContext2D;
 	private var __image:ImageElement;
-	private var __style:CSSStyleDeclaration;
 	
 	
 	public function new (bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) {
@@ -164,8 +163,6 @@ class Bitmap extends DisplayObjectContainer {
 	
 	public override function __renderDOM (renderSession:RenderSession):Void {
 		
-		//if (!__renderable) return;
-		
 		if (stage != null && __worldVisible && __renderable && bitmapData != null && bitmapData.__valid) {
 			
 			if (bitmapData.__sourceImage != null) {
@@ -223,15 +220,7 @@ class Bitmap extends DisplayObjectContainer {
 				
 			}
 			
-			__style = __canvas.style;
-			__style.setProperty ("position", "absolute", null);
-			__style.setProperty ("top", "0", null);
-			__style.setProperty ("left", "0", null);
-			__style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
-			
-			renderSession.element.appendChild (__canvas);
-			
-			__reset ();
+			__initializeElement (__canvas, renderSession);
 			
 		}
 		
@@ -240,39 +229,10 @@ class Bitmap extends DisplayObjectContainer {
 		__canvas.width = bitmapData.width;
 		__canvas.height = bitmapData.height;
 		
-		if (__worldTransformChanged) {
-			
-			__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
-			
-		}
-		
-		if (__worldZ != ++renderSession.z) {
-			
-			__worldZ = renderSession.z;
-			__style.setProperty ("z-index", Std.string (__worldZ), null);
-			
-		}
-		
 		__canvasContext.globalAlpha = __worldAlpha;
-		
 		__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
-			
-		if (__worldClipChanged) {
-			
-			// TODO: Clip canvas instead of using CSS
-			
-			if (__worldClip == null) {
-				
-				__style.removeProperty ("clip");
-				
-			} else {
-				
-				var clip = __worldClip.transform (__worldTransform.clone ().invert ());
-				__style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
-				
-			}
-			
-		}
+		
+		__applyStyle (renderSession, true, false);
 		
 	}
 	
@@ -290,60 +250,11 @@ class Bitmap extends DisplayObjectContainer {
 			
 			__image = cast Browser.document.createElement ("img");
 			__image.src = bitmapData.__sourceImage.src;
-			
-			__style = __image.style;
-			__style.setProperty ("position", "absolute", null);
-			__style.setProperty ("top", "0", null);
-			__style.setProperty ("left", "0", null);
-			__style.setProperty (renderSession.transformOriginProperty, "0 0 0", null);
-			
-			renderSession.element.appendChild (__image);
-			
-			__reset ();
+			__initializeElement (__image, renderSession);
 			
 		}
 		
-		if (__worldAlphaChanged) {
-			
-			if (__worldAlpha < 1) {
-				
-				__style.setProperty ("opacity", Std.string (__worldAlpha), null);
-				
-			} else {
-				
-				__style.removeProperty ("opacity");
-				
-			}
-			
-		}
-		
-		if (__worldTransformChanged) {
-			
-			__style.setProperty (renderSession.transformProperty, __worldTransform.to3DString (renderSession.roundPixels), null);
-			
-		}
-		
-		if (__worldZ != ++renderSession.z) {
-			
-			__worldZ = renderSession.z;
-			__style.setProperty ("z-index", Std.string (__worldZ), null);
-			
-		}
-		
-		if (__worldClipChanged) {
-			
-			if (__worldClip == null) {
-				
-				__style.removeProperty ("clip");
-				
-			} else {
-				
-				var clip = __worldClip.transform (__worldTransform.clone ().invert ());
-				__style.setProperty ("clip", "rect(" + clip.y + "px, " + clip.right + "px, " + clip.bottom + "px, " + clip.x + "px)", null);
-				
-			}
-			
-		}
+		__applyStyle (renderSession, true, true);
 		
 	}
 	
