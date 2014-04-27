@@ -80,6 +80,13 @@ class Shape extends DisplayObject {
 					transform.tx += __worldClipOffset.x;
 					transform.ty += __worldClipOffset.y;
 					
+					if (scrollRect != null) {
+						
+						transform.tx += scrollRect.x;
+						transform.ty += scrollRect.y;
+						
+					}
+					
 				}
 				
 				if (renderSession.roundPixels) {
@@ -98,7 +105,7 @@ class Shape extends DisplayObject {
 					
 				} else {
 					
-					context.drawImage (__graphics.__canvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x, __graphics.__bounds.y, scrollRect.width, scrollRect.height);
+					context.drawImage (__graphics.__canvas, scrollRect.x - __graphics.__bounds.x, scrollRect.y - __graphics.__bounds.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x, __graphics.__bounds.y, scrollRect.width, scrollRect.height);
 					
 				}
 				

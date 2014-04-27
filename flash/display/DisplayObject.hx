@@ -432,7 +432,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 				if (scrollRect != null) {
 					
 					var clip = scrollRect.clone ().transform (__worldTransform);
-					__worldClipOffset = new Point (-clip.x + __worldTransform.tx, -clip.y + __worldTransform.ty);
+					__worldClipOffset = new Point (-clip.x, -clip.y);
 					
 				}
 				
@@ -446,7 +446,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 				if (scrollRect != null) {
 					
 					worldClip = scrollRect.clone ().transform (__worldTransform);
-					worldClipOffset = new Point (-worldClip.x + __worldTransform.tx, -worldClip.y + __worldTransform.ty);
+					worldClipOffset = new Point (-worldClip.x, -worldClip.y);
 					
 				}
 				

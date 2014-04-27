@@ -99,7 +99,7 @@ class Sprite extends DisplayObjectContainer {
 				context.globalAlpha = __worldAlpha;
 				var transform = __worldTransform;
 				
-				if (__worldClipOffset != null) {
+				if (__worldClipOffset != null && scrollRect == null) {
 					
 					transform = transform.clone ();
 					transform.tx += __worldClipOffset.x;
@@ -123,7 +123,7 @@ class Sprite extends DisplayObjectContainer {
 					
 				} else {
 					
-					context.drawImage (__graphics.__canvas, scrollRect.x, scrollRect.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x, __graphics.__bounds.y, scrollRect.width, scrollRect.height);
+					context.drawImage (__graphics.__canvas, scrollRect.x - __graphics.__bounds.x, scrollRect.y - __graphics.__bounds.y, scrollRect.width, scrollRect.height, __graphics.__bounds.x, __graphics.__bounds.y, scrollRect.width, scrollRect.height);
 					
 				}
 				

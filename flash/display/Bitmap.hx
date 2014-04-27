@@ -105,6 +105,13 @@ class Bitmap extends DisplayObjectContainer {
 				transform.tx += __worldClipOffset.x;
 				transform.ty += __worldClipOffset.y;
 				
+				if (scrollRect != null) {
+					
+					transform.tx += scrollRect.x;
+					transform.ty += scrollRect.y;
+					
+				}
+				
 			}
 			
 			if (renderSession.roundPixels) {
