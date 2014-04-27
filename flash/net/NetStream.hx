@@ -12,29 +12,6 @@ import js.Browser;
 class NetStream extends EventDispatcher {
 	
 	
-	private static inline var BUFFER_UPDATED:String = "flash.net.NetStream.updated";
-	private static inline var CODE_PLAY_STREAMNOTFOUND:String = "NetStream.Play.StreamNotFound";
-	private static inline var CODE_BUFFER_EMPTY:String = "NetStream.Buffer.Empty";
-	private static inline var CODE_BUFFER_FULL:String = "NetStream.Buffer.Full";
-	private static inline var CODE_BUFFER_FLUSH:String = "NetStream.Buffer.Flush";
-	private static inline var CODE_BUFFER_START:String = "NetStream.Play.Start";
-	private static inline var CODE_BUFFER_STOP:String = "NetStream.Play.Stop";
-	private static inline var CODE_PLAY_TRANSITIONCOMPLETE:String = "NetStream.Play.TransitionComplete";
-	private static inline var CODE_PLAY_SWITCH:String = "NetStream.Play.Switch";
-	private static inline var CODE_PLAY_COMPLETE:String = "NetStream.Play.Complete";
-	private static inline var CODE_PLAY_UNSUPPORTEDFORMAT:String = "NetStream.Play.UnsupportedFormat";
-	private static inline var CODE_PLAY_ERROR:String = "NetStream.Play.error";
-	private static inline var CODE_PLAY_WAITING:String = "NetStream.Play.waiting";
-	private static inline var CODE_PLAY_SEEKING:String = "NetStream.Play.seeking";
-	private static inline var CODE_PLAY_PAUSE:String = "NetStream.Play.pause";
-	private static inline var CODE_PLAY_PLAYING:String = "NetStream.Play.playing";
-	private static inline var CODE_PLAY_TIMEUPDATE:String = "NetStream.Play.timeupdate";
-	private static inline var CODE_PLAY_LOADSTART:String = "NetStream.Play.loadstart";
-	private static inline var CODE_PLAY_STALLED:String = "NetStream.Play.stalled";
-	private static inline var CODE_PLAY_DURATIONCHANGED:String = "NetStream.Play.durationchanged";
-	private static inline var CODE_PLAY_CANPLAYTHROUGH:String = "NetStream.Play.canplaythrough";
-	private static inline var CODE_PLAY_CANPLAY:String = "NetStream.Play.canplay";
-	
 	public var audioCodec:Int;
 	public var bufferLength:Float;
 	public var bufferTime:Float;
@@ -166,87 +143,87 @@ class NetStream extends EventDispatcher {
 	
 	private function video_onCanPlay (event:Dynamic):Void {
 		
-		__playStatus (CODE_PLAY_CANPLAY);
+		__playStatus ("NetStream.Play.canplay");
 		
 	}
 	
 	
 	private function video_onCanPlayThrough (event:Dynamic):Void {
 		
-		__playStatus (CODE_PLAY_CANPLAYTHROUGH);
+		__playStatus ("NetStream.Play.canplaythrough");
 		
 	}
 	
 	
 	private function video_onDurationChanged (event:Dynamic):Void {
 		
-		__playStatus (CODE_PLAY_DURATIONCHANGED);
+		__playStatus ("NetStream.Play.durationchanged");
 		
 	}
 	
 	
 	private function video_onEnd (event:Dynamic):Void {
 		
-		__connection.dispatchEvent (new NetStatusEvent (NetStatusEvent.NET_STATUS, false, false, { code : CODE_BUFFER_STOP } ));
-		__playStatus (CODE_PLAY_COMPLETE);
+		__connection.dispatchEvent (new NetStatusEvent (NetStatusEvent.NET_STATUS, false, false, { code : "NetStream.Play.Stop" } ));
+		__playStatus ("NetStream.Play.Complete");
 		
 	}
 	
 	
 	private function video_onError (event:Dynamic):Void {
 		
-		__connection.dispatchEvent (new NetStatusEvent (NetStatusEvent.NET_STATUS, false, false, { code : CODE_BUFFER_STOP } ));
-		__playStatus (CODE_PLAY_ERROR);
+		__connection.dispatchEvent (new NetStatusEvent (NetStatusEvent.NET_STATUS, false, false, { code : "NetStream.Play.Stop" } ));
+		__playStatus ("NetStream.Play.error");
 		
 	}
 	
 	
 	private function video_onLoadStart (event:Dynamic):Void {
 		
-		__playStatus (CODE_PLAY_LOADSTART);
+		__playStatus ("NetStream.Play.loadstart");
 		
 	}
 	
 	
 	private function video_onPause (event:Dynamic):Void {
 		
-		__playStatus (CODE_PLAY_PAUSE);
+		__playStatus ("NetStream.Play.pause");
 		
 	}
 	
 	
 	private function video_onPlaying (event:Dynamic):Void {
 		
-		__connection.dispatchEvent (new NetStatusEvent (NetStatusEvent.NET_STATUS, false, false, { code : CODE_BUFFER_START } ));
-		__playStatus (CODE_PLAY_PLAYING);
+		__connection.dispatchEvent (new NetStatusEvent (NetStatusEvent.NET_STATUS, false, false, { code : "NetStream.Play.Start" } ));
+		__playStatus ("NetStream.Play.playing");
 		
 	}
 	
 	
 	private function video_onSeeking (event:Dynamic):Void {
 		
-		__playStatus (CODE_PLAY_SEEKING);
+		__playStatus ("NetStream.Play.seeking");
 		
 	}
 	
 	
 	private function video_onStalled (event:Dynamic):Void {
 		
-		__playStatus (CODE_PLAY_STALLED);
+		__playStatus ("NetStream.Play.stalled");
 		
 	}
 	
 	
 	private function video_onTimeUpdate (event:Dynamic):Void {
 		
-		__playStatus (CODE_PLAY_TIMEUPDATE);
+		__playStatus ("NetStream.Play.timeupdate");
 		
 	}
 	
 	
 	private function video_onWaiting (event:Dynamic):Void {
 		
-		__playStatus (CODE_PLAY_WAITING);
+		__playStatus ("NetStream.Play.waiting");
 		
 	}
 	
