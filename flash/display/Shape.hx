@@ -122,7 +122,7 @@ class Shape extends DisplayObject {
 		
 		if (stage != null && __worldVisible && __renderable && __graphics != null) {
 		
-			if (__graphics.__dirty || __worldAlphaChanged) {
+			if (__graphics.__dirty || __worldAlphaChanged || (__canvas == null && __graphics.__canvas != null)) {
 				
 				__graphics.__render ();
 				
@@ -149,6 +149,7 @@ class Shape extends DisplayObject {
 					__canvas.height = __graphics.__canvas.height;
 					
 					__canvasContext.globalAlpha = __worldAlpha;
+					__canvasContext.drawImage (__graphics.__canvas, 0, 0);
 					
 				} else {
 					
@@ -205,8 +206,6 @@ class Shape extends DisplayObject {
 					}
 					
 				}
-				
-				__canvasContext.globalAlpha = __worldAlpha;
 				
 			}
 				

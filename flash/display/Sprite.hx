@@ -148,7 +148,7 @@ class Sprite extends DisplayObjectContainer {
 		
 		if (stage != null && __worldVisible && __renderable && __graphics != null) {
 			
-			if (__graphics.__dirty || __worldAlphaChanged) {
+			if (__graphics.__dirty || __worldAlphaChanged || (__canvas == null && __graphics.__canvas != null)) {
 				
 				__graphics.__render ();
 				
@@ -174,6 +174,7 @@ class Sprite extends DisplayObjectContainer {
 					__canvas.width = __graphics.__canvas.width;
 					__canvas.height = __graphics.__canvas.height;
 					
+					__canvasContext.globalAlpha = __worldAlpha;
 					__canvasContext.drawImage (__graphics.__canvas, 0, 0);
 					
 				} else {
@@ -231,8 +232,6 @@ class Sprite extends DisplayObjectContainer {
 					}
 					
 				}
-				
-				__canvasContext.globalAlpha = __worldAlpha;
 				
 			}
 			
