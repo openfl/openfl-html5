@@ -52,6 +52,7 @@ class DisplayObjectContainer extends InteractiveObject {
 				
 			}
 			
+			child.dispatchEvent (new Event (Event.ADDED, true));
 			DisplayObject.__worldDirty = true;
 			
 		}
@@ -88,6 +89,8 @@ class DisplayObjectContainer extends InteractiveObject {
 				child.__setStageReference (stage);
 				
 			}
+			
+			child.dispatchEvent (new Event (Event.ADDED, true));
 			
 		}
 		
@@ -183,6 +186,7 @@ class DisplayObjectContainer extends InteractiveObject {
 			child.parent = null;
 			__children.remove (child);
 			__removedChildren.push (child);
+			child.dispatchEvent (new Event (Event.REMOVED, true));
 			
 			DisplayObject.__worldDirty = true;
 			
