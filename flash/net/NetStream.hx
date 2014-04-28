@@ -5,6 +5,7 @@ import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.events.NetStatusEvent;
 import flash.media.SoundTransform;
+import haxe.Timer;
 import js.html.VideoElement;
 import js.Browser;
 
@@ -24,10 +25,12 @@ class NetStream extends EventDispatcher {
 	public var liveDelay:Float;
 	public var objectEncoding:Int;
 	public var soundTransform:SoundTransform;
+	public var speed (get, set):Float;
 	public var time:Float;
 	public var videoCodec:Int;
 	
 	private var __connection:NetConnection;
+	private var __timer:Timer;
 	private var __video (default, null):VideoElement;
 	
 	
@@ -66,6 +69,33 @@ class NetStream extends EventDispatcher {
 		
 		__video.src = url;
 		__video.play ();
+		
+	}
+	
+	
+	public function requestVideoStatus ():Void {
+		
+		if (__timer == null) {
+			
+			__timer = new Timer (1);
+			
+		}
+		
+		__timer.run = function () {
+			
+			if (__video.paused) {
+				
+				__playStatus ("NetStream.Play.pause");
+				
+			} else {
+				
+				__playStatus ("NetStream.Play.playing");
+				
+			}
+			
+			__timer.stop ();
+			
+		};
 		
 	}
 	
@@ -123,6 +153,7 @@ class NetStream extends EventDispatcher {
 					code: code,
 					duration: __video.duration,
 					position: __video.currentTime,
+					speed: __video.playbackRate,
 					start: __video.startTime
 					
 				});
@@ -224,6 +255,27 @@ class NetStream extends EventDispatcher {
 	private function video_onWaiting (event:Dynamic):Void {
 		
 		__playStatus ("NetStream.Play.waiting");
+		
+	}
+	
+	
+	
+	
+	// Get & Set Methods
+	
+	
+	
+	
+	private function get_speed ():Float {
+		
+		return __video.playbackRate;
+		
+	}
+	
+	
+	private function set_speed (value:Float):Float {
+		
+		return __video.playbackRate = value;
 		
 	}
 	

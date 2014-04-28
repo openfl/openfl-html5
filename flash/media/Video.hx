@@ -164,8 +164,8 @@ class Video extends DisplayObject {
 			
 			if (__dirty) {
 				
-				__stream.__video.width = Std.int (width);
-				__stream.__video.height = Std.int (height);
+				__stream.__video.width = Std.int (__width);
+				__stream.__video.height = Std.int (__height);
 				__dirty = false;
 				
 			}

@@ -607,6 +607,10 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 			scaleY = value / bounds.height;
 			
+		} else {
+			
+			scaleY = 1;
+			
 		}
 		
 		return value;
@@ -643,6 +647,10 @@ class DisplayObjectContainer extends InteractiveObject {
 		if (value != bounds.width) {
 			
 			scaleX = value / bounds.width;
+			
+		} else {
+			
+			scaleX = 1;
 			
 		}
 		
