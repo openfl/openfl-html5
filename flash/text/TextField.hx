@@ -14,6 +14,7 @@ import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
 import js.html.CSSStyleDeclaration;
 import js.html.DivElement;
+import js.html.Element;
 import js.Browser;
 
 
@@ -64,6 +65,8 @@ class TextField extends InteractiveObject {
 	private var __div:DivElement;
 	private var __height:Float;
 	private var __isHTML:Bool;
+	private var __measuredHeight:Int;
+	private var __measuredWidth:Int;
 	private var __ranges:Array<TextFormatRange>;
 	private var __text:String;
 	private var __textFormat:TextFormat;
@@ -248,6 +251,42 @@ class TextField extends InteractiveObject {
 			}
 			
 			return measurements;
+			
+		}
+		
+	}
+	
+	
+	private function __measureTextWithDOM ():Void {
+	 	
+		var div:Element = __div;
+		
+		if (__div == null) {
+			
+			div = Browser.document.createElement ("div");
+			div.innerHTML = __text;
+			div.style.setProperty ("font", __getFont (__textFormat), null);
+			div.style.position = "absolute";
+			div.style.top = "110%"; // position off-screen!
+			Browser.document.body.appendChild (div);
+			
+		}
+		
+		__measuredWidth = div.clientWidth;
+		
+		// Now set the width so that the height is accurate as a
+		// function of the flow within the width bounds...
+		if (__div == null) {
+			
+			div.style.width = Std.string (width)+"px";
+			
+		}
+		
+		__measuredHeight = div.clientHeight;
+		
+		if (__div == null) {
+			
+			Browser.document.body.removeChild (div);
 			
 		}
 		
@@ -816,16 +855,8 @@ class TextField extends InteractiveObject {
 			
 		} else {
 			
-			var div = Browser.document.createElement ("div");
-			div.innerHTML = __text;
-			div.style.setProperty ("font", __getFont (__textFormat), null);
-			div.style.position = "absolute";
-			div.style.top = "-100%";
-			Browser.document.body.appendChild (div);
-			var clientWidth = div.offsetWidth;
-			Browser.document.body.removeChild (div);
-			
-			return clientWidth;
+			__measureTextWithDOM ();
+			return __measuredWidth;
 			
 		}
 		
@@ -834,9 +865,23 @@ class TextField extends InteractiveObject {
 	
 	public function get_textHeight ():Float {
 		
-		// TODO: Make this more accurate
-		
-		return __textFormat.size * 1.185;
+		if (__canvas != null) {
+			
+			// TODO: Make this more accurate
+			return __textFormat.size * 1.185;
+			
+		} else if (__div != null) {
+			
+			return __div.clientHeight;
+			
+		} else {
+			
+			__measureTextWithDOM ();
+			
+			// Add a litte extra space for descenders...
+			return __measuredHeight + __textFormat.size * 0.185;
+			
+		}
 		
 	}
 	
