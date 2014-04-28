@@ -232,7 +232,7 @@ class Bitmap extends DisplayObjectContainer {
 		__canvasContext.globalAlpha = __worldAlpha;
 		__canvasContext.drawImage (bitmapData.__sourceCanvas, 0, 0);
 		
-		__applyStyle (renderSession, true, false);
+		__applyStyle (renderSession, true, false, true);
 		
 	}
 	
@@ -254,7 +254,7 @@ class Bitmap extends DisplayObjectContainer {
 			
 		}
 		
-		__applyStyle (renderSession, true, true);
+		__applyStyle (renderSession, true, true, true);
 		
 	}
 	

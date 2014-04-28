@@ -170,7 +170,7 @@ class Video extends DisplayObject {
 				
 			}
 			
-			__applyStyle (renderSession, true, true);
+			__applyStyle (renderSession, true, true, true);
 			
 		} else {
 			

@@ -497,7 +497,9 @@ class TextField extends InteractiveObject {
 			
 			if (__div != null) {
 				
-				__applyStyle (renderSession, true, true);
+				// TODO: Enable scrollRect clipping
+				
+				__applyStyle (renderSession, true, true, false);
 				
 			}
 			

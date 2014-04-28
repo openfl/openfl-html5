@@ -181,7 +181,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
-	private function __applyStyle (renderSession:RenderSession, setTransform:Bool, setAlpha:Bool):Void {
+	private function __applyStyle (renderSession:RenderSession, setTransform:Bool, setAlpha:Bool, setClip:Bool):Void {
 		
 		if (setTransform && __worldTransformChanged) {
 			
@@ -210,7 +210,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			
 		}
 		
-		if (__worldClipChanged) {
+		if (setClip && __worldClipChanged) {
 			
 			if (__worldClip == null) {
 				

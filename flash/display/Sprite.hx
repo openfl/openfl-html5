@@ -183,7 +183,7 @@ class Sprite extends DisplayObjectContainer {
 					
 				}
 				
-				__applyStyle (renderSession, false, false);
+				__applyStyle (renderSession, false, false, true);
 				
 			}
 			

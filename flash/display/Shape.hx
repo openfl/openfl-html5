@@ -150,7 +150,7 @@ class Shape extends DisplayObject {
 					
 				}
 				
-				__applyStyle (renderSession, false, false);
+				__applyStyle (renderSession, false, false, true);
 				
 			}
 				

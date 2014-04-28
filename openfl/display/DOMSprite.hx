@@ -33,7 +33,7 @@ class DOMSprite extends Sprite {
 				
 			}
 			
-			__applyStyle (renderSession, true, true);
+			__applyStyle (renderSession, true, true, true);
 			
 		} else {
 			
