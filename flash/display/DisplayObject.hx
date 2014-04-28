@@ -356,7 +356,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	public function __update (transformOnly:Bool):Void {
 		
 		__renderable = (visible && scaleX != 0 && scaleY != 0 && !__isMask);
-		if (!__renderable && !__isMask) return;
+		//if (!__renderable && !__isMask) return;
 		
 		if (rotation != __rotationCache) {
 			

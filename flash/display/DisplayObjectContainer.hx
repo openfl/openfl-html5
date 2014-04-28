@@ -553,7 +553,13 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		super.__update (transformOnly);
 		
-		if (!__renderable) return;
+		if (!__renderable && !__worldAlphaChanged && !__worldClipChanged && !__worldTransformChanged && !__worldVisibleChanged) {
+			
+			return;
+			
+		}
+		
+		//if (!__renderable) return;
 		
 		for (child in __children) {
 			
