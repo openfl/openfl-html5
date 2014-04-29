@@ -279,7 +279,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			
 			var list = [];
 			var current = this;
-			var transformDirty = false;
+			var transformDirty = __transformDirty;
 			
 			while (current.parent != null) {
 				
@@ -736,9 +736,13 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	
 	private function set_scrollRect (value:Rectangle):Rectangle {
 		
-		#if dom
-		if (value != __scrollRect) __setRenderDirty ();
-		#end
+		if (value != __scrollRect) {
+			
+			__setTransformDirty ();
+			#if dom __setRenderDirty (); #end
+			
+		}
+		
 		return __scrollRect = value;
 		
 	}
