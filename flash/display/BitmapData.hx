@@ -230,6 +230,7 @@ class BitmapData implements IBitmapDrawable {
 		
 		if (sourceRect.x + sourceRect.width > sourceBitmapData.width) sourceRect.width = sourceBitmapData.width - sourceRect.x;
 		if (sourceRect.y + sourceRect.height > sourceBitmapData.height) sourceRect.height = sourceBitmapData.height - sourceRect.y;
+		if (sourceRect.width <= 0 || sourceRect.height <= 0) return;
 		
 		if (alphaBitmapData != null && alphaBitmapData.transparent) {
 			
