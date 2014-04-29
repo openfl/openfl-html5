@@ -567,6 +567,13 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		if (!__renderable && !__isMask) return;
 		__worldAlpha = alpha;
 		
+		if (__transformDirty) {
+			
+			__transformDirty = false;
+			__worldTransformDirty--;
+			
+		}
+		
 	}
 	
 	
