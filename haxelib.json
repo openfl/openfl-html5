@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": [],
 	"description": "OpenFL support for HTML5",
-	"version": "1.4.1-beta",
-	"releasenote": "Event, DOM and other improvements",
+	"version": "1.4.2-beta",
+	"releasenote": "Event, transform, render fixes, added video",
 	"contributors": [ "singmajesty" ],
 	"dependencies": {}
 }
