@@ -353,8 +353,7 @@ class Stage extends Sprite {
 		}
 		
 		__renderable = true;
-		__update (false);
-		//DisplayObject.__worldDirty = false;
+		__update (false, true);
 		
 		if (__canvas != null) {
 			
@@ -490,40 +489,53 @@ class Stage extends Sprite {
 	}
 	
 	
-	public override function __update (transformOnly:Bool):Void {
+	public override function __update (transformOnly:Bool, updateChildren:Bool):Void {
 		
 		if (transformOnly) {
 			
-			if (DisplayObject.__worldTransformDirty) {
+			if (DisplayObject.__worldTransformDirty > 0) {
 				
-				super.__update (true);
+				super.__update (true, updateChildren);
 				
-				DisplayObject.__worldTransformDirty = false;
-				__dirty = true;
+				if (updateChildren) {
+					
+					DisplayObject.__worldTransformDirty = 0;
+					__dirty = true;
+					
+				}
 				
 			}
 			
 		} else {
 			
-			if (DisplayObject.__worldTransformDirty || __dirty || DisplayObject.__worldDirty) {
+			if (DisplayObject.__worldTransformDirty > 0 || __dirty || DisplayObject.__worldRenderDirty > 0) {
 				
-				super.__update (false);
+				super.__update (false, updateChildren);
 				
-				#if dom
-				__wasDirty = true;
-				#end
-				
-				DisplayObject.__worldTransformDirty = false;
-				DisplayObject.__worldDirty = false;
-				__dirty = false;
+				if (updateChildren) {
+					
+					#if dom
+					__wasDirty = true;
+					#end
+					
+					DisplayObject.__worldTransformDirty = 0;
+					DisplayObject.__worldRenderDirty = 0;
+					__dirty = false;
+					
+				}
 				
 			} #if dom else if (__wasDirty) {
 				
 				// If we were dirty last time, we need at least one more
 				// update in order to clear "changed" properties
 				
-				super.__update (false);
-				__wasDirty = false;
+				super.__update (false, updateChildren);
+				
+				if (updateChildren) {
+					
+					__wasDirty = false;
+					
+				}
 				
 			} #end
 			

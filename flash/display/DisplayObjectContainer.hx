@@ -53,7 +53,7 @@ class DisplayObjectContainer extends InteractiveObject {
 			}
 			
 			child.dispatchEvent (new Event (Event.ADDED, true));
-			DisplayObject.__worldDirty = true;
+			__setRenderDirty ();
 			
 		}
 		
@@ -94,7 +94,7 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 		}
 		
-		DisplayObject.__worldDirty = true;
+		__setRenderDirty ();
 		__children.insert (index, child);
 		
 		return child;
@@ -188,7 +188,7 @@ class DisplayObjectContainer extends InteractiveObject {
 			__removedChildren.push (child);
 			child.dispatchEvent (new Event (Event.REMOVED, true));
 			
-			DisplayObject.__worldDirty = true;
+			__setRenderDirty ();
 			
 		}
 		
@@ -338,18 +338,13 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		if (__children.length == 0) return;
 		
-		// TODO the bounds have already been calculated this render session so return what we have
-		
-		var matrixCache = null;
-		
-		if (matrix != null) {
+		if (DisplayObject.__worldTransformDirty > 0) {
 			
-			var matrixCache = __worldTransform;
-			__worldTransform = matrix;
-			__updateChildren (true);
+			__getTransform ();
+			__update (true, true);
 			
 		}
-			
+		
 		for (child in __children) {
 			
 			if (!child.__renderable) continue;
@@ -359,28 +354,11 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 		if (matrix != null) {
 			
-			__worldTransform = matrixCache;
+			var bounds = rect.transform (__worldTransform.clone ().invert ());
+			bounds = bounds.transform (matrix);
+			rect.copyFrom (bounds);
 			
 		}
-		
-	}
-	
-	
-	private override function __getLocalBounds (rect:Rectangle):Void {
-		
-		var matrixCache = __worldTransform;
-		__worldTransform = new Matrix ();
-		
-		__updateChildren (true);
-		
-		/*for (child in __children) {
-			
-			child.__update (null, 1);
-			
-		}*/
-		
-		__getBounds (rect, null);
-		__worldTransform = matrixCache;
 		
 	}
 	
@@ -517,7 +495,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	public override function __renderMask (renderSession:RenderSession):Void {
 		
 		var bounds = new Rectangle ();
-		__getLocalBounds (bounds);
+		__getBounds (bounds, new Matrix ());
 		
 		renderSession.context.rect (0, 0, bounds.width, bounds.height);	
 		
@@ -553,11 +531,11 @@ class DisplayObjectContainer extends InteractiveObject {
 	}
 	
 	
-	public override function __update (transformOnly:Bool):Void {
+	public override function __update (transformOnly:Bool, updateChildren:Bool):Void {
 		
-		super.__update (transformOnly);
+		super.__update (transformOnly, updateChildren);
 		
-		if (!__renderable && !__worldAlphaChanged && !__worldClipChanged && !__worldTransformChanged && !__worldVisibleChanged) {
+		if (!__renderable #if dom && !__worldAlphaChanged && !__worldClipChanged && !__worldTransformChanged && !__worldVisibleChanged #end) {
 			
 			return;
 			
@@ -565,22 +543,26 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		//if (!__renderable) return;
 		
-		for (child in __children) {
+		if (updateChildren) {
 			
-			child.__update (transformOnly);
+			for (child in __children) {
+				
+				child.__update (transformOnly, true);
+				
+			}
 			
 		}
 		
 	}
 	
 	
-	public override function __updateChildren (transformOnly):Void {
+	public override function __updateChildren (transformOnly:Bool):Void {
 		
 		super.__updateChildren (transformOnly);
 		
 		for (child in __children) {
 			
-			child.__update (transformOnly);
+			child.__update (transformOnly, true);
 			
 		}
 		
@@ -596,10 +578,8 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	private override function get_height ():Float {
 		
-		// TODO: More efficient way to do this?
-		
 		var bounds = new Rectangle ();
-		__getLocalBounds (bounds);
+		__getBounds (bounds, new Matrix ());
 		
 		return bounds.height * scaleY;
 		
@@ -608,10 +588,8 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	private override function set_height (value:Float):Float {
 		
-		// TODO: More efficient way to do this?
-		
 		var bounds = new Rectangle ();
-		__getLocalBounds (bounds);
+		__getBounds (bounds, new Matrix ());
 		
 		if (value != bounds.height) {
 			
@@ -637,10 +615,8 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	private override function get_width ():Float {
 		
-		// TODO: More efficient way to do this?
-		
 		var bounds = new Rectangle ();
-		__getLocalBounds (bounds);
+		__getBounds (bounds, new Matrix ());
 		
 		return bounds.width * scaleX;
 		
@@ -649,10 +625,8 @@ class DisplayObjectContainer extends InteractiveObject {
 	
 	private override function set_width (value:Float):Float {
 		
-		// TODO: More efficient way to do this?
-		
 		var bounds = new Rectangle ();
-		__getLocalBounds (bounds);
+		__getBounds (bounds, new Matrix ());
 		
 		if (value != bounds.width) {
 			

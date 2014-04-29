@@ -56,7 +56,7 @@ class Video extends DisplayObject {
 	private override function __getBounds (rect:Rectangle, matrix:Matrix):Void {
 		
 		var bounds = new Rectangle (0, 0, __width, __height);
-		bounds.transform (__getTransform ());
+		bounds.transform (__worldTransform);
 		
 		rect.__expand (bounds.x, bounds.y, bounds.width, bounds.height);
 		
@@ -202,7 +202,13 @@ class Video extends DisplayObject {
 	
 	private override function set_height (value:Float):Float {
 		
-		if (scaleY != 1 || value != __height) __dirty = true;
+		if (scaleY != 1 || value != __height) {
+			
+			__setTransformDirty ();
+			__dirty = true;
+			
+		}
+		
 		scaleY = 1;
 		return __height = value;
 		
@@ -218,7 +224,13 @@ class Video extends DisplayObject {
 	
 	private override function set_width (value:Float):Float {
 		
-		if (scaleX != 1 || __width != value) __dirty = true;
+		if (scaleX != 1 || __width != value) {
+			
+			__setTransformDirty ();
+			__dirty = true;
+			
+		}
+		
 		scaleX = 1;
 		return __width = value;
 		

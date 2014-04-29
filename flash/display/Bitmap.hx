@@ -47,7 +47,7 @@ class Bitmap extends DisplayObjectContainer {
 		if (bitmapData != null) {
 			
 			var bounds = new Rectangle (0, 0, bitmapData.width, bitmapData.height);
-			bounds = bounds.transform (__getTransform ());
+			bounds = bounds.transform (__worldTransform);
 			
 			rect.__expand (bounds.x, bounds.y, bounds.width, bounds.height);
 			
@@ -292,6 +292,7 @@ class Bitmap extends DisplayObjectContainer {
 			
 			if (value != bitmapData.height) {
 				
+				__setTransformDirty ();
 				scaleY = value / bitmapData.height;
 				
 			}
@@ -324,6 +325,7 @@ class Bitmap extends DisplayObjectContainer {
 			
 			if (value != bitmapData.width) {
 				
+				__setTransformDirty ();
 				scaleX = value / bitmapData.width;
 				
 			}

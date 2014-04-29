@@ -295,6 +295,7 @@ class BitmapData implements IBitmapDrawable {
 		source.__updateChildren (false);
 		source.__renderCanvas (renderSession);
 		source.__worldTransform = matrixCache;
+		source.__updateChildren (true);
 		
 		__sourceContext.setTransform (1, 0, 0, 1, 0, 0);
 		
