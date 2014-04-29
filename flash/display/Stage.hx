@@ -171,7 +171,6 @@ class Stage extends Sprite {
 		}
 		
 		this.stage = this;
-		this.parent = this;
 		
 		quality = StageQuality.HIGH;
 		__clearBeforeRender = true;

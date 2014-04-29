@@ -550,6 +550,12 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			__worldClip = worldClip;
 			#end
 			
+			if (updateChildren && __renderDirty) {
+				
+				__renderDirty = false;
+				
+			}
+			
 		}
 		
 	}

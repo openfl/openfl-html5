@@ -52,8 +52,9 @@ class DisplayObjectContainer extends InteractiveObject {
 				
 			}
 			
+			child.__setTransformDirty ();
+			child.__setRenderDirty ();
 			child.dispatchEvent (new Event (Event.ADDED, true));
-			__setRenderDirty ();
 			
 		}
 		
@@ -90,11 +91,12 @@ class DisplayObjectContainer extends InteractiveObject {
 				
 			}
 			
+			child.__setTransformDirty ();
+			child.__setRenderDirty ();
 			child.dispatchEvent (new Event (Event.ADDED, true));
 			
 		}
 		
-		__setRenderDirty ();
 		__children.insert (index, child);
 		
 		return child;
@@ -186,9 +188,9 @@ class DisplayObjectContainer extends InteractiveObject {
 			child.parent = null;
 			__children.remove (child);
 			__removedChildren.push (child);
+			child.__setTransformDirty ();
+			child.__setRenderDirty ();
 			child.dispatchEvent (new Event (Event.REMOVED, true));
-			
-			__setRenderDirty ();
 			
 		}
 		
@@ -341,6 +343,21 @@ class DisplayObjectContainer extends InteractiveObject {
 		if (DisplayObject.__worldTransformDirty > 0) {
 			
 			__getTransform ();
+			
+			if (matrix == null) {
+				
+				__update (true, true);
+				
+			}
+			
+		}
+		
+		var matrixCache = null;
+		
+		if (matrix != null) {
+			
+			matrixCache = __worldTransform;
+			__worldTransform = matrix;
 			__update (true, true);
 			
 		}
@@ -354,9 +371,8 @@ class DisplayObjectContainer extends InteractiveObject {
 			
 		if (matrix != null) {
 			
-			var bounds = rect.transform (__worldTransform.clone ().invert ());
-			bounds = bounds.transform (matrix);
-			rect.copyFrom (bounds);
+			__worldTransform = matrixCache;
+			__update (true, true);
 			
 		}
 		
