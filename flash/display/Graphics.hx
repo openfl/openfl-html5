@@ -693,6 +693,7 @@ class Graphics {
 							if (thickness == null) {
 								
 								__hasStroke = false;
+								__closePath(false);
 								
 							} else {
 								
