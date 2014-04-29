@@ -37,7 +37,7 @@ class Sprite extends DisplayObjectContainer {
 		
 		if (__graphics != null) {
 			
-			__graphics.__getBounds (rect, __worldTransform);
+			__graphics.__getBounds (rect, matrix != null ? matrix : __worldTransform);
 			
 		}
 		

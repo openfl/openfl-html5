@@ -340,24 +340,14 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		if (__children.length == 0) return;
 		
-		if (DisplayObject.__worldTransformDirty > 0) {
-			
-			__getTransform ();
-			
-			if (matrix == null) {
-				
-				__updateChildren (true);
-				
-			}
-			
-		}
-		
 		var matrixCache = null;
 		
 		if (matrix != null) {
 			
 			matrixCache = __worldTransform;
+			trace (__worldTransform);
 			__worldTransform = matrix;
+			trace (__worldTransform);
 			__updateChildren (true);
 			
 		}
@@ -365,6 +355,7 @@ class DisplayObjectContainer extends InteractiveObject {
 		for (child in __children) {
 			
 			if (!child.__renderable) continue;
+			trace ("child transform: " + child.__worldTransform);
 			child.__getBounds (rect, null);
 			
 		}
