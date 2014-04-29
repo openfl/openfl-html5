@@ -265,9 +265,10 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 	}
 	
 	
-	private function __getLocalBounds (rect:Rectangle):Void {
+	private inline function __getLocalBounds (rect:Rectangle):Void {
 		
-		
+		__getTransform ();
+		__getBounds (rect, new Matrix ());
 		
 	}
 	
@@ -282,7 +283,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			
 			while (current.parent != null) {
 				
-				list.push (current.parent);
+				list.push (current);
 				current = current.parent;
 				
 				if (current.__transformDirty) {
@@ -295,11 +296,10 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 			
 			if (transformDirty) {
 				
-				list.reverse ();
-				
-				for (item in list) {
+				var i = list.length;
+				while (--i >= 0) {
 					
-					item.__update (true, false);
+					list[i].__update (true, false);
 					
 				}
 				

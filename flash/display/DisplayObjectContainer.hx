@@ -345,9 +345,7 @@ class DisplayObjectContainer extends InteractiveObject {
 		if (matrix != null) {
 			
 			matrixCache = __worldTransform;
-			trace (__worldTransform);
 			__worldTransform = matrix;
-			trace (__worldTransform);
 			__updateChildren (true);
 			
 		}
@@ -355,7 +353,6 @@ class DisplayObjectContainer extends InteractiveObject {
 		for (child in __children) {
 			
 			if (!child.__renderable) continue;
-			trace ("child transform: " + child.__worldTransform);
 			child.__getBounds (rect, null);
 			
 		}
@@ -374,11 +371,11 @@ class DisplayObjectContainer extends InteractiveObject {
 		
 		if (!visible || (interactiveOnly && !mouseEnabled)) return false;
 		
-		var i = __children.length - 1;
+		var i = __children.length;
 		
 		if (interactiveOnly && (stack == null || !mouseChildren)) {
 			
-			while (i >= 0) {
+			while (--i >= 0) {
 				
 				if (__children[i].__hitTest (x, y, shapeFlag, null, interactiveOnly)) {
 					
@@ -392,15 +389,13 @@ class DisplayObjectContainer extends InteractiveObject {
 					
 				}
 				
-				i--;
-				
 			}
 			
 		} else if (stack != null) {
 			
 			var length = stack.length;
 			
-			while (i >= 0) {
+			while (--i >= 0) {
 				
 				if (__children[i].__hitTest (x, y, shapeFlag, stack, interactiveOnly)) {
 					
@@ -409,8 +404,6 @@ class DisplayObjectContainer extends InteractiveObject {
 					return true;
 					
 				}
-				
-				i--;
 				
 			}
 			
@@ -502,7 +495,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	public override function __renderMask (renderSession:RenderSession):Void {
 		
 		var bounds = new Rectangle ();
-		__getBounds (bounds, new Matrix ());
+		__getLocalBounds (bounds);
 		
 		renderSession.context.rect (0, 0, bounds.width, bounds.height);	
 		
@@ -586,7 +579,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	private override function get_height ():Float {
 		
 		var bounds = new Rectangle ();
-		__getBounds (bounds, new Matrix ());
+		__getLocalBounds (bounds);
 		
 		return bounds.height * scaleY;
 		
@@ -596,7 +589,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	private override function set_height (value:Float):Float {
 		
 		var bounds = new Rectangle ();
-		__getBounds (bounds, new Matrix ());
+		__getLocalBounds (bounds);
 		
 		if (value != bounds.height) {
 			
@@ -623,7 +616,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	private override function get_width ():Float {
 		
 		var bounds = new Rectangle ();
-		__getBounds (bounds, new Matrix ());
+		__getLocalBounds (bounds);
 		
 		return bounds.width * scaleX;
 		
@@ -633,7 +626,7 @@ class DisplayObjectContainer extends InteractiveObject {
 	private override function set_width (value:Float):Float {
 		
 		var bounds = new Rectangle ();
-		__getBounds (bounds, new Matrix ());
+		__getLocalBounds (bounds);
 		
 		if (value != bounds.width) {
 			

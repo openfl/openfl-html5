@@ -144,10 +144,9 @@ private typedef VectorData<T> = Array<T>;
 		#if flash
 		return this.lastIndexOf(x, from);
 		#else
-		var i = this.length - 1;
-		while (i >= from) {
+		var i = this.length;
+		while (--i >= from) {
 			if (this[i] == x) return i;
-			i--;
 		}
 		return -1;
 		#end
