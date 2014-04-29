@@ -719,14 +719,14 @@ class Graphics {
 						case LineTo (x, y):
 							
 							__beginPath ();
-							__context.lineTo (x, y);
+							__context.lineTo (x - offsetX, y - offsetY);
 							__positionX = x;
 							__positionY = y;
 							
 						case MoveTo (x, y):
 							
 							__beginPath ();
-							__context.moveTo (x, y);
+							__context.moveTo (x - offsetX, y - offsetY);
 							__positionX = x;
 							__positionY = y;
 						
@@ -814,13 +814,13 @@ class Graphics {
 					
 					case LineTo (x, y):
 						
-						__context.lineTo (x, y);
+						__context.lineTo (x - offsetX, y - offsetY);
 						__positionX = x;
 						__positionY = y;
 						
 					case MoveTo (x, y):
 						
-						__context.moveTo (x, y);
+						__context.moveTo (x - offsetX, y - offsetY);
 						__positionX = x;
 						__positionY = y;
 					
