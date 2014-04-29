@@ -74,6 +74,12 @@ import flash.Lib;
 			total++;
 		}
 		sounds.push (sound);
+		::elseif (type == "music")::
+		var sound = Path.withoutExtension ("::resourceName::");
+		if (!sounds.remove (sound)) {
+			total++;
+		}
+		sounds.push (sound);
 		::end::
 		::end::::end::
 		
