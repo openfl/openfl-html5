@@ -41,6 +41,7 @@ class Stage extends Sprite {
 	private var __colorString:String;
 	private var __context:CanvasRenderingContext2D;
 	private var __cursor:String;
+	private var __cursorHidden:Bool;
 	private var __dirty:Bool;
 	private var __div:DivElement;
 	private var __element:HtmlElement;
@@ -473,15 +474,26 @@ class Stage extends Sprite {
 			
 			__cursor = cursor;
 			
-			if (__canvas != null) {
+			if (!__cursorHidden) {
 				
-				__canvas.style.cursor = cursor;
-				
-			} else {
-				
-				__div.style.cursor = cursor;
+				var element = __canvas != null ? __canvas : __div;
+				element.style.cursor = cursor;
 				
 			}
+			
+		}
+		
+	}
+	
+	
+	private function __setCursorHidden (value:Bool):Void {
+		
+		if (__cursorHidden != value) {
+			
+			__cursorHidden = value;
+			
+			var element = __canvas != null ? __canvas : __div;
+			element.style.cursor = value ? "none" : __cursor;
 			
 		}
 		
