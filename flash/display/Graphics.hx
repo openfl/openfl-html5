@@ -80,10 +80,10 @@ class Graphics {
 		if (__bounds != null) {
 			
 			__dirty = true;
+			__bounds = null;
 			
 		}
 		
-		__bounds = null;
 		__visible = false;
 		
 	}
@@ -438,7 +438,7 @@ class Graphics {
 						case CurveTo (cx, cy, x, y):
 							
 							__beginPath ();
-							__context.quadraticCurveTo (cx, cy, x, y);
+							__context.quadraticCurveTo (cx - offsetX, cy - offsetY, x - offsetX, y - offsetY);
 							__positionX = x;
 							__positionY = y;
 						
