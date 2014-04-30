@@ -291,12 +291,28 @@ class BitmapData implements IBitmapDrawable {
 		renderSession.context = __sourceContext;
 		renderSession.roundPixels = true;
 		
+		if (!smoothing) {
+			
+			untyped (__sourceContext).mozImageSmoothingEnabled = false;
+			untyped (__sourceContext).webkitImageSmoothingEnabled = false;
+			__sourceContext.imageSmoothingEnabled = false;
+			
+		}
+		
 		var matrixCache = source.__worldTransform;
 		source.__worldTransform = matrix != null ? matrix : new Matrix ();
 		source.__updateChildren (false);
 		source.__renderCanvas (renderSession);
 		source.__worldTransform = matrixCache;
 		source.__updateChildren (true);
+		
+		if (!smoothing) {
+			
+			untyped (__sourceContext).mozImageSmoothingEnabled = true;
+			untyped (__sourceContext).webkitImageSmoothingEnabled = true;
+			__sourceContext.imageSmoothingEnabled = true;
+			
+		}
 		
 		__sourceContext.setTransform (1, 0, 0, 1, 0, 0);
 		

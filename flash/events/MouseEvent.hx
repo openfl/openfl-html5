@@ -10,6 +10,9 @@ class MouseEvent extends Event {
 	
 	public static var CLICK:String = "click";
 	public static var DOUBLE_CLICK:String = "doubleClick";
+	public static var MIDDLE_CLICK:String = "middleClick";
+	public static var MIDDLE_MOUSE_DOWN:String = "middleMouseDown";
+	public static var MIDDLE_MOUSE_UP:String = "middleMouseUp";
 	public static var MOUSE_DOWN:String = "mouseDown";
 	public static var MOUSE_MOVE:String = "mouseMove";
 	public static var MOUSE_OUT:String = "mouseOut";
