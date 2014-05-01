@@ -256,7 +256,6 @@ class Graphics {
 		if (!__inPath) {
 			
 			__context.beginPath ();
-			__context.moveTo (__positionX, __positionY);
 			__inPath = true;
 			
 		}
@@ -462,7 +461,7 @@ class Graphics {
 								
 								__context.fillStyle = pattern;
 								setFill = true;
-								
+
 							}
 							
 							__closePath (false);
@@ -671,23 +670,8 @@ class Graphics {
 						
 						case EndFill:
 							
-							if (__inPath) {
-								
-								if (__hasFill) {
-									
-									__context.fill ();
-									__context.closePath ();
-									
-								}
-								
-								if (__hasStroke) {
-									
-									__context.stroke ();
-									
-								}
-								
-							}
-						
+							__closePath(true);
+
 						case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 							
 							if (thickness == null) {
@@ -738,24 +722,8 @@ class Graphics {
 			}
 			
 			__dirty = false;
-			
-			if (__inPath) {
-				
-				if (__hasFill) {
-					
-					__context.fill ();
-					__context.closePath ();
-					
-				}
-				
-				if (__hasStroke) {
-					
-					__context.stroke ();
-					
-				}
-				
-			}
-			
+			__closePath(false);
+
 		}
 		
 	}
