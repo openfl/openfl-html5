@@ -26,7 +26,7 @@ class Stage extends Sprite {
 	
 	public var align:StageAlign;
 	public var color (get, set):Int;
-	public var displayState:StageDisplayState;
+	public var displayState(default, set):StageDisplayState;
 	public var focus (get, set):InteractiveObject;
 	public var frameRate:Float;
 	public var quality:StageQuality;
@@ -982,7 +982,36 @@ class Stage extends Sprite {
 		return __focus;
 		
 	}
-	
+
+
+	function set_displayState (value:StageDisplayState):StageDisplayState {
+		switch(value) {
+			case NORMAL:
+				var fs_exit_function = untyped __js__("function() {
+			    if (document.exitFullscreen) {
+			      document.exitFullscreen();
+			    } else if (document.msExitFullscreen) {
+			      document.msExitFullscreen();
+			    } else if (document.mozCancelFullScreen) {
+			      document.mozCancelFullScreen();
+			    } else if (document.webkitExitFullscreen) {
+			      document.webkitExitFullscreen();
+			    }
+				}");
+				fs_exit_function();
+			case FULL_SCREEN | FULL_SCREEN_INTERACTIVE:
+				var fsfunction = untyped __js__("function(elem) {
+					if (elem.requestFullscreen) elem.requestFullscreen();
+					else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+					else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+					else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+				}");
+				fsfunction(__element);
+			default:
+		}
+		displayState = value;
+		return value;
+	}
 	
 }
 
