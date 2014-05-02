@@ -54,12 +54,13 @@ class ByteArray implements ArrayAccess<Int> {
 	}
 	
 	
-	static public function fromBytes (inBytes:Bytes) 
-   {
-      var result = new ByteArray ();
-	  result.__fromBytes (inBytes);
-      return result;
-   }
+	static public function fromBytes (inBytes:Bytes) {
+		
+		var result = new ByteArray ();
+		result.__fromBytes (inBytes);
+		return result;
+		
+	}
 	
 	
 	public inline function readBoolean ():Bool {
