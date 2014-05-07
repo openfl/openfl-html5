@@ -674,10 +674,10 @@ class Graphics {
 
 						case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 							
+							__closePath(false);
 							if (thickness == null) {
 								
 								__hasStroke = false;
-								__closePath(false);
 								
 							} else {
 								
