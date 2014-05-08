@@ -216,7 +216,7 @@ class Graphics {
 		__halfStrokeWidth = (thickness != null) ? thickness / 2 : 0;
 		__commands.push (LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit));
 		
-		if (alpha != null) __visible = true;
+		if (thickness != null) __visible = true;
 		
 	}
 	
@@ -674,10 +674,10 @@ class Graphics {
 
 						case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 							
+							__closePath(false);
 							if (thickness == null) {
 								
 								__hasStroke = false;
-								__closePath(false);
 								
 							} else {
 								
