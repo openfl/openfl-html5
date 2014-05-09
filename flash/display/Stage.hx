@@ -609,7 +609,7 @@ class Stage extends Sprite {
 		}
 		
 		var touch = event.changedTouches[0];
-		var point = new Point (touch.pageX - rect.left, touch.pageY - rect.top);
+		var point = new Point ((touch.pageX - rect.left) * (stageWidth / rect.width), (touch.pageY - rect.top) * (stageHeight / rect.height));
 		
 		__mouseX = point.x;
 		__mouseY = point.y;
@@ -757,8 +757,8 @@ class Stage extends Sprite {
 		if (__canvas != null) {
 			
 			rect = __canvas.getBoundingClientRect ();
-			__mouseX = (event.clientX - rect.left) * (__canvas.width / rect.width);
-			__mouseY = (event.clientY - rect.top) * (__canvas.height / rect.height);
+			__mouseX = (event.clientX - rect.left) * (stageWidth / rect.width);
+			__mouseY = (event.clientY - rect.top) * (stageHeight / rect.height);
 			
 		} else {
 			
