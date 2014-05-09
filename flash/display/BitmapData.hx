@@ -17,6 +17,7 @@ import js.html.Image;
 import js.html.ImageData;
 import js.html.Uint8ClampedArray;
 import js.Browser;
+import openfl.gl.GLTexture;
 
 
 @:autoBuild(openfl.Assets.embedBitmap())
@@ -30,7 +31,8 @@ class BitmapData implements IBitmapDrawable {
 	public var rect (default, null):Rectangle;
 	public var transparent (default, null):Bool;
 	public var width (default, null):Int;
-	
+
+	public var __glTexture:GLTexture;
 	public var __worldTransform:Matrix;
 	
 	private var __loading:Bool;
