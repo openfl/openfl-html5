@@ -643,7 +643,9 @@ class TextField extends InteractiveObject {
 	
 	private function get_bottomScrollV ():Int {
 		
-		return 0;
+		// TODO: Only return lines that are visible
+		
+		return numLines;
 		
 	}
 	
@@ -797,7 +799,27 @@ class TextField extends InteractiveObject {
 	
 	private function get_maxScrollH ():Int { return 0; }
 	private function get_maxScrollV ():Int { return 0; }
-	private function get_numLines ():Int { return 0; }
+	
+	
+	private function get_numLines ():Int {
+		
+		if (text != "" && text != null) {
+			
+			var count = text.split ("\n").length;
+			
+			if (__isHTML) {
+				
+				count += text.split ("<br>").length - 1;
+				
+			}
+			
+			return count;
+			
+		}
+		
+		return 1;
+		
+	}
 	
 	
 	public function get_text ():String {
