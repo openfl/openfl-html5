@@ -335,7 +335,7 @@ class TextField extends InteractiveObject {
 					
 					if (border || background) {
 						
-						__context.rect (0, 0, __width, __height);
+						__context.rect (0.5, 0.5, __width - 1, __height - 1);
 						
 						if (background) {
 							
@@ -388,7 +388,15 @@ class TextField extends InteractiveObject {
 					
 					if (border || background) {
 						
-						__context.rect (0, 0, __width, __height);
+						if (border) {
+							
+							__context.rect (0.5, 0.5, __width - 1, __height - 1);
+
+						} else {
+							
+							__context.rect (0, 0, __width, __height);
+
+						}					
 						
 						if (background) {
 							
@@ -400,6 +408,7 @@ class TextField extends InteractiveObject {
 						if (border) {
 							
 							__context.lineWidth = 1;
+							__context.lineCap = "square";
 							__context.strokeStyle = "#" + StringTools.hex (borderColor, 6);
 							__context.stroke ();
 							
