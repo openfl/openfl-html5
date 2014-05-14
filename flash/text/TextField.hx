@@ -90,6 +90,8 @@ class TextField extends InteractiveObject {
 		background = false;
 		gridFitType = GridFitType.PIXEL;
 		sharpness = 0;
+		scrollH = 0;
+		scrollV = 1;
 		
 		if (__defaultTextFormat == null) {
 			
@@ -798,7 +800,7 @@ class TextField extends InteractiveObject {
 	
 	
 	private function get_maxScrollH ():Int { return 0; }
-	private function get_maxScrollV ():Int { return 0; }
+	private function get_maxScrollV ():Int { return 1; }
 	
 	
 	private function get_numLines ():Int {
