@@ -278,7 +278,7 @@ class TextField extends InteractiveObject {
 		// function of the flow within the width bounds...
 		if (__div == null) {
 			
-			div.style.width = Std.string (width)+"px";
+			div.style.width = Std.string (__width) + "px";
 			
 		}
 		
@@ -933,7 +933,16 @@ class TextField extends InteractiveObject {
 	
 	override public function get_width ():Float {
 		
-		return __width * scaleX;
+		if (autoSize == TextFieldAutoSize.LEFT) {
+			
+			//return __width * scaleX;
+			return (textWidth + 4) * scaleX;
+			
+		} else {
+			
+			return __width * scaleX;
+			
+		}
 		
 	}
 	
