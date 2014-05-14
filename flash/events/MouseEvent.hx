@@ -24,6 +24,8 @@ class MouseEvent extends Event {
 	public static var RIGHT_MOUSE_UP:String = "rightMouseUp";
 	public static var ROLL_OUT:String = "rollOut";
 	public static var ROLL_OVER:String = "rollOver";
+
+	private static var __buttonDown:Bool;
 	
 	public var altKey:Bool;
 	public var buttonDown:Bool;
@@ -60,7 +62,6 @@ class MouseEvent extends Event {
 	
 	public static function __create (type:String, event:js.html.MouseEvent, local:Point, target:InteractiveObject):MouseEvent {
 		
-		var __mouseDown = false;
 		var delta = 2;
 		
 		if (type == MouseEvent.MOUSE_WHEEL) {
@@ -82,36 +83,17 @@ class MouseEvent extends Event {
 		}
 		
 		// source: http://unixpapa.com/js/mouse.html
-		if (type == MouseEvent.MOUSE_DOWN || type == MouseEvent.MOUSE_MOVE) {
+		if (type == MouseEvent.MOUSE_DOWN) {
 			
-			__mouseDown = if (event.which != null) 
-				event.which == 1
-			else if (event.button != null) 
-				#if (haxe_210 || haxe3)
-				(event.button == 0) 
-				#else
-				(js.Lib.isIE && event.button == 1 || event.button == 0) 
-				#end
-			else false;
+			__buttonDown = true;
 			
 		} else if (type == MouseEvent.MOUSE_UP) {
 			
-			if (event.which != null) 
-				if (event.which == 1)
-					__mouseDown = false;
-			else if (event.button != null) 
-				#if (haxe_210 || haxe3)
-				if (event.button == 0)
-				#else
-				if (js.Lib.isIE && event.button == 1 || event.button == 0) 
-				#end
-					__mouseDown = false;
-			else 
-				__mouseDown = false;
+			__buttonDown = false;
 			
 		}
 		
-		var pseudoEvent = new MouseEvent (type, true, false, local.x, local.y, null, event.ctrlKey, event.altKey, event.shiftKey, __mouseDown, delta);
+		var pseudoEvent = new MouseEvent (type, true, false, local.x, local.y, null, event.ctrlKey, event.altKey, event.shiftKey, __buttonDown, delta);
 		pseudoEvent.stageX = Lib.current.stage.mouseX;
 		pseudoEvent.stageY = Lib.current.stage.mouseY;
 		pseudoEvent.target = target;
