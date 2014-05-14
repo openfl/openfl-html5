@@ -214,7 +214,7 @@ class Stage extends Sprite {
 		
 		var keyEvents = [ "keydown", "keyup" ];
 		var touchEvents = [ "touchstart", "touchmove", "touchend" ];
-		var mouseEvents = [ "mousedown", "mousemove", "mouseup", "click", "dblclick" ];
+		var mouseEvents = [ "mousedown", "mousemove", "mouseup", "click", "dblclick", "mousewheel" ];
 		var focusEvents = [ "focus", "blur" ];
 		
 		var element = __canvas != null ? __canvas : __div;
@@ -779,10 +779,11 @@ class Stage extends Sprite {
 			case "mousemove": MouseEvent.MOUSE_MOVE;
 			case "click": MouseEvent.CLICK;
 			case "dblclick": MouseEvent.DOUBLE_CLICK;
+			case "mousewheel": MouseEvent.MOUSE_WHEEL;
 			default: null;
 			
 		}
-		
+
 		if (__hitTest (mouseX, mouseY, false, __stack, true)) {
 			
 			var target = __stack[__stack.length - 1];
