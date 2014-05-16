@@ -37,16 +37,12 @@
 	
 </head>
 <body>
-	
 	::foreach assets::::if (type == "font")::
-	<span style="font-family: ::id::"> </span>
-	::end::::end::
+	<span style="font-family: ::id::"> </span>::end::::end::
 	
 	<div id="openfl-embed"></div>
-
-	::if DEBUG::<script type="text/javascript" src="./webgl-debug.js"></script>::end::
-	::if DEFINE_STATS::<script type="text/javascript" src="./stats.min.js"></script>::end::
-	<script type="text/javascript" src="./soundjs.min.js"></script>
+	::if linkedLibraries::::foreach (linkedLibraries)::
+	<script type="text/javascript" src="::__current__::"></script>::end::::end::
 	<script type="text/javascript" src="./::APP_FILE::.js"></script>
 	
 </body>
