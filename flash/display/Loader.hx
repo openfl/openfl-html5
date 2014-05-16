@@ -72,7 +72,7 @@ class Loader extends Sprite {
 			
 		}
 		
-		BitmapData.fromFile (request.url, BitmapData_onLoad);
+		BitmapData.fromFile (request.url, BitmapData_onLoad, BitmapData_onError);
 		
 	}
 	
@@ -126,6 +126,15 @@ class Loader extends Sprite {
 		addChild (contentLoaderInfo.content);
 		
 		var event = new Event (Event.COMPLETE);
+		event.target = contentLoaderInfo;
+		event.currentTarget = contentLoaderInfo;
+		contentLoaderInfo.dispatchEvent (event);
+		
+	}
+	
+	private function BitmapData_onError ():Void {
+		
+		var event = new IOErrorEvent (IOErrorEvent.IO_ERROR);
 		event.target = contentLoaderInfo;
 		event.currentTarget = contentLoaderInfo;
 		contentLoaderInfo.dispatchEvent (event);

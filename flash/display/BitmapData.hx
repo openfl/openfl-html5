@@ -431,7 +431,7 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
-	public static function fromFile (path:String, onload:BitmapData -> Void = null):BitmapData {
+	public static function fromFile (path:String, onload:BitmapData -> Void = null, onfail:Void -> Void = null):BitmapData {
 		
 		var bitmapData = new BitmapData (0, 0, true);
 		bitmapData.__sourceImage = new Image ();	
@@ -449,6 +449,17 @@ class BitmapData implements IBitmapDrawable {
 			}
 			
 		}
+		
+		bitmapData.__sourceImage.onerror = function (_) {
+			
+			bitmapData.__valid = false;
+			if (onfail != null) {
+				
+				onfail();
+				
+			}
+		}
+		
 		bitmapData.__sourceImage.src = path;
 		
 		// Another IE9 bug: loading 20+ images fails unless this line is added.
