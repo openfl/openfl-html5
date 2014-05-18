@@ -29,9 +29,21 @@ import js.Browser;
 		return new MovieClip ();
 		
 	}
-
 	
-	public static function create (width:Int, height:Int, element:HtmlElement, backgroundColor:Int):Void {
+	
+	public static function create (element:HtmlElement, width:Null<Int> = null, height:Null<Int> = null, backgroundColor:Null<Int>):Void {
+		
+		if (width == null) {
+			
+			width = 0;
+			
+		}
+		
+		if (height == null) {
+			
+			height = 0;
+			
+		}
 		
 		untyped __js__ ("
 			var lastTime = 0;

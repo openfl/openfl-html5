@@ -62,12 +62,22 @@ class Stage extends Sprite {
 	
 	
 	
-	public function new (width:Int, height:Int, element:HtmlElement = null, color:Int = 0xFFFFFF) {
+	public function new (width:Int, height:Int, element:HtmlElement = null, color:Null<Int> = null) {
 		
 		super ();
 		
 		this.__element = element;
-		this.color = color;
+		
+		if (color == null) {
+			
+			__transparent = true;
+			this.color = 0x000000;
+			
+		} else {
+			
+			this.color = color;
+			
+		}
 		
 		this.name = null;
 		
@@ -76,10 +86,27 @@ class Stage extends Sprite {
 		
 		#if !dom
 		
-		__canvas = cast Browser.document.createElement ("canvas");
-		__canvas.setAttribute ("moz-opaque", "true");
+		if (Std.is (__element, CanvasElement)) {
+			
+			__canvas = cast __element;
+			
+		} else {
+			
+			__canvas = cast Browser.document.createElement ("canvas");
+			
+		}
 		
-		__context = untyped __js__ ('this.__canvas.getContext ("2d", { alpha: false })');
+		if (__transparent) {
+			
+			__context = cast __canvas.getContext ("2d");
+			
+		} else {
+			
+			__canvas.setAttribute ("moz-opaque", "true");
+			__context = untyped __js__ ('this.__canvas.getContext ("2d", { alpha: false })');
+			
+		}
+		
 		//untyped (__context).mozImageSmoothingEnabled = false;
 		//untyped (__context).webkitImageSmoothingEnabled = false;
 		//__context.imageSmoothingEnabled = false;
@@ -93,7 +120,13 @@ class Stage extends Sprite {
 		__div = cast Browser.document.createElement ("div");
 		
 		var style = __div.style;
-		style.backgroundColor = __colorString;
+		
+		if (!__transparent) {
+			
+			style.backgroundColor = __colorString;
+			
+		}
+		
 		style.setProperty ("-webkit-transform", "translate3D(0,0,0)", null);
 		style.setProperty ("transform", "translate3D(0,0,0)", null);
 		//style.setProperty ("-webkit-transform-style", "preserve-3d", null);
@@ -161,7 +194,11 @@ class Stage extends Sprite {
 			
 			if (__canvas != null) {
 				
-				element.appendChild (__canvas);
+				if (element != cast __canvas) {
+					
+					element.appendChild (__canvas);
+					
+				}
 				
 			} else {
 				
@@ -357,10 +394,19 @@ class Stage extends Sprite {
 		
 		if (__canvas != null) {
 			
-			if (stageWidth != __canvas.width || stageHeight != __canvas.height) {
+			if (!__fullscreen || __element != cast __canvas) {
 				
-				__canvas.width = stageWidth;
-				__canvas.height = stageHeight;
+				if (stageWidth != __canvas.width || stageHeight != __canvas.height) {
+					
+					__canvas.width = stageWidth;
+					__canvas.height = stageHeight;
+					
+				}
+				
+			} else {
+				
+				stageWidth = __canvas.width;
+				stageHeight = __canvas.height;
 				
 			}
 			
@@ -427,8 +473,12 @@ class Stage extends Sprite {
 				
 				if (__canvas != null) {
 					
-					__canvas.width = stageWidth;
-					__canvas.height = stageHeight;
+					if (__element != cast __canvas) {
+						
+						__canvas.width = stageWidth;
+						__canvas.height = stageHeight;
+						
+					}
 					
 				} else {
 					
@@ -447,10 +497,14 @@ class Stage extends Sprite {
 				
 				if (__canvas != null) {
 					
-					__canvas.style.width = __originalWidth * targetRatio + "px";
-					__canvas.style.height = __originalHeight * targetRatio + "px";
-					__canvas.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
-					__canvas.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
+					if (__element != cast __canvas) {
+						
+						__canvas.style.width = __originalWidth * targetRatio + "px";
+						__canvas.style.height = __originalHeight * targetRatio + "px";
+						__canvas.style.marginLeft = ((__element.clientWidth - (__originalWidth * targetRatio)) / 2) + "px";
+						__canvas.style.marginTop = ((__element.clientHeight - (__originalHeight * targetRatio)) / 2) + "px";
+						
+					}
 					
 				} else {
 					
