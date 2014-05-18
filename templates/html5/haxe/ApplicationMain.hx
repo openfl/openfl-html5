@@ -29,7 +29,7 @@ import flash.Lib;
 	private static var total = 0;
 	
 	
-	@:expose("openfl.embed")
+	@:keep @:expose("openfl.embed")
 	public static function embed (elementName:String, width:Null<Int> = null, height:Null<Int> = null, background:String = null) {
 		
 		var element:HtmlElement = null;
