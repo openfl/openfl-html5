@@ -88,6 +88,8 @@ class BitmapData implements IBitmapDrawable {
 	
 	public function clone ():BitmapData {
 		
+		__syncImageData ();
+		
 		if (!__valid) {
 			
 			return new BitmapData (width, height, transparent);
@@ -197,30 +199,47 @@ class BitmapData implements IBitmapDrawable {
 			
 		}
 		
+		sourceBitmapData.__convertToCanvas ();
+		sourceBitmapData.__createImageData ();
+		
+		var srcData = sourceBitmapData.__sourceImageData.data;
+		var srcStride = Std.int (sourceBitmapData.width * 4);
+		var srcPosition = Std.int ((sourceRect.x * 4) + (srcStride * sourceRect.y) + srcIdx);
+		var srcRowOffset = srcStride - Std.int (4 * sourceRect.width);
+		var srcRowEnd = Std.int (4 * (sourceRect.x + sourceRect.width));
+		
 		__convertToCanvas ();
 		__createImageData ();
 		
-		var data = __sourceImageData.data;
-		sourceBitmapData.__convertToCanvas ();
-		var sourceData = sourceBitmapData.__sourceContext.getImageData (sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height).data;
+		var destData = __sourceImageData.data;
+		var destStride = Std.int (width * 4);
+		var destPosition = Std.int ((destPoint.x * 4) + (destStride * destPoint.y) + destIdx);
+		var destRowOffset = destStride - Std.int (4 * sourceRect.width);
+		var destRowEnd = Std.int (4 * (destPoint.x + sourceRect.width));
 		
-		var pos = 4 * (Math.round (destPoint.x) + (Math.round (destPoint.y) * width)) + destIdx;
-		var boundR = Math.round (4 * (destPoint.x + sourceRect.width));
+		var length = Std.int (sourceRect.width * sourceRect.height);
 		
-		while (srcIdx < sourceData.length) {
+		for (i in 0...length) {
 			
-			if ((pos % (width * 4)) > boundR - 1) {
+			destData[destPosition] = srcData[srcPosition];
+			
+			srcPosition += 4;
+			destPosition += 4;
+			
+			if ((srcPosition % srcStride) > srcRowEnd) {
 				
-				pos += width * 4 - boundR;
+				srcPosition += srcRowOffset;
 				
 			}
 			
-			data[pos] = sourceData[srcIdx];
-			pos += 4;
-			srcIdx += 4;
+			if ((destPosition % destStride) > destRowEnd) {
+				
+				destPosition += destRowOffset;
+				
+			}
 			
 		}
-	
+		
 		__sourceImageDataChanged = true;
 		
 	}
@@ -255,6 +274,8 @@ class BitmapData implements IBitmapDrawable {
 			}
 			
 		}
+		
+		sourceBitmapData.__syncImageData ();
 		
 		if (sourceBitmapData.__sourceImage != null) {
 			
@@ -532,8 +553,37 @@ class BitmapData implements IBitmapDrawable {
 		__createImageData ();
 		
 		var byteArray = new ByteArray ();
-		byteArray.length = __sourceImageData.data.length;
-		byteArray.byteView.set (__sourceImageData.data);
+		
+		if (rect == null || rect.equals (this.rect)) {
+			
+			byteArray.length = __sourceImageData.data.length;
+			byteArray.byteView.set (__sourceImageData.data);
+			
+		} else {
+			
+			var srcData = __sourceImageData.data;
+			var srcStride = Std.int (width * 4);
+			var srcPosition = Std.int ((rect.x * 4) + (srcStride * rect.y));
+			var srcRowOffset = srcStride - Std.int (4 * rect.width);
+			var srcRowEnd = Std.int (4 * (rect.x + rect.width));
+			
+			var length = Std.int (4 * rect.width * rect.height);
+			byteArray.length = length;
+			
+			for (i in 0...length) {
+				
+				byteArray.__set (i, srcData[srcPosition++]);
+				
+				if ((srcPosition % srcStride) > srcRowEnd) {
+					
+					srcPosition += srcRowOffset;
+					
+				}
+				
+			}
+			
+		}
+		
 		byteArray.position = 0;
 		
 		return byteArray;
@@ -541,7 +591,7 @@ class BitmapData implements IBitmapDrawable {
 	}
 	
 	
-	public function hitTest(firstPoint:Point, firstAlphaThreshold:Int, secondObject:Dynamic, secondBitmapDataPoint:Point = null, secondAlphaThreshold:Int = 1):Bool {
+	public function hitTest (firstPoint:Point, firstAlphaThreshold:Int, secondObject:Dynamic, secondBitmapDataPoint:Point = null, secondAlphaThreshold:Int = 1):Bool {
 		
 		if (!__valid) return false;
 		
@@ -890,25 +940,29 @@ class BitmapData implements IBitmapDrawable {
 	
 	private function __createCanvas (width:Int, height:Int):Void {
 		
-		__sourceCanvas = cast Browser.document.createElement ("canvas");		
-		__sourceCanvas.width = width;
-		__sourceCanvas.height = height;
-		
-		if (!transparent) {
+		if (__sourceCanvas == null) {
 			
-			if (!transparent) __sourceCanvas.setAttribute ("moz-opaque", "true");
-			__sourceContext = untyped __js__ ('this.__sourceCanvas.getContext ("2d", { alpha: false })');
+			__sourceCanvas = cast Browser.document.createElement ("canvas");		
+			__sourceCanvas.width = width;
+			__sourceCanvas.height = height;
 			
-		} else {
+			if (!transparent) {
+				
+				if (!transparent) __sourceCanvas.setAttribute ("moz-opaque", "true");
+				__sourceContext = untyped __js__ ('this.__sourceCanvas.getContext ("2d", { alpha: false })');
+				
+			} else {
+				
+				__sourceContext = __sourceCanvas.getContext ("2d");
+				
+			}
 			
-			__sourceContext = __sourceCanvas.getContext ("2d");
+			untyped (__sourceContext).mozImageSmoothingEnabled = false;
+			untyped (__sourceContext).webkitImageSmoothingEnabled = false;
+			__sourceContext.imageSmoothingEnabled = false;
+			__valid = true;
 			
 		}
-		
-		untyped (__sourceContext).mozImageSmoothingEnabled = false;
-		untyped (__sourceContext).webkitImageSmoothingEnabled = false;
-		__sourceContext.imageSmoothingEnabled = false;
-		__valid = true;
 		
 	}
 	
@@ -1034,16 +1088,17 @@ class BitmapData implements IBitmapDrawable {
 			__loadFromBase64 (__base64Encode (bytes), type, function (_) {
 				
 				__convertToCanvas ();
+				__createImageData ();
 				
-				var pixels = __sourceContext.getImageData (0, 0, width, height);
+				var data = __sourceImageData.data;
 				
 				for (i in 0...rawAlpha.length) {
 					
-					pixels.data[i * 4 + 3] = rawAlpha.readUnsignedByte ();
+					data[i * 4 + 3] = rawAlpha.readUnsignedByte ();
 					
 				}
 				
-				__sourceContext.putImageData (pixels, 0, 0);
+				__sourceImageDataChanged = true;
 				
 				if (onload != null) {
 					
