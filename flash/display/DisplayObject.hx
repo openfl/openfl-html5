@@ -830,12 +830,10 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable {
 		var bounds = new Rectangle ();
 		__getLocalBounds (bounds);
 		
-		trace("Setting width to " + value);
 		
 		if (value != bounds.width) {
 			
 			scaleX = value / bounds.width;
-			trace("Scale width to " + scaleX);
 			
 		} else {
 			
