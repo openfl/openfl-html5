@@ -407,6 +407,8 @@ class Graphics {
 								pattern = null;
 								setFill = false;
 								
+								bitmap.__syncImageData ();
+								
 							}
 							
 							bitmapMatrix = matrix;
@@ -596,7 +598,7 @@ class Graphics {
 							if (useAlpha) { alphaIndex = numValues; numValues ++; }
 							
 							var totalCount = tileData.length;
-							var itemCount = Std.int(totalCount / numValues);
+							var itemCount = Std.int (totalCount / numValues);
 							var index = 0;
 							
 							var rect = null;
@@ -604,6 +606,7 @@ class Graphics {
 							var previousTileID = -1;
 							
 							var surface:Dynamic;
+							sheet.__bitmap.__syncImageData ();
 							
 							if (sheet.__bitmap.__sourceImage != null) {
 								

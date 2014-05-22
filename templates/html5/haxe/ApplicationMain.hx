@@ -21,26 +21,44 @@ import flash.Lib;
 @:access(flash.Lib) class ApplicationMain {
 	
 	
-	public static var images (default, null) = new Map<String, Image> ();
+	public static var images (default, null) = new Map <String, Image> ();
 	public static var urlLoaders = new Map <String, URLLoader> ();
 	
 	private static var assetsLoaded = 0;
 	private static var preloader:::PRELOADER_NAME::;
 	private static var total = 0;
 	
-	//public static var loaders:Map <String, Loader>;
-	//public static var urlLoaders:Map <String, URLLoader>;
 	
-	
-	static function main () {
+	@:keep @:expose("openfl.embed")
+	public static function embed (elementName:String, width:Null<Int> = null, height:Null<Int> = null, background:String = null) {
 		
-		#if munit
-		var element = null;
-		#else
-		var element:HtmlElement = cast js.Browser.document.getElementById ("openfl-embed");
-		#end
+		var element:HtmlElement = null;
 		
-		flash.Lib.create (::WIN_WIDTH::, ::WIN_HEIGHT::, element, ::WIN_BACKGROUND::);
+		if (elementName != null) {
+			
+			element = cast js.Browser.document.getElementById (elementName);
+			
+		}
+		
+		var color = null;
+		
+		if (background != null) {
+			
+			background = StringTools.replace (background, "#", "");
+			
+			if (background.indexOf ("0x") > -1) {
+				
+				color = Std.parseInt (background);
+				
+			} else {
+				
+				color = Std.parseInt ("0x" + background);
+				
+			}
+			
+		}
+		
+		flash.Lib.create (element, width, height, color);
 		
 		preloader = ::if (PRELOADER_NAME != "")::new ::PRELOADER_NAME::::else::NMEPreloader::end:: ();
 		Lib.current.addChild (preloader);
@@ -106,9 +124,16 @@ import flash.Lib;
 				
 			}
 			
-			
-			
 		}
+		
+	}
+	
+	
+	public static function main () {
+		
+		#if munit
+		embed (null, ::WIN_WIDTH::, ::WIN_HEIGHT::, ::WIN_BACKGROUND::);
+		#end
 		
 	}
 	
